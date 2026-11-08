@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Fleyrer y colaboradores de Nanuq
 // SPDX-License-Identifier: GPL-3.0-or-later
 'use strict';
-const VERSION = '1.44.3';
+const VERSION = '1.44.4';
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 // JSON que llega de afuera (Jellyfin, SomeDL, la fiesta, tus otros dispositivos): sin claves «toString»/«valueOf»/«__proto__».

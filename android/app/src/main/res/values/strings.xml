@@ -9,4 +9,5 @@
     <string name="pause">Pausar</string>
     <string name="notice_channel_name">Canciones solicitadas</string>
     <string name="notice_channel_desc">Avisos cuando termina de descargarse una canción que pediste</string>
+    <string name="share">Compartir</string>
 </resources>

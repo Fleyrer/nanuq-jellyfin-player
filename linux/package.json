@@ -1,14 +1,14 @@
 {
   "name": "nanuq",
   "productName": "Nanuq",
-  "version": "1.44.4",
+  "version": "1.44.6",
   "description": "Cliente de música para Jellyfin",
   "main": "main.js",
   "author": {
     "name": "Nanuq",
     "email": "nanuq@localhost"
   },
-  "homepage": "https://jellyfin.org",
+  "homepage": "https://github.com/Fleyrer/nanuq-jellyfin-player",
   "license": "GPL-3.0-or-later",
   "private": true,
   "scripts": {

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Fleyrer y colaboradores de Nanuq
 // SPDX-License-Identifier: GPL-3.0-or-later
 'use strict';
-const VERSION = '1.44.4';
+const VERSION = '1.44.6';
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 // JSON que llega de afuera (Jellyfin, SomeDL, la fiesta, tus otros dispositivos): sin claves «toString»/«valueOf»/«__proto__».
@@ -775,6 +775,20 @@ const Settings = {
   favSort: store.get('favSort', 'name'),
   set(k, v) { this[k] = v; store.set(k, v); }
 };
+// Las preferencias van sin cifrar (no dicen nada de ti), así que se revisan al leerlas: un valor alterado o de otra versión
+// vuelve al de siempre en vez de romper algo (p. ej. un volumen de 5 hacía fallar el arranque).
+(() => {
+  const one = (k, ok, d) => { if (!ok.includes(Settings[k])) Settings[k] = d; };
+  const numIn = (k, a, b, d) => { const v = +Settings[k]; Settings[k] = Number.isFinite(v) && v >= a && v <= b ? v : d; };
+  const bool = k => { if (typeof Settings[k] !== 'boolean') Settings[k] = !!Settings[k]; };
+  numIn('volume', 0, 1, 1); numIn('quality', 32000, 140000000, 140000000); numIn('dlQuality', 32000, 140000000, 320000);
+  numIn('dlMax', 1, 100000, 100); numIn('pfMin', 1, 240, 10);
+  one('albumSort', ['name', 'artist', 'recent', 'year', 'random'], 'name'); one('songView', ['list', 'grid'], 'list');
+  one('songSort', ['name', 'artist', 'album', 'recent', 'plays', 'random'], 'name'); one('artistView', ['songs', 'albums'], 'songs');
+  one('artistSort', ['album', 'name', 'plays'], 'album'); one('playerAnim', ['all', 'disc', 'none'], 'all');
+  one('favSort', ['name', 'artist', 'album', 'recent', 'played', 'plays', 'random'], 'name');
+  ['wave', 'devSync', 'devSameNet', 'devOthers', 'dlWifi', 'dlAuto', 'pfOn', 'djVoice', 'fade', 'discord', 'discordCover'].forEach(bool);
+})();
 
 /* =========================================================
    Descargas para escuchar sin datos (solo en la app de Android)
@@ -1335,7 +1349,7 @@ const DJ_SEGS = {
   fresh: { name: tx('Recién llegadas'), q: { sort: 'DateCreated,SortName' }, lines: [tx('Recién llegado a tu biblioteca: {a}.'), tx('Esto acaba de entrar a tu colección: {a}. Vamos a estrenarlo.')] },
   genre: { name: tx('Ronda de género'), q: null, lines: [tx('Ahora, una ronda de {G}: {a}.'), tx('Cambiamos a {G}, con {a}.'), tx('Puro {G} de tu biblioteca: {a}.'), tx('Se me antojó {G}. Va {a}.')], stale: [tx('Desempolvé algo de {G} que tenías olvidado: {a}.'), tx('{G} que hace mucho no escuchas: {a}.')] },
   decade: { name: tx('Viaje en el tiempo'), q: null, lines: [tx('Viajemos a los {d}: {a}.'), tx('Máquina del tiempo encendida: los {d}, con {a}.'), tx('Nos vamos a los {d}, con {a}.')] },
-  mood: { name: tx('Para este momento'), q: null, lines: [tx('Para esta {m}, algo {v}: {a}.'), 'Esta {m} pide algo {v}. Va {a}.'] }
+  mood: { name: tx('Para este momento'), q: null, lines: [tx('Para esta {m}, algo {v}: {a}.'), tx('Esta {m} pide algo {v}. Va {a}.')] }
 };
 // Ánimo según la hora: mezcla de «Según tu ánimo» y cómo se presenta.
 const djMoment = () => { const h = new Date().getHours(); return h >= 6 && h < 12 ? [tx('mañana'), 'chill', tx('tranquilo')] : h >= 12 && h < 19 ? [tx('tarde'), 'energy', tx('con energía')] : h >= 19 ? [tx('noche'), 'party', tx('para animarla')] : [tx('madrugada'), 'blue', tx('para la madrugada')]; };
@@ -1839,7 +1853,7 @@ function tileHTML(d) {
 function offlineBanner(el) {
   const n = DL.on && api && api.kind === 'jellyfin' ? DL.list().filter(e => e.state === 'done').length : 0;
   if (!n || !el.isConnected || $('.offbar', el)) return;
-  el.querySelector('.head')?.insertAdjacentHTML('afterend', `<div class="err offbar" style="margin-bottom:18px"><b>${tx('Sin conexión con tu servidor')}</b>${tx('Puedes escuchar')} ${n === 1 ? tx('tu canción descargada') : 'tus ' + n + tx(' canciones descargadas')}.<div style="margin-top:10px"><button class="btn pri" data-act="open" data-r="downloads" data-push="1">${ic('download')}${tx('Tus descargas')}</button></div></div>`);
+  el.querySelector('.head')?.insertAdjacentHTML('afterend', `<div class="err offbar" style="margin-bottom:18px"><b>${tx('Sin conexión con tu servidor')}</b>${tx('Puedes escuchar')} ${n === 1 ? tx('tu canción descargada') : tx('tus {0} canciones descargadas', [n])}.<div style="margin-top:10px"><button class="btn pri" data-act="open" data-r="downloads" data-push="1">${ic('download')}${tx('Tus descargas')}</button></div></div>`);
 }
 V.home = async (el) => {
   el.innerHTML = head(greeting()) + `<div class="sec"><h2>${tx('Tu música')}</h2></div><div class="tiles" id="hMine"></div><div class="sec"><h2>${tx('Según tu ánimo')}</h2></div><div class="tiles" id="hMood">${loading()}</div><div class="sec"><h2>${tx('Álbumes recién agregados')}</h2><a href="#" class="lnk" data-act="home-albums">${tx('Ver todos')}</a></div><div class="hscroll" id="hNew">${loading()}</div>`;
@@ -2257,7 +2271,7 @@ const ServerStats = {
 
 // Personalidad musical según el género favorito: nombre, frase y el disfraz (accesorio de un tema) que se pone Nanuq.
 const RECAP_PERSONAS = [
-  [['metal', 'rock', 'punk', 'grunge', 'hardcore', 'emo'], tx('Oso Rockero'), 'Guitarras al máximo y los audífonos echando humo.', 'chile'],
+  [['metal', 'rock', 'punk', 'grunge', 'hardcore', 'emo'], tx('Oso Rockero'), tx('Guitarras al máximo y los audífonos echando humo.'), 'chile'],
   [['reggaeton', 'latin', 'latino', 'salsa', 'cumbia', 'bachata', 'merengue', 'urbano', 'tropical'], tx('Oso Tropical'), tx('Si hay ritmo, hay baile. Nanuq ya se puso el collar de flores.'), 'caribe'],
   [['electro', 'edm', 'house', 'techno', 'trance', 'dubstep', 'synth', 'drum'], tx('Oso Raver'), tx('Luces de neón, bajos profundos y lentes oscuros a medianoche.'), 'synth'],
   [['hip hop', 'hip-hop', 'rap', 'trap', 'r&b', 'soul', 'funk'], tx('Oso del Barrio'), tx('Flow constante y la cabeza siguiendo el beat.'), 'gato'],
@@ -3214,7 +3228,7 @@ async function render(restore) {
    Player
    ========================================================= */
 const P = {
-  audio: new Audio(), queue: [], i: -1, cur: null, mode: store.get('mode', 'once'), session: uid(), seq: 0, peaks: new Map(), lastReport: 0,
+  audio: new Audio(), queue: [], i: -1, cur: null, mode: ['once', 'all', 'one'].includes(store.get('mode', 'once')) ? store.get('mode', 'once') : 'once', session: uid(), seq: 0, peaks: new Map(), lastReport: 0,
 };
 P.audio.preload = 'auto';
 // Pausas que hace Nanuq (tus botones, la barra espaciadora, los controles del sistema, la fiesta, cambiar de canción…)
@@ -3808,7 +3822,7 @@ function renderSheetQueue(scroll) {
   const nextUp = P.queue.slice(P.i + 1, P.i + 101);
   box.innerHTML = (P.cur ? `<div class="sqh">${tx('Sonando')}</div>${row(P.cur, P.i)}` : '')
     + (nextUp.length ? `<div class="sqh">${tx('A continuación')}</div>${nextUp.map((t, k) => row(t, P.i + 1 + k)).join('')}` : `<div class="none">${tx('No hay más canciones en la cola.')}</div>`)
-    + (P.queue.length - P.i - 1 > 100 ? `<div class="sqh">y ${P.queue.length - P.i - 101} ${tx('más')}</div>` : '');
+    + (P.queue.length - P.i - 1 > 100 ? `<div class="sqh">${tx('y {0} más', [P.queue.length - P.i - 101])}</div>` : '');
   if (scroll) box.scrollTop = 0;
 }
 function applyLyricsMode(on) {
@@ -4006,7 +4020,7 @@ async function lyricsSearch() {
   res.sort((a, b) => (b.L.synced - a.L.synced));
   menu(t, res.slice(0, 8).map(r => {
     const first = (r.L.lines.find(l => l.text) || {}).text || '';
-    return [`${r.L.synced ? '✓ Sincronizada' : tx('Sin tiempos')} · ${r.provider} · “${first.slice(0, 32)}${first.length > 32 ? '…' : ''}”`, r.L.synced ? 'sync' : 'lyrics', async () => {
+    return [`${r.L.synced ? tx('✓ Sincronizada') : tx('Sin tiempos')} · ${r.provider} · “${first.slice(0, 32)}${first.length > 32 ? '…' : ''}”`, r.L.synced ? 'sync' : 'lyrics', async () => {
       // La letra elegida ya está aquí: se muestra al momento, sin esperar a que Jellyfin la guarde y la vuelva a servir.
       const keepLocal = () => store.set(lrcKey(t.id), r.L.synced ? toLRC(t, r.L.lines) : r.L.lines.map(l => l.text).join('\n'));
       let saved = false;
@@ -4131,7 +4145,7 @@ function menu(t, items, headHTML = '') {
    como un control remoto. Jellyfin es el puente: sesiones (/Sessions), órdenes (/Sessions/{id}/Playing…)
    y avisos al instante por su WebSocket. No se abre ningún puerto en los dispositivos.
    ========================================================= */
-const DEV_LABEL = { Android: tx('Teléfono (Android)'), Linux: 'Computadora (Linux)', Windows: 'Computadora (Windows)', Mac: 'Mac', iOS: 'iPhone' };
+const DEV_LABEL = { Android: tx('Teléfono (Android)'), Linux: tx('Computadora (Linux)'), Windows: tx('Computadora (Windows)'), Mac: 'Mac', iOS: 'iPhone' };
 const devLabel = s => DEV_LABEL[s && s.DeviceName] || (s && s.DeviceName) || tx('Otro dispositivo');
 const DEV_NAME = { Android: tx('el teléfono (Android)'), Linux: tx('la computadora (Linux)'), Windows: tx('la computadora (Windows)'), Mac: tx('la Mac'), iOS: tx('el iPhone') };
 const devName = s => DEV_NAME[s && s.DeviceName] || (s && s.DeviceName) || tx('el otro dispositivo');
@@ -4459,12 +4473,12 @@ async function openDevices() {
   if (!RC.wsOk) items.push([tx('Este dispositivo no pudo abrir la conexión en vivo con Jellyfin (WebSocket), así que los demás no pueden controlarlo. Revisa que tu proxy permita WebSocket.'), 'x', () => { }]);
   for (const p of RC.peers) {
     if (RC.remote && p.DeviceId === RC.remote.DeviceId) continue;
-    const what = p.NowPlayingItem ? (p.PlayState && p.PlayState.IsPaused ? tx('en pausa: ') : 'sonando: ') + p.NowPlayingItem.Name : tx('sin música');
+    const what = p.NowPlayingItem ? (p.PlayState && p.PlayState.IsPaused ? tx('en pausa: ') : tx('sonando: ')) + p.NowPlayingItem.Name : tx('sin música');
     const where = String(p.RemoteEndPoint || '').replace(/^::ffff:/, '');
     const label = devLabel(p) + (where ? ' (' + where + ')' : '') + ' · ' + what + (p.sameNet ? '' : tx(' · otra red'));
     if (!p.ctl) { items.push([devLabel(p) + tx(' · no recibe órdenes todavía: actualiza Nanuq a ') + VERSION + tx(' en ese dispositivo y vuelve a abrirlo.'), 'x', () => { }]); continue; }
     if (!RC.remote && P.cur) items.push([tx('Pasar la música a ') + label, 'next-up', () => RC.there(p)]);
-    else if (p.NowPlayingItem) items.push(['Controlar ' + label, 'queue', () => RC.enter(p)]);
+    else if (p.NowPlayingItem) items.push([tx('Controlar {0}', [label]), 'queue', () => RC.enter(p)]);
     else if (P.cur) items.push([tx('Pasar la música a ') + label, 'next-up', () => RC.there(p)]);
     else items.push([label, 'x', () => { }]);
   }
@@ -5018,7 +5032,7 @@ const PH = {
 };
 // ---- Invitado (teléfono) ----
 const PG = {
-  ws: null, st: null, you: null, key: '', url: '', code: '', room: '', state: 'off', why: '', tick: null, up: null, retry: 0, retryT: 0, found: null, finding: false, wait: new Map(), bye: false, chunk: 262144,
+  ws: null, st: null, you: null, key: '', url: '', code: '', room: '', state: 'off', why: '', tick: null, up: null, retry: 0, retryT: 0, found: null, finding: false, wait: new Map(), bye: false, chunk: 262144, fails: 0,
   connect(url, code) {
     this.leave(true);
     this.url = url; this.code = code || ''; this.state = 'connecting'; this.why = ''; this.bye = false; renderPartySoon();
@@ -5075,7 +5089,7 @@ const PG = {
   resume() {
     const p = store.get('party', null);
     if (!partyGuest() || !p || !p.key || !/^ws:\/\/[^/]+\/fiesta$/.test(String(p.url)) || Date.now() - num(p.at) > 2 * 3600e3) { if (p) store.del('party'); return; }
-    this.key = String(p.key).slice(0, 64); this.room = String(p.room || '').slice(0, 60); this.lastOn = num(p.at); this.connect(p.url, '');
+    this.key = String(p.key).slice(0, 64); this.room = String(p.room || '').slice(0, 60); this.lastOn = num(p.at); this.fails = 0; this.connect(p.url, '');
   },
   abortUp() { if (this.up) this.up.dead = true; },
   onMsg(m) {
@@ -5935,4 +5949,6 @@ showSplash(sess && sess.kind === 'jellyfin' && sess.token ? sess.userName : '');
 if (sess && sess.kind === 'jellyfin' && sess.token) startApp(new Jellyfin(sess)); else showLogin();
 })();
 try { history.replaceState({ d: 0 }, ''); history.pushState({ d: 1 }, ''); } catch { }
-if ('serviceWorker' in navigator && location.protocol !== 'file:') { navigator.serviceWorker.register('sw.js').catch(() => { }); }
+// Solo en el navegador (para abrir sin conexión). La app de escritorio y la de Android ya traen los archivos y no lo usan:
+// una copia guardada de la app en la carpeta de datos sería algo más que otra app podría alterar.
+if ('serviceWorker' in navigator && location.protocol !== 'file:' && !window.nanuqDesktop) { navigator.serviceWorker.register('sw.js').catch(() => { }); }

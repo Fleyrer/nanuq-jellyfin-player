@@ -13,6 +13,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { Readable } = require('stream');
 
 app.setName('Nanuq');
 // En Wayland, GNOME busca el ícono de la ventana por su app_id, que Electron saca del nombre del .desktop
@@ -24,6 +25,9 @@ if (process.platform === 'win32') app.setAppUserModelId('com.nanuq.app');
 if (process.env.NANUQ_PROFILE) app.setPath('userData', process.env.NANUQ_PROFILE);
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required'); // la siguiente canción arranca sola
 app.commandLine.appendSwitch('enable-features', 'MediaSessionService,HardwareMediaKeyHandling');
+// Sin caché HTTP en el disco: ahí Chromium guarda las respuestas tal cual (carátulas, y antes también URLs con el token),
+// sin forma de saber si otra app las cambió. Las carátulas se vuelven a pedir a tu Jellyfin al abrir la app.
+app.commandLine.appendSwitch('disable-http-cache');
 
 const WWW = path.join(__dirname, 'www');
 // Puerto fijo: localStorage (sesión, ajustes, cola) depende del origen, incluido el puerto.
@@ -338,9 +342,48 @@ function ptLocal(a) {
 const ptOpenNow = () => !!PT.srv;
 function ptEmit(ev) { if (win && !win.isDestroyed()) win.webContents.send('nanuq:party-ev', ev); }
 // Restos de una sala anterior (la app se cerró de golpe): se borran al arrancar.
+// Dónde se guardan las canciones de la sala: EN DISCO. En Linux, la caché del usuario (~/.cache/nanuq; en el Flatpak,
+// ~/.var/app/com.nanuq.app/cache/nanuq). Antes era la carpeta temporal, que en el Flatpak (y en /tmp de muchas
+// distribuciones) es memoria RAM: hasta 800 MB de canciones ocupaban RAM. En Windows y macOS la temporal ya es disco.
+function ptBase() {
+  if (process.platform !== 'linux') return app.getPath('temp');
+  const d = path.join(process.env.XDG_CACHE_HOME || path.join(os.homedir(), '.cache'), 'nanuq');
+  try { fs.mkdirSync(d, { recursive: true, mode: 0o700 }); return d; } catch { return app.getPath('temp'); }
+}
 function ptCleanTemp() {
-  const tmp = app.getPath('temp'), me = typeof process.getuid === 'function' ? process.getuid() : null;
+  const me = typeof process.getuid === 'function' ? process.getuid() : null;
+  for (const tmp of new Set([app.getPath('temp'), ptBase()]))
   try { for (const n of fs.readdirSync(tmp)) if (n.startsWith('nanuq-fiesta-')) { const f = path.join(tmp, n); try { const st = fs.lstatSync(f); if (st.isDirectory() && (me == null || st.uid === me)) fs.rmSync(f, { recursive: true, force: true }); } catch { } } } catch { }
+}
+// ---- Canciones cifradas en el disco ----
+// En disco, otra app de tu usuario podría cambiar un archivo mientras espera su turno (p. ej. meter uno armado para atacar
+// el decodificador de audio). Por eso cada canción se guarda cifrada y autenticada (AES-256-GCM) con una clave al azar
+// que solo vive en la memoria de esta sala: en bloques de 64 KB, cada uno con su etiqueta, y el número de bloque dentro
+// del nonce (no se pueden cambiar de lugar ni mezclar con los de otra canción). Al reproducir se descifra y se comprueba
+// bloque por bloque; si un solo byte cambió, no se entrega nada de ese bloque y la canción se quita de la lista.
+// También impide leerlas: al cerrar la sala la clave se pierde y lo que quedara en el disco es ilegible.
+const PT_CH = 64 * 1024;
+const ptNonce = (e, k) => { const n = Buffer.alloc(12); e.nonce.copy(n, 0); n.writeUInt32BE(k, 8); return n; };
+function ptSeal(e, plain) {
+  const c = crypto.createCipheriv('aes-256-gcm', PT.fkey, ptNonce(e, e.k++));
+  return Buffer.concat([c.update(plain), c.final(), c.getAuthTag()]);
+}
+// Tamaño que debe tener el archivo cifrado (cada bloque lleva 16 bytes de etiqueta).
+const ptEncSize = e => e.size + Math.ceil(e.size / PT_CH) * 16;
+async function* ptOpenRange(e, start, end) {
+  const fh = await fs.promises.open(e.file, 'r');
+  try {
+    for (let k = Math.floor(start / PT_CH); k <= Math.floor(end / PT_CH); k++) {
+      const n = Math.min(PT_CH, e.size - k * PT_CH), buf = Buffer.alloc(n + 16);
+      const { bytesRead } = await fh.read(buf, 0, buf.length, k * (PT_CH + 16));
+      if (bytesRead !== buf.length) throw new Error('incompleto');
+      const d = crypto.createDecipheriv('aes-256-gcm', e.fkey, ptNonce(e, k));
+      d.setAuthTag(buf.subarray(n));
+      const plain = Buffer.concat([d.update(buf.subarray(0, n)), d.final()]); // final() falla si el bloque se alteró
+      const a = k * PT_CH;
+      yield plain.subarray(Math.max(0, start - a), Math.min(n, end - a + 1));
+    }
+  } finally { await fh.close(); }
 }
 // ¿Es audio? Por los primeros bytes (no por lo que diga el teléfono). Devuelve el tipo con el que se sirve.
 function ptSniff(h) {
@@ -530,10 +573,12 @@ function ptAdd(c, m) {
   if (PT.list.length >= PT_MAX.list) return err('La lista de la fiesta está llena.');
   if (PT.list.filter(e => e.by === g.id).length >= PT_MAX.perGuest) return err('Ya tienes ' + PT_MAX.perGuest + ' canciones en la lista: espera a que suenen.');
   if (PT.list.some(e => e.state === 'uploading' && e.by === g.id)) return err('Espera a que termine de llegar la anterior.');
+  try { const fsx = fs.statfsSync(PT.dir); if (fsx.bavail * fsx.bsize < 1e9) return err('La computadora de la fiesta ya no tiene espacio para más canciones: espera a que suenen.'); } catch { }
   const id = crypto.randomBytes(4).toString('hex'), file = path.join(PT.dir, id + '.audio');
   const e = { id, by: g.id, byName: g.name, conn: c, title: ptStr(s.title, 200) || 'Sin título', artist: ptStr(s.artist, 200), album: ptStr(s.album, 200),
     duration: Math.max(0, Math.min(+s.duration || 0, 6 * 3600)), lyrics: typeof s.lyrics === 'string' ? s.lyrics.slice(0, PT_MAX.lyrics) : '', cover: ptCover(s.cover),
-    state: 'uploading', bytes: 0, head: Buffer.alloc(0), mime: '', file, at: Date.now(), last: Date.now() };
+    state: 'uploading', bytes: 0, head: Buffer.alloc(0), mime: '', file, at: Date.now(), last: Date.now(),
+    fkey: PT.fkey, nonce: crypto.randomBytes(8), k: 0, pend: Buffer.alloc(0), size: 0 };
   try { e.ws = fs.createWriteStream(file, { mode: 0o600 }); } catch { return err('No se pudo guardar la canción.'); }
   e.ws.on('error', () => ptKill(e, 'No se pudo guardar la canción.'));
   PT.list.push(e);
@@ -552,12 +597,17 @@ function ptChunk(c, data) {
   if (e.head.length < 16) e.head = Buffer.concat([e.head, body.subarray(0, 16 - e.head.length)]);
   // El disco va más lento que la red: se frena al teléfono hasta que se escriba. Se suelta también si el archivo se cierra
   // (terminó, se quitó): si no, la conexión quedaba frenada para siempre y no se enteraba de nada más.
-  if (!e.ws.write(body) && !c.held) { c.held = true; c.sock.pause(); const go = () => { if (!c.held) return; c.held = false; try { c.sock.resume(); } catch { } }; e.ws.once('drain', go); e.ws.once('close', go); }
+  e.pend = e.pend.length ? Buffer.concat([e.pend, body]) : Buffer.from(body);
+  let ok = true;
+  while (e.pend.length >= PT_CH) { ok = e.ws.write(ptSeal(e, e.pend.subarray(0, PT_CH))) && ok; e.pend = e.pend.subarray(PT_CH); }
+  if (!ok && !c.held) { c.held = true; c.sock.pause(); const go = () => { if (!c.held) return; c.held = false; try { c.sock.resume(); } catch { } }; e.ws.once('drain', go); e.ws.once('close', go); }
   if (!e.shownAt || Date.now() - e.shownAt > 1000) { e.shownAt = Date.now(); ptState(); }
 }
 function ptEnd(c, m) {
   const e = PT.list.find(x => x.id === ptStr(m.id, 8) && x.conn === c && x.state === 'uploading'); if (!e) return;
   e.state = 'closing';
+  if (e.pend.length) e.ws.write(ptSeal(e, e.pend));
+  e.pend = Buffer.alloc(0); e.size = e.bytes;
   e.ws.end(() => {
     if (!PT.list.includes(e)) return;
     const mime = ptSniff(e.head);
@@ -583,7 +633,8 @@ function ptServe(req, res, p) {
   if (!e) { res.writeHead(404).end(); return; }
   fs.stat(e.file, (err, st) => {
     if (err || !st.isFile()) { res.writeHead(404).end(); return; }
-    const size = st.size, m = /^bytes=(\d*)-(\d*)$/.exec(String(req.headers.range || ''));
+    if (st.size !== ptEncSize(e)) { res.writeHead(404).end(); ptKill(e); return; } // alguien cambió el archivo
+    const size = e.size, m = /^bytes=(\d*)-(\d*)$/.exec(String(req.headers.range || ''));
     let start = 0, end = size - 1, code = 200;
     if (m && (m[1] || m[2])) {
       if (m[1]) { start = +m[1]; if (m[2]) end = Math.min(+m[2], size - 1); } else start = Math.max(0, size - +m[2]);
@@ -592,7 +643,7 @@ function ptServe(req, res, p) {
     }
     res.writeHead(code, { 'Content-Type': e.mime, 'Content-Length': end - start + 1, 'Accept-Ranges': 'bytes', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', ...(code === 206 ? { 'Content-Range': `bytes ${start}-${end}/${size}` } : {}) });
     if (req.method === 'HEAD') { res.end(); return; }
-    fs.createReadStream(e.file, { start, end }).on('error', () => res.destroy()).pipe(res);
+    Readable.from(ptOpenRange(e, start, end)).on('error', () => { res.destroy(); if (PT.list.includes(e)) ptKill(e); }).pipe(res);
   });
 }
 // Carátulas para los teléfonos (su lista de la fiesta): GET /fiesta/c/<id>?k=<llave del invitado>. Solo con una llave de
@@ -632,7 +683,7 @@ function ptListen(srv) {
 async function ptOpen(name) {
   if (ptOpenNow()) return ptStatus();
   ptCleanTemp();
-  PT.dir = fs.mkdtempSync(path.join(app.getPath('temp'), 'nanuq-fiesta-')); try { fs.chmodSync(PT.dir, 0o700); } catch { }
+  PT.dir = fs.mkdtempSync(path.join(ptBase(), 'nanuq-fiesta-')); PT.fkey = crypto.randomBytes(32); try { fs.chmodSync(PT.dir, 0o700); } catch { }
   PT.code = String(crypto.randomInt(0, 1e6)).padStart(6, '0'); PT.token = crypto.randomBytes(16).toString('hex'); PT.rid = crypto.randomBytes(6).toString('hex');
   PT.name = ptStr(name, 40) || 'Fiesta Nanuq'; PT.list = []; PT.now = null; PT.keys.clear(); PT.fails.clear(); PT.failAll = 0; PT.lockUntil = 0;
   const srv = http.createServer(ptGuestCover);
@@ -667,7 +718,7 @@ function ptClose() {
   try { PT.udp && PT.udp.close(); } catch { } PT.udp = null;
   clearInterval(PT.gcT); clearTimeout(PT.stT);
   for (const e of PT.list.slice()) { try { e.ws && e.ws.destroy(); } catch { } }
-  PT.list = []; PT.now = null; PT.keys.clear();
+  PT.list = []; PT.now = null; PT.keys.clear(); PT.fkey = null;
   try { fs.rmSync(PT.dir, { recursive: true, force: true }); } catch { }
   ptEmit({ type: 'state', open: false });
 }
@@ -717,7 +768,12 @@ ipcMain.handle('nanuq:party', async (e, o = {}) => {
 
 // Tamaño y posición de la ventana entre sesiones.
 const stateFile = () => path.join(app.getPath('userData'), 'window.json');
-function loadState() { try { return JSON.parse(fs.readFileSync(stateFile(), 'utf8')); } catch { return {}; } }
+// Solo números razonables: el archivo vive en tu carpeta de datos y podría venir alterado.
+function loadState() {
+  let o; try { o = JSON.parse(fs.readFileSync(stateFile(), 'utf8')); } catch { return {}; }
+  const n = (v, a, b) => Number.isInteger(v) && v >= a && v <= b ? v : undefined;
+  return o && typeof o === 'object' ? { width: n(o.width, 360, 20000), height: n(o.height, 520, 20000), x: n(o.x, -20000, 20000), y: n(o.y, -20000, 20000), maximized: o.maximized === true } : {};
+}
 function saveState() {
   if (!win || win.isDestroyed()) return;
   const s = { ...win.getNormalBounds(), maximized: win.isMaximized() };
@@ -725,6 +781,8 @@ function saveState() {
 }
 
 async function start() {
+  // Caché HTTP de versiones anteriores: ya no se usa (disable-http-cache) y ocupa espacio.
+  try { fs.rmSync(path.join(app.getPath('userData'), 'Cache'), { recursive: true, force: true }); } catch { }
   await secInit();
   ptCleanTemp(); // carpetas de una fiesta anterior que no se cerró bien
   const port = await serve();
@@ -766,9 +824,13 @@ async function start() {
   });
   // Descargas: solo los archivos que genera la propia app (el video de «Tu año con Nanuq», como blob: de nuestro origen).
   ses.on('will-download', (e, item) => { if (!item.getURL().startsWith('blob:' + origin + '/')) e.preventDefault(); });
-  // Una sola vez: borrar la caché de versiones anteriores, que pudo guardar URLs con el token.
-  const purged = path.join(app.getPath('userData'), 'cache-sin-token');
-  if (!fs.existsSync(purged)) ses.clearCache().then(() => fs.writeFileSync(purged, String(Date.now()))).catch(() => { });
+  // Integridad del código de la app: los archivos vienen siempre del paquete instalado (solo lectura en RPM y Flatpak) por
+  // el servidor interno. Lo que Chromium deja en la carpeta de datos y podría ejecutar en una sesión siguiente se borra
+  // ANTES de abrir la página: el service worker y su caché (versiones anteriores lo registraban: guardaba copias de
+  // index.html y app.js) y la caché de código compilado de JavaScript. Si otra app los alterara, no llegan a usarse.
+  try { await ses.clearStorageData({ storages: ['serviceworkers', 'cachestorage'] }); } catch { }
+  try { await ses.clearCodeCaches({}); } catch { }
+  try { fs.rmSync(path.join(app.getPath('userData'), 'cache-sin-token'), { force: true }); } catch { }
   if (st.maximized) win.maximize();
   win.once('ready-to-show', () => win.show());
   for (const ev of ['resize', 'move']) win.on(ev, () => { clearTimeout(saveState.t); saveState.t = setTimeout(saveState, 400); });
@@ -782,7 +844,7 @@ async function start() {
   // Atajos útiles: F5/Ctrl+R recarga, F11 pantalla completa, Ctrl+Shift+I herramientas (para depurar).
   win.webContents.on('before-input-event', (e, i) => {
     if (i.type !== 'keyDown') return;
-    if (i.key === 'F5' || (i.control && i.key.toLowerCase() === 'r')) { win.webContents.reload(); e.preventDefault(); }
+    if (i.key === 'F5' || (i.control && i.key.toLowerCase() === 'r')) { e.preventDefault(); ses.clearCodeCaches({}).catch(() => { }).finally(() => win.webContents.reload()); }
     else if (i.key === 'F11') { win.setFullScreen(!win.isFullScreen()); e.preventDefault(); }
     else if (i.control && i.shift && i.key.toLowerCase() === 'i') { win.webContents.toggleDevTools(); e.preventDefault(); }
   });

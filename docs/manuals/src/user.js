@@ -210,6 +210,7 @@ ${steps(['Barra lateral → <b>Fiesta</b> → <b>Abrir la fiesta</b>. Aparece un
 <div class="shots-row">${shot('phone-party', 'Buscar fiestas en tu red.', 'phone')}<div style="flex:1.4">
 ${steps(['Conéctate a la <b>misma red Wi-Fi</b> que la computadora.', 'Más → <b>Fiesta</b> → <b>Buscar fiestas en mi red</b> (o escribe la dirección) y el código.', 'Busca en tus playlists, artistas, álbumes, canciones o letras y toca una canción para <b>mandarla</b>. Tu teléfono la baja de tu Jellyfin y se la pasa a la computadora, con su letra y carátula.', 'Canta: la letra aparece en tu teléfono y en el techo del iglú.'])}</div></div>
 <p>Tu Nanuq aparece en el iglú con el disfraz de tu tema, y cuando suena tu canción, la levanta en alto. Si tu teléfono se duerme, sigues en la fiesta y vuelves a entrar solo. Solo <b>Salir</b> te saca.</p>
+<p>Las canciones que llegan a la computadora se guardan en su disco <b>cifradas</b> y solo mientras están en la lista: se borran al sonar o al cerrar la fiesta, y ninguna otra app puede leerlas ni cambiarlas.</p>
 ${tip('Si los teléfonos no encuentran la sala, revisa el firewall de la computadora (TCP 47864 y UDP 47865) o escribe la dirección a mano.', 'pony', true)}`, `
 ${shot('igloo', 'The igloo: DJ Nanuq in the center and a Nanuq for each guest.')}
 <h2>On the computer (host)</h2>
@@ -218,6 +219,7 @@ ${steps(['Sidebar → <b>Party</b> → <b>Open the party</b>. A <b>6-digit code<
 <div class="shots-row">${shot('phone-party', 'Find parties on your network.', 'phone')}<div style="flex:1.4">
 ${steps(['Connect to the <b>same Wi-Fi network</b> as the computer.', 'More → <b>Party</b> → <b>Find parties on my network</b> (or type the address) and the code.', 'Search your playlists, artists, albums, songs or lyrics and tap a song to <b>send it</b>. Your phone downloads it from your Jellyfin and passes it to the computer, with its lyrics and cover.', 'Sing: the lyrics show up on your phone and on the igloo\'s ceiling.'])}</div></div>
 <p>Your Nanuq shows up in the igloo in your theme's costume, and when your song plays, it holds it up high. If your phone sleeps, you're still at the party and rejoin on your own. Only <b>Leave</b> takes you out.</p>
+<p>Songs that reach the computer are stored on its disk <b>encrypted</b> and only while they're in the list: they're deleted when they play or when the party closes, and no other app can read or change them.</p>
 ${tip('If phones can\'t find the room, check the computer\'s firewall (TCP 47864 and UDP 47865) or type the address by hand.', 'pony', true)}`));
 
   add('dispositivos', t('Mis dispositivos', 'My devices'), t('Un Nanuq suena; los demás lo controlan.', 'One Nanuq plays; the others control it.'), t(`
@@ -280,14 +282,14 @@ ${shot('themes', 'Settings → Theme: each theme with its Nanuq.')}
 
   add('privacidad', t('Privacidad y seguridad', 'Privacy and security'), t('Tu música, tus datos, tu servidor.', 'Your music, your data, your server.'), t(`
 <ul><li>Nanuq solo habla con <b>tu</b> Jellyfin (y con SomeDL si lo configuras). Sin cuentas, sin analítica, sin anuncios. Lo único externo son las fuentes de Google Fonts.</li>
-<li>Tu sesión, tu cola y todo lo que dice algo de ti se guardan <b>cifrados</b> (AES-256 con el llavero del sistema o el almacén de claves de Android).</li>
+<li>Tu sesión, tu cola y todo lo que dice algo de ti se guardan <b>cifrados</b> (AES-256 con el llavero del sistema o el almacén de claves de Android). Si algo de lo guardado se alterara, Nanuq lo nota y no lo usa.</li>
 <li>Revisado contra servidores y metadatos maliciosos, ataques de memoria y de denegación de servicio.</li>
 <li><b>Cerrar sesión</b> revoca tu token y borra lo personal del dispositivo.</li></ul>
 <h2>Software libre</h2>
 <p>Nanuq es <b>software libre</b> bajo la <b>licencia GNU GPL versión 3 o posterior</b>: puedes usarlo, estudiarlo, compartirlo y modificarlo. Si compartes una versión modificada, tiene que llevar la misma licencia y su código fuente. Se ofrece sin ninguna garantía. Lo ves en <b>Ajustes → Nanuq</b> (al final), con el enlace al texto completo, y en el archivo <code>LICENSE</code> del proyecto.</p>
 ${tip('Los detalles técnicos están en <code>SECURITY.md</code> y en el manual técnico.', 'amoled')}`, `
 <ul><li>Nanuq only talks to <b>your</b> Jellyfin (and to SomeDL if you set it up). No accounts, no analytics, no ads. The only external thing is the Google Fonts fonts.</li>
-<li>Your session, your queue and anything that says something about you are stored <b>encrypted</b> (AES-256 with the system keyring or the Android keystore).</li>
+<li>Your session, your queue and anything that says something about you are stored <b>encrypted</b> (AES-256 with the system keyring or the Android keystore). If anything stored were altered, Nanuq notices and doesn't use it.</li>
 <li>Reviewed against malicious servers and metadata, memory and denial-of-service attacks.</li>
 <li><b>Logging out</b> revokes your token and deletes personal data from the device.</li></ul>
 <h2>Free software</h2>

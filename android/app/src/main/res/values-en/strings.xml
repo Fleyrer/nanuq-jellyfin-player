@@ -11,4 +11,5 @@
     <string name="pause">Pause</string>
     <string name="notice_channel_name">Requested songs</string>
     <string name="notice_channel_desc">Notices when a song you requested finishes downloading</string>
+    <string name="share">Share</string>
 </resources>

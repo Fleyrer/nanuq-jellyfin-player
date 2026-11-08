@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Nanuq service worker: guarda la app para abrirla sin conexión.
 // La música y la API de Jellyfin siempre van directo a la red.
-const CACHE = 'nanuq-v1.44.4';
+const CACHE = 'nanuq-v1.44.6';
 const SHELL = ['./', 'index.html', 'i18n.js', 'app.js', 'app.css', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/logo.webp'];
 
 self.addEventListener('install', e => {
@@ -28,7 +28,7 @@ self.addEventListener('fetch', e => {
   const sameOrigin = !fonts;
   if (req.mode === 'navigate') {
     // Red primero para recibir actualizaciones; caché si no hay conexión.
-    e.respondWith(fetch(req).then(r => { const copy = r.clone(); caches.open(CACHE).then(c => c.put('index.html', copy)); return r; }).catch(() => caches.match('index.html')));
+    e.respondWith(fetch(req).then(r => { if (r.ok) { const copy = r.clone(); caches.open(CACHE).then(c => c.put('index.html', copy)); } return r; }).catch(() => caches.match('index.html')));
     return;
   }
   // El código de la app (app.js, app.css, i18n.js) también va red primero: así nunca se junta un index.html nuevo con un

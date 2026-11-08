@@ -325,7 +325,7 @@ public class MainActivity extends Activity {
             synchronized (videos) { if (uri == null || !savedVideos.contains(uri)) return; }
             runOnUiThread(() -> {
                 Intent send = new Intent(Intent.ACTION_SEND).setType("video/*").putExtra(Intent.EXTRA_STREAM, Uri.parse(uri)).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                try { startActivity(Intent.createChooser(send, "Compartir")); } catch (ActivityNotFoundException ignored) { }
+                try { startActivity(Intent.createChooser(send, getString(R.string.share))); } catch (ActivityNotFoundException ignored) { }
             });
         }
 

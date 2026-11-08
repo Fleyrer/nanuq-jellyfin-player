@@ -40,7 +40,7 @@ final class LocalServer {
     private final ServerSocket server;
     private final Files files;
     // Como mucho 32 conexiones atendidas a la vez (el reproductor usa una o dos): nadie puede agotar la memoria abriendo
-    // miles, y como cada una tiene 5 s para mandar su petición, tampoco puede bloquear el servidor dejándolas mudas.
+    // miles, y como cada una tiene 10 s en total para mandar su petición, tampoco puede bloquear el servidor dejándolas mudas.
     private final ExecutorService pool = Executors.newFixedThreadPool(32);
 
     LocalServer(Files files) throws IOException {

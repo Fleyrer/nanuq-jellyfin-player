@@ -981,7 +981,16 @@ const EN = {
   "{0} minutos": "{0} minutes",
   "Idioma del sistema": "System language",
   "Software libre bajo la licencia GNU GPL versión 3 o posterior: puedes usarlo, estudiarlo, compartirlo y modificarlo.": "Free software under the GNU GPL version 3 or later: you can use, study, share and modify it.",
-  "Ver la licencia": "View the license"
+  "Ver la licencia": "View the license",
+  "Esta {m} pide algo {v}. Va {a}.": "This {m} calls for something {v}. Here's {a}.",
+  "Guitarras al máximo y los audífonos echando humo.": "Guitars cranked up and headphones smoking.",
+  "y {0} más": "and {0} more",
+  "✓ Sincronizada": "✓ Synced",
+  "Computadora (Linux)": "Computer (Linux)",
+  "Computadora (Windows)": "Computer (Windows)",
+  "sonando:": "playing:",
+  "Controlar {0}": "Control {0}",
+  "tus {0} canciones descargadas": "your {0} downloaded songs"
 };
 function tx(s, v) {
   let r = String(s ?? '');

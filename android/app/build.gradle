@@ -1,0 +1,87 @@
+// SPDX-FileCopyrightText: 2026 Fleyrer y colaboradores de Nanuq
+// SPDX-License-Identifier: GPL-3.0-or-later
+plugins {
+    id 'com.android.application'
+}
+
+// La carpeta web/ (index.html, i18n.js, app.js, app.css, manifest, icons/) es la única fuente de la interfaz.
+def webRoot = rootProject.file('../web')
+
+// La versión se toma de `const VERSION = 'x.y.z'` en web/app.js.
+def webVersion = (new File(webRoot, 'app.js').text =~ /const VERSION = '(\d+)\.(\d+)\.(\d+)'/)
+def vParts = webVersion.find() ? (1..3).collect { webVersion.group(it) as int } : [0, 0, 1]
+def vName = vParts.join('.')
+def vCode = vParts[0] * 10000 + vParts[1] * 100 + vParts[2]
+
+def keystoreProps = new Properties()
+def keystoreFile = rootProject.file('keystore.properties')
+if (keystoreFile.exists()) keystoreFile.withInputStream { keystoreProps.load(it) }
+
+def webOut = layout.buildDirectory.dir('generated/webassets')
+
+def syncWeb = tasks.register('syncWeb', Sync) {
+    description = 'Copia la PWA a los assets de Android e inyecta el puente nativo.'
+    into webOut.map { it.dir('www') }
+    from(webRoot) {
+        include 'index.html', 'i18n.js', 'app.js', 'app.css', 'manifest.webmanifest', 'icons/**'
+        filesMatching('index.html') {
+            filter { String line ->
+                line.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<script src="android-bridge.js"></script>')
+            }
+        }
+    }
+    from(rootProject.file('bridge')) { include 'android-bridge.js' }
+}
+
+android {
+    namespace 'com.nanuq.app'
+    compileSdk 35
+
+    buildFeatures { buildConfig true }
+
+    defaultConfig {
+        applicationId 'com.nanuq.app'
+        minSdk 24
+        targetSdk 35
+        versionCode vCode
+        versionName vName
+    }
+
+    signingConfigs {
+        if (keystoreProps['storeFile']) {
+            release {
+                storeFile file(keystoreProps['storeFile'])
+                storePassword keystoreProps['storePassword']
+                keyAlias keystoreProps['keyAlias']
+                keyPassword keystoreProps['keyPassword']
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (keystoreProps['storeFile']) signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    sourceSets {
+        main.assets.srcDirs += webOut.get().asFile
+    }
+}
+
+tasks.named('preBuild') { dependsOn syncWeb }
+
+// Nombre del APK: nanuq-<versión>-<tipo>.apk
+android.applicationVariants.configureEach { variant ->
+    variant.outputs.configureEach { output ->
+        outputFileName = "nanuq-${variant.versionName}-${variant.buildType.name}.apk"
+    }
+}

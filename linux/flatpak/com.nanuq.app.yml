@@ -1,0 +1,56 @@
+# Nanuq empaquetado como Flatpak a partir de la compilación de Electron (npm run dist → linux-unpacked).
+app-id: com.nanuq.app
+runtime: org.freedesktop.Platform
+runtime-version: '26.08'
+sdk: org.freedesktop.Sdk
+base: org.electronjs.Electron2.BaseApp
+base-version: '26.08'
+command: nanuq
+separate-locales: false
+finish-args:
+  - --share=ipc
+  - --share=network                 # Jellyfin y el servidor interno en 127.0.0.1
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --socket=pulseaudio             # sonido
+  - --device=dri                    # aceleración gráfica
+  - --own-name=org.mpris.MediaPlayer2.chromium.*   # controles del sistema (MPRIS)
+  - --talk-name=org.freedesktop.Notifications
+  - --talk-name=org.freedesktop.secrets       # llavero de GNOME: guardar el token de la sesión cifrado
+  - --talk-name=org.kde.kwalletd5             # llavero de KDE (KWallet)
+  - --talk-name=org.kde.kwalletd6
+  # «Escuchando Nanuq» en Discord (Rich Presence): solo para conectarse al socket discord-ipc-N de Discord o de
+  # Vesktop/Equibop (arRPC). Una app en Flatpak lo crea en su propio $XDG_RUNTIME_DIR, que en el sistema es
+  # $XDG_RUNTIME_DIR/.flatpak/<id>/xdg-run. Esa carpeta solo existe después de abrir esa app una vez en la sesión, y
+  # Flatpak no comparte lo que no existe al abrir Nanuq: con «:create» se crea si falta, así Nanuq ve el socket aunque
+  # Discord se abra DESPUÉS. (Con «:ro» solo funcionaba si Discord se había abierto antes.)
+  - --filesystem=xdg-run/discord-ipc-0:ro
+  - --filesystem=xdg-run/app/com.discordapp.Discord:create
+  - --filesystem=xdg-run/.flatpak/com.discordapp.Discord/xdg-run:create
+  - --filesystem=xdg-run/.flatpak/dev.vencord.Vesktop/xdg-run:create
+  - --filesystem=xdg-run/.flatpak/org.equicord.equibop/xdg-run:create
+modules:
+  - name: nanuq
+    buildsystem: simple
+    build-commands:
+      - cp -a nanuq /app/nanuq
+      - rm -f /app/nanuq/chrome-sandbox   # en Flatpak el sandbox de Chromium lo maneja zypak
+      - install -Dm755 nanuq.sh /app/bin/nanuq
+      - install -Dm644 com.nanuq.app.desktop /app/share/applications/com.nanuq.app.desktop
+      - install -Dm644 com.nanuq.app.metainfo.xml /app/share/metainfo/com.nanuq.app.metainfo.xml
+      - install -Dm644 icon-512.png /app/share/icons/hicolor/512x512/apps/com.nanuq.app.png
+      - install -Dm644 icon-192.png /app/share/icons/hicolor/192x192/apps/com.nanuq.app.png
+    sources:
+      - type: dir
+        path: ../../dist/_build/linux-unpacked
+        dest: nanuq
+      - type: file
+        path: nanuq.sh
+      - type: file
+        path: com.nanuq.app.desktop
+      - type: file
+        path: com.nanuq.app.metainfo.xml
+      - type: file
+        path: ../../web/icons/icon-512.png
+      - type: file
+        path: ../../web/icons/icon-192.png

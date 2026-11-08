@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Nanuq</string>
+    <string name="channel_name">Reproducción</string>
+    <string name="channel_desc">Controles de la música que suena</string>
+    <string name="prev">Anterior</string>
+    <string name="next">Siguiente</string>
+    <string name="play">Reproducir</string>
+    <string name="pause">Pausar</string>
+    <string name="notice_channel_name">Canciones solicitadas</string>
+    <string name="notice_channel_desc">Avisos cuando termina de descargarse una canción que pediste</string>
+</resources>

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Nanuq
+GenericName=Reproductor de música
+Comment=Música desde tu servidor Jellyfin
+Exec=nanuq %U
+Icon=com.nanuq.app
+Terminal=false
+Categories=AudioVideo;Audio;Player;
+Keywords=música;music;jellyfin;reproductor;
+StartupWMClass=com.nanuq.app

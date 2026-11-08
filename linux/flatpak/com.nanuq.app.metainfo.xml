@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.nanuq.app</id>
+  <name>Nanuq</name>
+  <summary>Música desde tu servidor Jellyfin</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <description>
+    <p>Cliente de música para tu servidor Jellyfin, con letras sincronizadas, mezclas, temas y un oso que baila con tu música.</p>
+  </description>
+  <launchable type="desktop-id">com.nanuq.app.desktop</launchable>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="1.44.3" date="2026-11-08"/>
+  </releases>
+</component>

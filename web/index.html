@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<!-- SPDX-FileCopyrightText: 2026 Fleyrer y colaboradores de Nanuq -->
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<html lang="es" data-theme="navy">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Seguridad: Nanuq habla con el Jellyfin que tú elijas (y con SomeDL), por eso connect/img/media admiten cualquier
+     servidor. Lo que se bloquea: TODO script que no sea un archivo de la app (nada en línea, ni <script> ni onerror=…
+     ni javascript:), eval, hojas de estilo en línea o de otros sitios (salvo Google Fonts), iframes (el puente de
+     Android se expone a todos los marcos), plugins, <base> y el envío de formularios a otra página.
+     style-src-attr 'unsafe-inline' deja los atributos style="…" (colores y posiciones calculadas): no ejecutan código.
+     El 'unsafe-inline' de style-src solo lo usan navegadores viejos sin style-src-elem/-attr. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src-elem 'self' https://fonts.googleapis.com; style-src-attr 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com data:; img-src * data: blob:; media-src * data: blob:; connect-src * ws: wss: data: blob:; worker-src 'self'; manifest-src 'self'; frame-src 'none'; child-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Nanuq</title>
+<meta name="description" content="Cliente de música para Jellyfin">
+<meta name="theme-color" content="#081120">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="splash" id="splash" aria-hidden="true"><div class="sp-in"><span class="sp-bear bear"></span><div class="sp-hi">Bienvenido</div><div class="sp-name"></div></div></div>
+<div class="app" id="app">
+  <aside class="side"><div class="side-card">
+    <div class="brand"><span class="logo" data-logo="44"></span><span class="word">nanuq</span></div>
+    <nav class="nav" id="sidenav"></nav>
+    <div class="grow"></div>
+    <nav class="nav"><button data-act="logout"><svg class="i"><use href="#i-out"/></svg>Cerrar sesión</button></nav>
+  </div></aside>
+  <main class="main" id="main"><div id="view"></div></main>
+  <section class="queue" id="queue"></section>
+  <footer class="player" id="player">
+    <div class="np-mini" data-act="sheet" role="button" tabindex="0" aria-label="Abrir el reproductor">
+      <div class="cover" id="pCover"></div>
+      <div class="meta"><div class="t" id="pAlbum">Nada en reproducción</div><div class="s" id="pArtist"></div><div class="s" id="pYear"></div></div>
+    </div>
+    <div class="seekwrap">
+      <div class="title" id="pTitle">&nbsp;</div>
+      <span class="time" id="pCur">0:00</span>
+      <div class="seek" data-seek><canvas></canvas></div>
+      <span class="time" id="pDur">0:00</span>
+    </div>
+    <div class="ctrls">
+      <button class="cbtn" data-act="prev" title="Anterior"><svg class="i f"><use href="#i-prev"/></svg></button>
+      <button class="cbtn play" data-act="toggle" title="Reproducir/Pausar"><svg class="i f"><use href="#i-play" class="pp"/></svg></button>
+      <button class="cbtn" data-act="next" title="Siguiente"><svg class="i f"><use href="#i-next"/></svg></button>
+      <button class="cbtn lyrbtn" data-act="lyrics-open" title="Letra"><svg class="i"><use href="#i-lyrics"/></svg></button>
+      <div class="vol"><button class="cbtn" data-act="mute" title="Silenciar"><svg class="i"><use href="#i-vol" id="volIco"/></svg></button><input type="range" id="vol" min="0" max="1" step="0.01" aria-label="Volumen"></div>
+      <button class="cbtn devbtn" data-act="devices" title="Mis dispositivos"><svg class="i"><use href="#i-devices"/></svg></button>
+      <button class="cbtn qtoggle" data-act="queue" title="Cola"><svg class="i"><use href="#i-queue"/></svg></button>
+    </div>
+  </footer>
+  <button class="mini" id="mini" data-act="sheet">
+    <div class="bar" id="mBar"></div>
+    <div class="cover" id="mCover"></div>
+    <div class="meta"><div class="t" id="mTitle">Nada en reproducción</div><div class="s" id="mArtist">Elige un álbum para empezar</div></div>
+    <span class="cbtn" data-act="toggle" role="button" aria-label="Reproducir/Pausar"><svg class="i f"><use href="#i-play" class="pp"/></svg></span>
+    <span class="cbtn" data-act="next" role="button" aria-label="Siguiente"><svg class="i f"><use href="#i-next"/></svg></span>
+  </button>
+  <nav class="tabs" id="tabs"></nav>
+</div>
+
+<div class="sheet" id="sheet" aria-hidden="true">
+  <div class="bg" id="sBg"></div>
+  <div class="top">
+    <span class="tb-l"><button class="cbtn" data-act="sheet-close" aria-label="Cerrar"><svg class="i"><use href="#i-down"/></svg></button></span>
+    <span class="tb-m"><span class="lbl" id="sLbl">Reproduciendo</span></span>
+    <span class="tb-r"><button class="cbtn devbtn" data-act="devices" aria-label="Mis dispositivos" title="Mis dispositivos"><svg class="i"><use href="#i-devices"/></svg></button><button class="cbtn" data-act="track-menu-cur" aria-label="Más"><svg class="i"><use href="#i-more"/></svg></button></span>
+  </div>
+  <div class="big"><div class="cover" id="sCover"></div><div class="djs" id="sDj"><div class="djs-crate" aria-hidden="true"></div><div class="djs-bear" aria-hidden="true"></div><div class="djs-say" id="sDjSay" role="status"></div></div></div>
+  <div class="synctop"><button class="btn" data-act="sync-cancel">Cancelar</button><span class="sp"></span><button class="btn" data-act="sync-restart"><svg class="i"><use href="#i-undo"/></svg>Inicio</button><button class="btn pri" data-act="sync-save">Guardar</button></div>
+  <div class="lyr" id="sLyr"></div>
+  <div class="lyr sq" id="sQueue" aria-label="Cola"></div>
+  <div class="lyr" id="sSync"></div>
+  <div class="info"><div class="t" id="sTitle">—</div><div class="s" id="sSub"></div></div>
+  <div class="sk"><div class="seek" data-seek><canvas></canvas></div><div class="times"><span id="sCur">0:00</span><span id="sDur">0:00</span></div></div>
+  <div class="ctrls">
+    <button class="cbtn" data-act="shuffle" title="Mezclar cola"><svg class="i"><use href="#i-shuffle"/></svg></button>
+    <button class="cbtn" data-act="prev"><svg class="i f"><use href="#i-prev"/></svg></button>
+    <button class="cbtn play" data-act="toggle"><svg class="i f"><use href="#i-play" class="pp"/></svg></button>
+    <button class="cbtn" data-act="next"><svg class="i f"><use href="#i-next"/></svg></button>
+    <button class="cbtn" data-act="cycle-mode" id="sMode" title="Repetición"><svg class="i"><use href="#i-repeat"/></svg></button>
+  </div>
+  <div class="sx"><button class="pill" data-act="lyrics" id="sLyrBtn"><svg class="i"><use href="#i-lyrics"/></svg><span>Letra</span></button><button class="pill" data-act="sheet-queue" id="sQBtn"><svg class="i"><use href="#i-queue"/></svg>Cola</button><button class="pill" data-act="fav" id="sFavBtn"><svg class="i"><use href="#i-heart"/></svg><span>Favorito</span></button><button class="pill" data-act="dl" id="sDlBtn" hidden><svg class="i"><use href="#i-download"/></svg><span>Descargar</span></button></div>
+  <div class="syncbar">
+    <button class="cbtn" data-act="sync-undo" title="Deshacer última marca"><svg class="i"><use href="#i-undo"/></svg></button>
+    <button class="cbtn sm" data-act="sync-nudge" data-d="-0.25" title="Mover la última marca ¼ s antes">−¼s</button>
+    <button class="mark" data-act="sync-mark">Marcar</button>
+    <button class="cbtn sm" data-act="sync-nudge" data-d="0.25" title="Mover la última marca ¼ s después">+¼s</button>
+    <button class="cbtn" data-act="toggle" title="Reproducir/Pausar"><svg class="i f"><use href="#i-play" class="pp"/></svg></button>
+  </div>
+</div>
+
+<div class="login hidden" id="login"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="lg" x1="0" y1="0" x2="1" y2=".4"><stop offset="0" style="stop-color:var(--logo1)"/><stop offset="1" style="stop-color:var(--logo2)"/></linearGradient>
+    <symbol id="logo" viewBox="6 20 100 92">
+<g style="stroke:var(--bear-line)" stroke-linejoin="round" stroke-linecap="round">
+  <path fill="#fff" stroke-width="3.2" d="M12 44.5C12.5 41 16 38.5 20 37C23 36 25.5 34.5 27.5 32.5C30 29.6 33.5 27.6 37 27C37.6 24.2 41.6 23 43.6 25.2C44.6 26.4 44.6 28 43.8 29C49 30.5 53 33.5 57 37.5C62 40 67 42.5 71.5 46.5C80 54 88 64 92.5 76C96 85 97.5 94 95 100C93 104.5 88.5 106.5 83 106.5L41 106.5C39.6 98 39 88 38.6 80C38.2 73 36.6 66.5 33.6 61C31 56.6 27.4 53.6 23.6 51.6C20 50.6 16.4 50 14 48.6C12.4 47.6 11.8 46 12 44.5Z"/>
+  <g style="fill:var(--bear-shade)" stroke="none">
+    <path d="M41 106.5C40 99 39.4 90 39.2 82.5C42.6 88 45 96 46 106.5Z"/>
+    <path d="M56.3 106.5C55.5 97 56.2 88 59.3 79.5C62.4 87 63.8 97 64.2 106.5Z"/>
+    <path d="M66.6 103.6C67.6 93 74.6 85 85.2 84C89.5 83.8 92.7 85 95 87C96.4 93 95.6 98.6 93.4 101.8C90 104.8 85.5 105 80 104.6C75 104 70 103.6 66.6 103.6Z"/>
+    <path d="M17 49.6C21 50.4 26 51 30 50C28.8 53.2 26.4 53.6 23.6 52.2C21 51.2 19 50.6 17 49.6Z"/>
+    <path d="M43 50C48 58 50 67 49.6 77C46 71 43.4 64 42 57Z"/>
+  </g>
+  <path fill="none" stroke-width="2.6" d="M55.8 106.3C54.8 96 55.8 86 59.8 77.5"/>
+  <path fill="none" stroke-width="2.6" d="M66.2 104C66.7 92 73.7 83.5 85.2 82.5C89.2 82.2 92.6 83.2 94.8 85"/>
+  <path fill="none" stroke-width="2" d="M40.2 26.6C40.8 25.3 42 25 42.7 25.9"/>
+  <path fill="none" stroke-width="2.2" d="M14.4 48.2C16.8 49 19.4 48.8 21.4 47.6"/>
+  <path fill="none" stroke-width="2.6" d="M26 37.4L30.2 36.2"/>
+  <path fill="none" stroke-width="1.9" d="M37.4 68L40.2 69.6M38.6 75.6L41.4 77M50 38.6L53.4 40.6L51.8 42.2L55 43.6"/>
+  <path style="fill:var(--bear-line)" stroke="none" d="M9.8 44.6C9.8 42.6 11.8 41.6 13.6 42.4C15 43.2 14.8 45.4 13.2 46C11.6 46.6 9.8 46.2 9.8 44.6Z"/>
+</g>
+<path d="M32 108.2H102" style="stroke:var(--bear-ground)" stroke-width="3" stroke-linecap="round"/>
+</symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+    <symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.2"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-disc" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M4 6h12M4 12h12M4 18h8M18 14v6M15 17h6"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+    <symbol id="i-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.2-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4.2" height="16" rx="1.2"/><rect x="13.8" y="4" width="4.2" height="16" rx="1.2"/></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24"><rect x="4" y="5" width="2.4" height="14" rx="1"/><path d="M19 5.9v12.2a.9.9 0 0 1-1.4.75L9 12.75a.9.9 0 0 1 0-1.5l8.6-6.1A.9.9 0 0 1 19 5.9z"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><rect x="17.6" y="5" width="2.4" height="14" rx="1"/><path d="M5 5.9v12.2a.9.9 0 0 0 1.4.75L15 12.75a.9.9 0 0 0 0-1.5L6.4 5.15A.9.9 0 0 0 5 5.9z"/></symbol>
+    <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></symbol>
+    <symbol id="i-repeat1" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/><path d="M11 10h1v4"/></symbol>
+    <symbol id="i-once" viewBox="0 0 24 24"><path d="M4 12h13M13 7l5 5-5 5M21 5v14"/></symbol>
+    <symbol id="i-vol" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></symbol>
+    <symbol id="i-mute" viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m22 9-6 6M16 9l6 6"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-qadd" viewBox="0 0 24 24"><path d="M3 6h12M3 12h12M3 18h7M18 13v8M14 17h8"/></symbol>
+    <symbol id="i-next-up" viewBox="0 0 24 24"><path d="M3 6h10M3 12h10M3 18h10M17 8l4 4-4 4"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="12" cy="19" r="1.3"/></symbol>
+    <symbol id="i-queue" viewBox="0 0 24 24"><path d="M3 6h14M3 12h14M3 18h9"/><path d="M16 15.5v5l4-2.5z" fill="currentColor"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+    <symbol id="i-server" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></symbol>
+    <symbol id="i-lyrics" viewBox="0 0 24 24"><path d="M4 4.5h16v11.5H9l-5 4z"/><path d="M8 8.5h8M8 12h5"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></symbol>
+    <symbol id="i-paste" viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h4"/></symbol>
+    <symbol id="i-sync" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol>
+    <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M5 19c0-9 6-14 15-14 0 9-5 15-14 15"/><path d="M5 19c3-5 6-8 10-10"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-rain" viewBox="0 0 24 24"><path d="M7 15a4 4 0 0 1-.6-8A6 6 0 0 1 18 8a3.5 3.5 0 0 1-.5 7z"/><path d="M8 18l-1 3M12 18l-1 3M16 18l-1 3"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 22c4 0 7-3 7-7 0-4-3-6-4-10-2 2-3 4-3 6-1-1-2-2-2-4-3 2-5 5-5 8 0 4 3 7 7 7z"/></symbol>
+    <symbol id="i-new" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 8v8M8 12h8"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></symbol>
+    <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></symbol>
+    <symbol id="i-dice" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1.2"/><circle cx="15" cy="15" r="1.2"/><circle cx="15" cy="9" r="1.2"/><circle cx="9" cy="15" r="1.2"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3v5h5M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 21v-5h-5"/></symbol>
+    <symbol id="i-rows" viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="5" rx="1"/><rect x="3" y="15" width="5" height="5" rx="1"/><path d="M11 6.5h10M11 17.5h10"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-devices" viewBox="0 0 24 24"><rect x="2" y="4" width="13" height="10" rx="1.6"/><path d="M5.5 18h6M8.5 14v4"/><rect x="17" y="8" width="5" height="12" rx="1.2"/></symbol>
+    <!-- Nanuq (el oso de icons/logo.webp) calcado en vector para DJ Nanuq: cabeza y cuerpo por separado para animarlos -->
+    <path id="djb-body" transform="matrix(.025 0 0 -.025 0 343)" fill="#fff" d="M2376 7304 c-12 -12 -16 -37 -16 -107 0 -76 -4 -96 -20 -117 -17 -22 -20 -42 -20 -160 0 -118 -3 -138 -20 -160 -15 -20 -20 -41 -20 -100 0 -59 -5 -80 -20 -100 -11 -14 -20 -41 -20 -60 0 -19 -9 -46 -20 -60 -11 -14 -20 -41 -20 -60 0 -19 -9 -46 -20 -60 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -11 -14 -20 -31 -20 -39 0 -7 -18 -35 -40 -61 -22 -26 -40 -54 -40 -61 0 -8 -9 -25 -20 -39 -11 -14 -20 -31 -20 -39 0 -7 -18 -35 -40 -61 -22 -26 -40 -54 -40 -61 0 -8 -9 -25 -20 -39 -11 -14 -20 -31 -20 -39 0 -7 -18 -35 -40 -61 -22 -26 -40 -54 -40 -61 0 -8 -27 -43 -60 -79 -33 -36 -60 -71 -60 -79 0 -7 -18 -35 -40 -61 -22 -26 -40 -53 -40 -60 0 -7 -18 -34 -40 -60 -22 -26 -40 -53 -40 -60 0 -7 -18 -34 -40 -60 -22 -26 -40 -53 -40 -60 0 -7 -18 -34 -40 -60 -22 -26 -40 -53 -40 -60 0 -7 -18 -34 -40 -60 -22 -26 -40 -53 -40 -60 0 -7 -18 -34 -40 -60 -22 -26 -40 -54 -40 -61 0 -8 -9 -25 -20 -39 -11 -14 -20 -31 -20 -39 0 -7 -18 -35 -40 -61 -22 -26 -40 -54 -40 -61 0 -8 -9 -25 -20 -39 -11 -14 -20 -31 -20 -39 0 -7 -18 -35 -40 -61 -22 -26 -40 -54 -40 -61 0 -8 -9 -25 -20 -39 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -11 -14 -20 -41 -20 -60 0 -19 -9 -46 -20 -60 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -11 -14 -20 -41 -20 -60 0 -19 -9 -46 -20 -60 -11 -14 -20 -41 -20 -60 0 -19 -9 -46 -20 -60 -11 -14 -20 -41 -20 -60 0 -19 -9 -46 -20 -60 -11 -14 -20 -41 -20 -60 0 -19 -9 -46 -20 -60 -11 -14 -20 -41 -20 -60 0 -19 -9 -46 -20 -60 -14 -18 -20 -41 -20 -80 0 -39 -6 -62 -20 -80 -14 -18 -20 -41 -20 -80 0 -39 -6 -62 -20 -80 -15 -20 -20 -41 -20 -100 0 -59 -5 -80 -20 -100 -30 -39 -30 -721 0 -760 11 -14 20 -41 20 -60 0 -19 9 -46 20 -60 11 -14 20 -41 20 -60 0 -19 9 -46 20 -60 11 -14 20 -41 20 -60 0 -19 9 -46 20 -60 11 -14 20 -32 20 -40 0 -8 9 -26 20 -40 11 -14 20 -32 20 -40 0 -8 9 -26 20 -40 11 -14 20 -32 20 -40 0 -8 27 -44 60 -80 33 -36 60 -73 60 -82 0 -22 375 -398 397 -398 8 0 37 -18 63 -40 26 -22 54 -40 61 -40 8 0 25 -9 39 -20 14 -11 32 -20 40 -20 8 0 26 -9 40 -20 14 -11 31 -20 37 -20 7 0 27 -9 45 -20 18 -11 44 -20 57 -20 13 0 41 -9 62 -20 22 -11 56 -29 78 -40 26 -14 58 -20 100 -20 42 0 74 -6 101 -20 26 -14 59 -20 100 -20 41 0 74 -6 100 -20 39 -20 59 -20 5320 -20 5261 0 5281 0 5320 20 30 15 59 20 120 20 61 0 90 5 120 20 22 11 58 20 81 20 23 0 59 9 80 20 22 11 56 29 78 40 21 11 49 20 62 20 13 0 39 9 57 20 18 11 38 20 45 20 6 0 23 9 37 20 14 11 32 20 40 20 8 0 26 9 40 20 14 11 31 20 39 20 7 0 35 18 61 40 26 22 55 40 63 40 22 0 397 376 397 398 0 9 27 46 60 82 33 36 60 72 60 80 0 8 9 26 20 40 11 14 20 32 20 40 0 8 9 26 20 40 11 14 20 32 20 40 0 8 9 26 20 40 11 14 20 41 20 60 0 19 9 46 20 60 11 14 20 32 20 40 0 8 9 26 20 40 15 20 20 41 20 100 0 59 5 80 20 100 30 39 30 681 0 720 -15 20 -20 41 -20 100 0 59 -5 80 -20 100 -11 14 -20 41 -20 60 0 19 -9 46 -20 60 -15 20 -20 41 -20 100 0 59 -5 80 -20 100 -11 14 -20 41 -20 60 0 19 -9 46 -20 60 -11 14 -20 41 -20 60 0 19 -9 46 -20 60 -11 14 -20 41 -20 60 0 19 -9 46 -20 60 -11 14 -20 41 -20 60 0 19 -9 46 -20 60 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 41 -20 60 0 19 -9 46 -20 60 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 41 -20 60 0 19 -9 46 -20 60 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 31 -20 39 0 7 -18 35 -40 61 -22 26 -40 54 -40 61 0 8 -9 25 -20 39 -11 14 -20 31 -20 39 0 7 -18 35 -40 61 -22 26 -40 54 -40 61 0 8 -9 25 -20 39 -11 14 -20 31 -20 39 0 7 -18 35 -40 61 -22 26 -40 53 -40 60 0 7 -18 34 -40 60 -22 26 -40 53 -40 60 0 7 -18 34 -40 60 -22 26 -40 54 -40 61 0 8 -27 43 -60 79 -33 36 -60 71 -60 79 0 7 -18 35 -40 61 -22 26 -40 53 -40 60 0 7 -18 34 -40 60 -22 26 -40 53 -40 60 0 7 -18 34 -40 60 -22 26 -40 53 -40 60 0 7 -18 34 -40 60 -22 26 -40 53 -40 60 0 7 -18 34 -40 60 -22 26 -40 53 -40 60 0 7 -18 34 -40 60 -22 26 -40 53 -40 60 0 7 -18 34 -40 60 -22 26 -40 54 -40 61 0 8 -9 25 -20 39 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 41 -20 60 0 19 -9 46 -20 60 -14 18 -20 41 -20 80 0 39 -6 62 -20 80 -14 18 -20 41 -20 80 0 39 -6 62 -20 80 -16 21 -20 41 -20 120 0 79 -4 99 -20 120 -17 21 -20 41 -20 137 0 88 -3 115 -16 127 -24 24 -9584 24 -9608 0z"/>
+    <path id="djb-belly" transform="matrix(.025 0 0 -.025 0 343)" fill="#daeaf9" d="M6760 4020 c-24 -13 -55 -19 -98 -20 -42 0 -76 -6 -102 -20 -22 -11 -58 -20 -80 -20 -23 0 -55 -8 -73 -17 -18 -10 -57 -20 -87 -23 -52 -5 -55 -7 -58 -35 -5 -39 -19 -47 -54 -29 -25 13 -32 13 -58 -1 -16 -8 -40 -15 -53 -15 -13 0 -32 -9 -42 -20 -10 -11 -28 -20 -40 -20 -12 0 -46 -18 -75 -40 -32 -24 -65 -40 -81 -40 -32 0 -87 -42 -100 -78 -9 -24 -26 -26 -70 -8 -10 5 -34 -7 -67 -34 -28 -22 -57 -40 -63 -40 -6 0 -33 -18 -59 -40 -26 -22 -54 -40 -62 -40 -7 0 -52 -36 -98 -80 -46 -44 -91 -80 -100 -80 -8 0 -26 -9 -40 -20 -14 -11 -32 -20 -41 -20 -9 0 -63 -47 -120 -105 -140 -142 -117 -119 -408 -407 -213 -211 -263 -266 -284 -312 -16 -35 -35 -60 -54 -70 -16 -8 -35 -27 -42 -42 -7 -16 -21 -34 -32 -42 -10 -7 -19 -24 -19 -36 0 -15 -10 -31 -27 -42 -33 -21 -52 -44 -53 -63 0 -7 -18 -35 -40 -61 -22 -26 -40 -54 -40 -61 0 -8 -9 -25 -20 -39 -11 -14 -20 -31 -20 -39 0 -7 -18 -35 -40 -61 -22 -26 -40 -54 -40 -61 0 -8 -9 -25 -20 -39 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -11 -14 -20 -31 -20 -39 0 -7 -18 -35 -40 -61 -30 -36 -40 -56 -40 -83 0 -20 -4 -38 -9 -41 -18 -11 -51 -97 -51 -131 0 -28 -5 -38 -25 -47 -13 -6 -28 -20 -31 -32 -4 -12 -15 -33 -25 -48 -11 -14 -19 -41 -19 -60 0 -18 -9 -44 -20 -58 -11 -14 -20 -41 -20 -60 0 -19 -9 -46 -20 -60 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -13 -16 -20 -41 -20 -70 0 -33 -6 -50 -20 -63 -15 -13 -20 -29 -20 -69 0 -37 -6 -61 -20 -78 -11 -14 -20 -40 -20 -57 0 -18 -9 -47 -20 -65 -37 -61 -29 -159 18 -202 l37 -36 3807 0 3807 0 36 31 c56 50 49 209 -9 209 -41 0 -67 64 -33 81 43 23 51 76 17 119 -11 14 -20 41 -20 60 0 19 -9 46 -20 60 -13 17 -20 41 -20 75 0 56 -5 67 -37 84 -18 9 -23 20 -23 51 0 21 -4 42 -10 45 -5 3 -10 23 -10 43 0 21 -9 48 -20 62 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 41 -20 60 0 19 -9 46 -20 60 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 31 -20 39 0 7 -18 35 -40 61 -22 26 -40 53 -40 60 0 6 -8 24 -19 38 -10 15 -21 37 -25 49 -4 12 -21 34 -39 49 -18 15 -34 38 -37 53 -4 20 -12 27 -35 29 -42 5 -49 15 -31 50 19 37 13 58 -25 78 -20 10 -29 22 -29 39 0 13 -9 30 -20 38 -11 7 -31 38 -45 68 -15 33 -55 87 -100 134 -41 44 -75 87 -75 95 0 9 -45 63 -100 120 -55 57 -100 109 -100 116 0 22 -30 44 -60 44 -38 0 -60 24 -60 64 0 61 -114 158 -122 104 -2 -12 -9 -23 -15 -26 -20 -6 -16 36 4 46 29 16 -182 252 -225 252 -8 0 -26 8 -40 19 -15 10 -37 21 -49 25 -12 4 -25 17 -29 29 -8 28 -64 87 -81 87 -8 0 -36 18 -64 40 -28 22 -56 40 -62 40 -7 0 -50 36 -97 80 -46 44 -91 80 -100 80 -8 0 -26 9 -40 20 -14 11 -33 20 -42 20 -9 0 -19 4 -22 9 -11 18 -102 54 -134 53 -25 -1 -35 4 -41 21 -26 66 -146 125 -199 98 -45 -23 -59 -17 -64 24 -3 25 -8 31 -38 35 -19 4 -49 13 -65 22 -95 49 -115 58 -134 58 -12 0 -36 8 -54 17 -18 9 -58 21 -89 25 -32 4 -86 13 -120 18 -77 13 -86 13 -120 5 -21 -6 -29 -2 -39 17 -20 38 -18 38 -459 37 -400 0 -427 -1 -460 -19z m-2491 -1728 c7 -13 6 -23 -1 -30 -19 -19 -28 -14 -28 18 0 34 14 39 29 12z m6011 -172 c0 -32 -9 -37 -28 -18 -7 7 -8 17 -1 30 15 27 29 22 29 -12z m-6890 -1760 c0 -11 -4 -20 -10 -20 -5 0 -10 9 -10 20 0 11 5 20 10 20 6 0 10 -9 10 -20z"/>
+    <path id="djb-head" transform="matrix(.025 0 0 -.025 0 343)" fill="#fff" d="M3440 13540 c-24 -13 -55 -19 -98 -20 -42 0 -76 -6 -102 -20 -22 -11 -50 -20 -62 -20 -13 0 -38 -9 -56 -20 -18 -11 -38 -20 -45 -20 -6 0 -23 -9 -37 -20 -14 -11 -31 -20 -39 -20 -7 0 -35 -18 -61 -40 -26 -22 -55 -40 -63 -40 -22 0 -317 -297 -317 -318 0 -9 -9 -28 -20 -42 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -11 -14 -20 -41 -20 -60 0 -19 -9 -46 -20 -60 -14 -18 -20 -41 -20 -80 0 -39 -6 -62 -20 -80 -17 -22 -20 -41 -20 -180 0 -139 3 -158 20 -180 14 -18 20 -41 20 -80 0 -39 6 -62 20 -80 11 -14 20 -41 20 -60 0 -19 9 -46 20 -60 11 -14 20 -32 20 -40 0 -8 9 -26 20 -40 11 -14 20 -32 20 -40 0 -8 9 -26 20 -40 11 -14 20 -32 20 -41 0 -9 81 -99 180 -199 186 -188 193 -198 160 -240 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -11 -14 -20 -41 -20 -60 0 -19 -9 -46 -20 -60 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -11 -14 -20 -41 -20 -60 0 -19 -9 -46 -20 -60 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -14 -18 -20 -41 -20 -80 0 -39 -6 -62 -20 -80 -14 -18 -20 -41 -20 -80 0 -39 -6 -62 -20 -80 -15 -20 -20 -41 -20 -100 0 -59 -5 -80 -20 -100 -17 -22 -20 -42 -20 -160 0 -118 -3 -138 -20 -160 -19 -24 -20 -45 -20 -660 0 -615 -1 -636 -20 -660 -18 -24 -20 -43 -20 -340 0 -297 -2 -316 -20 -340 -18 -24 -20 -43 -20 -340 0 -297 -2 -316 -20 -340 -17 -22 -20 -42 -20 -160 0 -118 -3 -138 -20 -160 -15 -20 -20 -41 -20 -100 0 -59 -5 -80 -20 -100 -11 -14 -20 -41 -20 -60 0 -19 -9 -46 -20 -60 -11 -14 -20 -41 -20 -60 0 -19 -9 -46 -20 -60 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -11 -14 -20 -31 -20 -39 0 -7 -14 -29 -31 -48 -16 -19 -29 -42 -27 -51 5 -25 10305 -31 10314 -7 7 17 -11 67 -38 107 -10 14 -18 32 -18 40 0 7 -9 24 -20 38 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 41 -20 60 0 19 -9 46 -20 60 -14 18 -20 41 -20 80 0 39 -6 62 -20 80 -14 18 -20 41 -20 80 0 39 -6 62 -20 80 -16 21 -20 41 -20 120 0 79 -4 99 -20 120 -18 23 -20 42 -20 220 0 178 -2 197 -20 220 -18 23 -20 43 -20 320 0 277 -2 297 -20 320 -19 24 -20 43 -20 400 0 357 -1 376 -20 400 -19 24 -20 44 -20 520 0 476 -1 496 -20 520 -15 20 -20 41 -20 100 0 59 -5 80 -20 100 -15 20 -20 41 -20 100 0 59 -5 80 -20 100 -14 18 -20 41 -20 80 0 39 -6 62 -20 80 -11 14 -20 41 -20 60 0 19 -9 46 -20 60 -11 14 -20 41 -20 60 0 19 -9 46 -20 60 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -34 44 -19 120 25 120 19 0 235 218 235 237 0 8 18 37 40 63 22 26 40 54 40 61 0 8 9 25 20 39 11 14 20 32 20 40 0 8 9 26 20 40 11 14 20 32 20 40 0 8 9 26 20 40 14 18 20 41 20 80 0 39 6 62 20 80 30 38 30 482 0 520 -11 14 -20 41 -20 60 0 19 -9 46 -20 60 -11 14 -20 41 -20 60 0 19 -9 46 -20 60 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 32 -20 40 0 8 -27 44 -60 80 -33 36 -60 72 -60 81 0 21 -98 119 -119 119 -9 0 -45 27 -81 60 -36 33 -71 60 -79 60 -7 0 -35 18 -61 40 -26 22 -53 40 -59 40 -6 0 -25 9 -43 20 -18 11 -43 20 -56 20 -12 0 -40 9 -62 20 -26 14 -59 20 -100 20 -41 0 -74 6 -100 20 -33 17 -59 20 -160 20 -101 0 -127 -3 -160 -20 -26 -14 -59 -20 -100 -20 -41 0 -74 -6 -100 -20 -22 -11 -50 -20 -62 -20 -13 0 -38 -9 -56 -20 -18 -11 -38 -20 -45 -20 -6 0 -23 -9 -37 -20 -14 -11 -32 -20 -40 -20 -8 0 -44 -27 -80 -60 -36 -33 -73 -60 -82 -60 -23 0 -238 -217 -238 -240 0 -64 -121 -100 -200 -60 -22 11 -49 20 -60 20 -11 0 -38 9 -60 20 -22 11 -58 20 -80 20 -22 0 -58 9 -80 20 -22 11 -49 20 -60 20 -11 0 -38 9 -60 20 -22 11 -58 20 -80 20 -22 0 -58 9 -80 20 -26 14 -59 20 -100 20 -41 0 -74 6 -100 20 -26 14 -59 20 -100 20 -41 0 -74 6 -100 20 -32 16 -59 20 -140 20 -81 0 -108 4 -140 20 -34 17 -59 20 -180 20 -121 0 -146 3 -180 20 -38 19 -59 20 -660 20 -601 0 -622 -1 -660 -20 -34 -17 -59 -20 -180 -20 -121 0 -146 -3 -180 -20 -30 -15 -59 -20 -120 -20 -61 0 -90 -5 -120 -20 -30 -15 -59 -20 -120 -20 -61 0 -90 -5 -120 -20 -22 -11 -58 -20 -80 -20 -22 0 -58 -9 -80 -20 -22 -11 -58 -20 -80 -20 -22 0 -58 -9 -80 -20 -22 -11 -58 -20 -80 -20 -22 0 -58 -9 -80 -20 -22 -11 -58 -20 -80 -20 -22 0 -58 -9 -80 -20 -22 -11 -49 -20 -61 -20 -12 0 -39 -9 -60 -20 -22 -11 -56 -29 -78 -40 -21 -11 -48 -20 -60 -20 -12 0 -39 -9 -61 -20 -51 -26 -79 -25 -117 3 -40 30 -83 81 -83 101 0 21 -336 356 -358 356 -9 0 -28 9 -42 20 -14 11 -32 20 -40 20 -8 0 -26 9 -40 20 -14 11 -31 20 -37 20 -7 0 -27 9 -45 20 -18 11 -43 20 -56 20 -12 0 -40 9 -62 20 -26 14 -59 20 -100 20 -41 0 -74 6 -100 20 -55 28 -228 28 -280 0z"/>
+    <path id="djb-muzzle" transform="matrix(.025 0 0 -.025 0 343)" fill="#daeaf9" d="M6880 11060 c-19 -11 -45 -19 -58 -20 -12 0 -40 -9 -62 -20 -22 -11 -48 -20 -60 -20 -45 0 -120 -50 -120 -80 0 -37 -78 -80 -146 -80 -42 0 -51 -5 -101 -52 -152 -146 -253 -252 -253 -267 0 -9 -9 -27 -20 -41 -11 -14 -20 -31 -20 -39 0 -7 -18 -35 -40 -61 -22 -26 -40 -53 -40 -60 0 -7 -18 -34 -40 -60 -29 -35 -40 -57 -40 -81 0 -19 -9 -45 -20 -59 -11 -14 -20 -41 -20 -60 0 -19 -9 -46 -20 -60 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -14 -18 -20 -41 -20 -80 0 -39 -6 -62 -20 -80 -11 -14 -20 -41 -20 -60 0 -19 -9 -46 -20 -60 -15 -20 -20 -41 -20 -98 0 -49 -5 -81 -16 -97 -14 -21 -14 -26 1 -55 19 -37 13 -47 -30 -52 -40 -4 -54 -1003 -15 -1058 11 -15 20 -34 20 -42 0 -7 9 -24 20 -38 14 -18 20 -41 20 -80 0 -39 6 -62 20 -80 11 -14 20 -30 20 -37 0 -6 8 -18 18 -25 10 -7 28 -29 40 -49 12 -19 30 -44 42 -54 11 -10 20 -25 20 -34 0 -9 27 -45 60 -81 33 -36 60 -72 60 -81 0 -19 61 -79 80 -79 8 0 44 -27 80 -60 36 -33 72 -60 80 -60 8 0 26 -9 40 -20 14 -11 32 -20 40 -20 8 0 26 -9 40 -20 14 -11 32 -20 40 -20 8 0 26 -9 40 -20 14 -11 31 -20 37 -20 7 0 27 -9 45 -20 18 -11 43 -20 56 -20 12 0 40 -9 62 -20 22 -11 49 -20 60 -20 11 0 38 -9 60 -20 26 -14 59 -20 100 -20 41 0 74 -6 100 -20 37 -19 59 -20 340 -20 281 0 303 1 340 20 30 15 59 20 120 20 61 0 90 5 120 20 22 11 49 20 60 20 11 0 38 9 60 20 22 11 50 20 62 20 13 0 38 9 56 20 18 11 38 20 45 20 6 0 23 9 37 20 14 11 32 20 40 20 8 0 26 9 40 20 14 11 32 20 40 20 8 0 26 9 40 20 14 11 32 20 40 20 9 0 54 36 100 80 46 44 92 80 100 80 20 0 80 61 80 81 0 8 36 53 80 99 44 46 80 91 80 98 0 8 18 36 40 62 29 35 40 57 40 81 0 19 9 45 20 59 14 18 20 41 20 80 0 39 6 62 20 80 15 20 20 41 20 100 0 59 5 80 20 100 30 38 30 402 0 440 -17 22 -20 42 -20 160 0 118 -3 138 -20 160 -15 20 -20 41 -20 100 0 59 -5 80 -20 100 -15 20 -20 41 -20 98 0 56 -5 80 -19 100 -10 15 -21 36 -25 48 -3 12 -18 26 -32 33 -22 10 -25 16 -19 39 20 82 19 90 -24 141 -39 47 -41 52 -41 117 0 51 -5 77 -20 102 -11 18 -20 38 -20 45 0 6 -9 23 -20 37 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 32 -20 40 0 8 -27 44 -60 80 -33 36 -60 72 -60 80 0 8 -9 26 -20 40 -11 14 -20 33 -20 42 0 21 -295 318 -317 318 -8 0 -37 18 -63 40 -26 22 -53 40 -59 40 -6 0 -25 9 -43 20 -18 11 -43 20 -56 20 -12 0 -40 9 -62 20 -22 11 -58 20 -80 20 -22 0 -58 9 -80 20 -59 30 -585 30 -640 0z m553 -397 c18 -10 66 -21 107 -25 153 -14 188 -23 218 -51 15 -15 33 -27 40 -27 6 0 26 -9 44 -20 18 -11 45 -20 59 -20 42 0 299 -239 299 -279 0 -9 9 -27 20 -41 17 -22 20 -41 20 -140 0 -99 -3 -118 -20 -140 -11 -14 -20 -41 -20 -60 0 -19 -9 -46 -20 -60 -11 -14 -20 -31 -20 -39 0 -7 -18 -35 -40 -61 -22 -26 -40 -54 -40 -62 0 -21 -99 -118 -120 -118 -22 0 -110 -87 -122 -122 -5 -14 -21 -31 -36 -37 -47 -18 -105 -56 -116 -76 -25 -44 -105 -85 -167 -85 -22 0 -57 -9 -79 -20 -30 -15 -59 -20 -120 -20 -53 0 -91 -5 -110 -15 -27 -14 -33 -14 -60 0 -19 10 -57 15 -111 15 -60 0 -91 5 -118 19 -20 10 -55 28 -77 40 -23 11 -50 21 -59 21 -10 0 -33 18 -52 40 -19 22 -43 40 -53 40 -10 0 -79 60 -154 134 -74 74 -146 138 -158 142 -26 8 -42 22 -51 46 -3 9 -19 25 -34 35 -39 25 -43 32 -43 88 0 34 -7 58 -20 75 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -16 21 -20 41 -20 120 0 79 4 99 20 120 11 14 20 41 20 62 0 40 201 258 238 258 9 0 28 9 42 20 14 11 32 20 40 20 8 0 26 9 40 20 14 11 31 20 38 20 8 0 26 8 40 18 49 34 91 44 262 60 41 4 89 15 105 24 45 26 381 26 428 1z m-673 -1452 c0 -24 -18 -37 -32 -23 -8 8 -7 16 2 27 17 21 30 19 30 -4z m-1052 -1373 c-4 -27 -28 -36 -28 -10 0 20 8 32 22 32 5 0 8 -10 6 -22z M10324 10569 c-10 -17 13 -36 27 -22 12 12 4 33 -11 33 -5 0 -12 -5 -16 -11z"/>
+    <path id="djb-nose" transform="matrix(.025 0 0 -.025 0 343)" fill="#053180" d="M6920 10620 c-24 -13 -55 -19 -98 -20 -42 0 -76 -6 -102 -20 -22 -11 -50 -20 -62 -20 -13 0 -38 -9 -56 -20 -18 -11 -38 -20 -45 -20 -6 0 -23 -9 -37 -20 -14 -11 -33 -20 -42 -20 -22 0 -238 -216 -238 -238 0 -9 -9 -28 -20 -42 -17 -22 -20 -41 -20 -160 0 -119 3 -138 20 -160 11 -14 20 -32 20 -40 0 -8 9 -26 20 -40 11 -14 20 -32 20 -40 0 -8 27 -44 60 -80 33 -36 60 -72 60 -81 0 -19 58 -75 86 -83 12 -4 27 -20 34 -36 6 -16 24 -33 38 -38 15 -6 54 -35 87 -66 33 -31 66 -56 73 -56 7 0 35 -18 63 -40 28 -22 62 -40 75 -40 14 0 42 -9 64 -20 22 -11 49 -20 60 -20 11 0 38 -9 60 -20 33 -17 59 -20 160 -20 101 0 127 3 160 20 22 11 49 20 60 20 11 0 38 9 60 20 22 11 50 20 64 20 13 0 47 18 75 40 28 22 56 40 63 40 7 0 42 27 78 60 36 33 73 60 82 60 22 0 238 216 238 238 0 9 9 28 20 42 11 14 20 32 20 40 0 8 9 26 20 40 11 14 20 32 20 40 0 8 9 26 20 40 42 54 28 322 -20 380 -22 26 -40 54 -40 62 0 18 -61 78 -79 78 -7 0 -35 18 -61 40 -26 22 -54 40 -61 40 -8 0 -25 9 -39 20 -14 11 -31 20 -37 20 -7 0 -27 9 -45 20 -18 11 -43 20 -56 20 -12 0 -40 9 -62 20 -22 11 -58 20 -80 20 -22 0 -58 9 -80 20 -59 30 -545 30 -600 0z"/>
+    <path id="djb-eyes" transform="matrix(.025 0 0 -.025 0 343)" fill="#053180" d="M4680 11060 c-19 -11 -54 -19 -78 -20 -23 0 -60 -9 -82 -20 -22 -11 -50 -20 -63 -20 -40 0 -297 -240 -297 -279 0 -9 -9 -27 -20 -41 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -20 -26 -31 -309 -12 -336 41 -58 210 -85 269 -41 52 38 83 82 83 118 0 19 9 45 20 59 11 14 20 40 20 58 0 19 8 46 19 60 10 15 21 37 25 49 4 12 19 26 34 32 15 5 38 16 52 24 111 64 131 67 190 37 22 -11 50 -20 63 -20 53 0 177 -126 177 -180 0 -19 9 -46 20 -60 11 -14 20 -40 20 -59 1 -119 227 -196 325 -110 19 17 35 38 35 48 0 9 9 27 20 41 11 14 20 40 20 60 0 20 -9 46 -20 60 -15 20 -20 41 -20 100 0 59 -5 80 -20 100 -11 14 -20 31 -20 39 0 7 -18 35 -40 61 -22 26 -40 54 -40 62 0 20 -98 118 -118 118 -8 0 -36 18 -62 40 -26 22 -53 40 -59 40 -6 0 -25 9 -43 20 -20 12 -51 20 -76 20 -23 0 -60 9 -82 20 -52 27 -151 27 -200 0z M9520 11060 c-20 -11 -55 -19 -82 -20 -39 0 -55 -7 -97 -40 -28 -22 -56 -40 -62 -40 -6 0 -32 -17 -58 -39 -25 -21 -56 -41 -68 -45 -12 -4 -25 -17 -29 -29 -4 -12 -24 -43 -45 -68 -22 -26 -39 -53 -39 -60 0 -8 -9 -25 -20 -39 -11 -14 -20 -32 -20 -40 0 -8 -9 -26 -20 -40 -14 -18 -20 -41 -20 -80 0 -39 -6 -62 -20 -80 -11 -14 -20 -32 -20 -40 0 -8 9 -26 20 -40 11 -14 20 -38 20 -55 0 -40 6 -46 67 -78 138 -71 293 0 293 134 0 38 6 61 20 79 11 14 20 31 20 38 0 8 8 26 19 40 10 15 21 37 25 49 4 12 19 26 34 32 15 5 38 16 52 24 111 63 169 73 228 37 18 -11 39 -20 46 -20 33 0 156 -140 156 -179 0 -20 9 -47 20 -61 11 -14 20 -40 20 -59 1 -119 227 -196 325 -110 19 17 35 38 35 48 0 9 9 27 20 41 11 14 20 40 20 60 0 20 -9 46 -20 60 -14 18 -20 41 -20 80 0 39 -6 62 -20 80 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 32 -20 40 0 8 -9 26 -20 40 -11 14 -20 32 -20 41 0 19 -61 79 -80 79 -8 0 -44 27 -80 60 -36 33 -71 60 -77 60 -7 0 -27 9 -45 20 -20 12 -51 20 -76 20 -23 0 -60 9 -82 20 -54 28 -189 28 -240 0z"/>
+    <symbol id="i-radio" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7M5.6 5.6a9 9 0 0 0 0 12.8M18.4 5.6a9 9 0 0 1 0 12.8"/></symbol>
+    <symbol id="i-req" viewBox="0 0 24 24"><path d="M9 18V5l12-2v7"/><circle cx="6" cy="18" r="3"/><path d="M18 14v7M14.5 17.5h7"/></symbol>
+    <symbol id="i-grip" viewBox="0 0 24 24"><path d="M5 8h14M5 12h14M5 16h14"/></symbol>
+    <symbol id="i-party" viewBox="0 0 24 24"><path d="M2.5 19.5h19M4 19.5a8 8 0 0 1 16 0"/><path d="M9.5 19.5v-2.5a2.5 2.5 0 0 1 5 0v2.5M6 14.5h12M8.5 11.5l1 3M15.5 11.5l-1 3M12 11.5v3"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></symbol>
+  </defs>
+</svg>
+
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

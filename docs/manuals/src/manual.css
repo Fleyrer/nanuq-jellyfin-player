@@ -1,0 +1,120 @@
+/* SPDX-FileCopyrightText: 2026 Fleyrer y colaboradores de Nanuq */
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+/* Diseño de los manuales de Nanuq (se imprimen a PDF con Chromium: ver build.js). */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+:root{--navy:#081120;--side:#0c182b;--ink:#13233d;--text:#1d2a3f;--muted:#5d6f8a;--line:#d7e1ee;--accent:#3cc0f5;--accent2:#1e88d6;--soft:#eef6fd;--pink:#ff4f9a;--green:#5bd68a;--purple:#9b5cf6;--orange:#ff8a1f;--yellow:#ffcc00}
+/* Sin márgenes laterales en la página (van en el body): si no, la portada de 210 mm no cabía en los 178 mm útiles y
+   Chromium encogía todo el documento al 85 % (la portada no llegaba a los bordes). */
+@page{size:A4;margin:17mm 0 19mm 0;
+  @bottom-left{content:var(--foot);font:500 8pt Inter,sans-serif;color:#8a9ab2;padding-left:16mm}
+  @bottom-right{content:counter(page);font:600 8.5pt Outfit,sans-serif;color:#1e88d6;padding-right:16mm}}
+@page cover{margin:0;@bottom-left{content:none}@bottom-right{content:none}}
+@page toc{@bottom-left{content:none}}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;padding:0 16mm;font:10.2pt/1.55 Inter,system-ui,sans-serif;color:var(--text)}
+h1,h2,h3,h4{font-family:Outfit,Inter,sans-serif;color:var(--ink);line-height:1.2}
+h2{font-size:15pt;margin:20px 0 8px;break-after:avoid}
+h3{font-size:12pt;margin:16px 0 6px;color:var(--accent2);break-after:avoid}
+p{margin:0 0 8px}
+ul,ol{margin:0 0 10px;padding-left:20px}li{margin:2px 0}
+a{color:var(--accent2);text-decoration:none}
+code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:8.6pt;background:#eef3fa;border-radius:4px;padding:1px 4px;color:#0f3a5f}
+kbd{font:600 8.5pt Inter,sans-serif;border:1px solid #c5d3e6;border-bottom-width:2px;border-radius:5px;padding:1px 6px;background:#fff;color:var(--ink)}
+.mk{position:absolute;font-size:6pt;line-height:1;color:transparent;white-space:nowrap}
+
+/* ---- Portada ---- */
+.cover{page:cover;position:relative;margin:0 -16mm;width:210mm;height:297mm;overflow:hidden;color:#fff;
+  background:radial-gradient(120% 70% at 50% 0%,#1e58a0 0%,#103a76 38%,#081120 78%)}
+.cover.tech{background:radial-gradient(120% 70% at 50% 0%,#2a2f7a 0%,#1a1f55 38%,#070b1c 78%)}
+.cover .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(124,160,255,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(124,160,255,.10) 1px,transparent 1px);background-size:9mm 9mm}
+.cover .aur{position:absolute;left:-10%;right:-10%;top:7%;height:36%;filter:blur(18px);opacity:.75}
+.cover .snow,.back .snow{position:absolute;inset:0;width:100%;height:100%}
+.cover .brand{position:absolute;top:20mm;left:0;right:0;text-align:center}
+.cover .brand .word{font:700 46pt Outfit,sans-serif;letter-spacing:.5px;color:#fff}
+.cover .brand .word b{color:var(--accent)}
+.cover .kind{display:inline-block;margin-top:6mm;padding:2.2mm 6mm;border-radius:99px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);font:600 12pt Outfit,sans-serif;letter-spacing:1.5px;text-transform:uppercase}
+.cover h1{color:#fff;font-size:30pt;margin:5mm 0 0;font-weight:700}
+.cover .sub{font:400 12.5pt Inter,sans-serif;color:#cfe3f7;margin-top:3mm;padding:0 30mm;line-height:1.5}
+.cover .hero{position:absolute;left:50%;top:104mm;width:118mm;transform:translateX(-50%);filter:drop-shadow(0 8mm 10mm rgba(0,0,0,.35))}
+.cover .ice{position:absolute;left:-5%;right:-5%;bottom:0;height:62mm}
+.cover .crew{position:absolute;bottom:20mm;left:0;right:0;display:flex;justify-content:center;gap:5mm}
+.cover .crew svg{width:24mm;height:24mm;filter:drop-shadow(0 2mm 2mm rgba(0,0,0,.3))}
+.cover .meta{position:absolute;bottom:9mm;left:0;right:0;text-align:center;font:500 9pt Inter,sans-serif;color:#9fb8d6;letter-spacing:.5px}
+
+/* ---- Índice ---- */
+.toc{page:toc;break-after:page}
+.toc .tt{display:flex;align-items:center;gap:5mm;margin:0 0 7mm}
+.toc .tt svg{width:24mm;height:24mm}
+.toc .tt h1{font-size:28pt;margin:0}
+.toc .tt p{margin:1mm 0 0;color:var(--muted)}
+.toc ol{list-style:none;padding:0;margin:0}
+.toc li{display:flex;align-items:baseline;gap:3mm;padding:2.1mm 0;border-bottom:1px dashed #dbe5f1;break-inside:avoid}
+.toc li .n{flex:none;width:9mm;height:9mm;border-radius:50%;display:inline-grid;place-items:center;font:700 10pt Outfit,sans-serif;color:#fff;transform:translateY(1.6mm)}
+.toc li .t{flex:1;font:600 11pt Outfit,sans-serif;color:var(--ink)}
+.toc li .t small{display:block;font:400 8.6pt Inter,sans-serif;color:var(--muted);margin-top:.5mm}
+.toc li .p{flex:none;font:700 11pt Outfit,sans-serif;color:var(--accent2)}
+.toc li.part{border:0;padding-top:5mm}
+.toc li.part .t{font-size:13pt;color:var(--accent2);text-transform:uppercase;letter-spacing:1px}
+.toc li.sub2{padding:1.2mm 0 1.2mm 12mm;border-bottom:1px dotted #e4ebf4}
+.toc li.sub2 .t{font:500 9.5pt Inter,sans-serif}
+.toc li.sub2 .p{font-size:9.5pt;color:var(--muted)}
+
+/* ---- Capítulos ---- */
+.chap{break-before:page}
+.opener{position:relative;border-radius:5mm;padding:9mm 9mm 9mm 9mm;margin:0 0 7mm;color:#fff;overflow:hidden;min-height:44mm;display:flex;align-items:center}
+.opener .num{font:800 42pt Outfit,sans-serif;opacity:.35;margin-right:5mm;line-height:1}
+.opener h1{color:#fff;font-size:22pt;margin:0}
+.opener p{margin:1.5mm 0 0;color:rgba(255,255,255,.88);font-size:10.5pt;max-width:110mm}
+.opener svg.nq{position:absolute;right:4mm;bottom:-3mm;width:44mm;height:44mm;filter:drop-shadow(0 2mm 3mm rgba(0,0,0,.25))}
+.opener .flakes{position:absolute;inset:0;opacity:.5}
+.part-page{break-before:page;height:240mm;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.part-page .lbl{font:700 11pt Outfit,sans-serif;letter-spacing:3px;text-transform:uppercase;color:var(--accent2)}
+.part-page h1{font-size:34pt;margin:3mm 0 4mm}
+.part-page p{max-width:130mm;color:var(--muted);font-size:11pt}
+.part-page svg{width:70mm;height:70mm;margin-top:6mm}
+
+/* ---- Bloques ---- */
+.tip{display:flex;gap:4mm;align-items:flex-start;background:var(--soft);border:1px solid #cfe6f8;border-radius:4mm;padding:3.5mm 4.5mm;margin:4mm 0;break-inside:avoid}
+.tip svg{flex:none;width:15mm;height:15mm;margin-top:-1mm}
+/* Los Nanuqs son blancos: sobre la hoja blanca se perdían. Van sobre un fondo oscuro. */
+.tip svg.nq,.toc .tt svg.nq,.part-page svg.nq{background:radial-gradient(circle at 50% 35%,#1e3a66,#081120 75%);border-radius:50%;padding:1.6mm}
+.part-page svg.nq{padding:7mm}
+.thgal{display:flex;flex-wrap:wrap;gap:2.5mm;justify-content:center;margin:4mm 0;break-inside:avoid}
+.thcard{width:25mm;text-align:center;font:600 7.5pt Inter,sans-serif;color:#e8f1fb;background:linear-gradient(160deg,#13233d,#081120);border-radius:3mm;padding:2mm 1mm 2.2mm}
+.thcard svg{width:21mm;height:21mm;display:block;margin:0 auto 1mm}
+.tip b.h{display:block;font:700 10pt Outfit,sans-serif;color:var(--accent2);margin-bottom:.5mm}
+.tip.warn{background:#fff6ec;border-color:#ffd9b0}.tip.warn b.h{color:#c45f00}
+.shot{margin:4mm 0 5mm;break-inside:avoid;text-align:center}
+.shot img{max-width:100%;border-radius:3mm;box-shadow:0 2mm 6mm rgba(8,17,32,.22),0 0 0 1px rgba(8,17,32,.08)}
+.shot.phone img{max-height:118mm;border-radius:5mm}
+.shot.half{display:inline-block;width:48.5%;vertical-align:top;margin-right:1.5%}
+.shots-row{display:flex;gap:4mm;justify-content:center;break-inside:avoid;margin:4mm 0}
+.shots-row .shot{margin:0;flex:1}
+.shot .cap{font:500 8.6pt Inter,sans-serif;color:var(--muted);margin-top:2mm}
+table{width:100%;border-collapse:collapse;margin:3mm 0 6mm;font-size:9pt}
+th{background:var(--side);color:#fff;font:600 8.8pt Outfit,sans-serif;text-align:left;padding:2mm 2.5mm}
+td{border-bottom:1px solid var(--line);padding:1.8mm 2.5mm;vertical-align:top}
+tr{break-inside:avoid}
+tbody tr:nth-child(even) td{background:#f6f9fd}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding:1mm 0 1mm 10mm;margin:1.5mm 0}
+.steps li::before{content:counter(s);position:absolute;left:0;top:.6mm;width:6.5mm;height:6.5mm;border-radius:50%;background:var(--accent);color:#fff;font:700 9pt Outfit,sans-serif;display:grid;place-items:center}
+.cols2{columns:2;column-gap:7mm}
+.badge{display:inline-block;font:600 7.6pt Inter,sans-serif;padding:.3mm 2mm;border-radius:99px;background:#e2f3fd;color:#0b6aa8;margin-left:1mm;vertical-align:1px}
+.diagram{margin:4mm 0 6mm;break-inside:avoid;text-align:center}
+.diagram svg{max-width:100%;height:auto}
+.diagram .cap{font:500 8.6pt Inter,sans-serif;color:var(--muted);margin-top:1.5mm}
+.lead{font-size:11pt;color:#33445d}
+/* Deep level */
+.fn{font-size:8.4pt;margin:2mm 0 5mm}
+.fn td{padding:1.3mm 2mm}
+.fn td.name{font-family:'JetBrains Mono',monospace;font-size:7.8pt;color:#0f3a5f;white-space:nowrap;width:40%;word-break:break-all;white-space:normal}
+.fn td.ln{font-family:'JetBrains Mono',monospace;font-size:7.6pt;color:#8a9ab2;width:9%;text-align:right}
+.fn th{font-size:8pt;padding:1.6mm 2mm}
+h3.file{font-family:'JetBrains Mono',monospace;font-size:10pt;color:var(--ink);border-left:3px solid var(--accent);padding-left:3mm}
+.back{page:cover;margin:0 -16mm;width:210mm;height:297mm;position:relative;overflow:hidden;background:radial-gradient(120% 70% at 50% 100%,#1e58a0 0%,#103a76 40%,#081120 80%);color:#fff;text-align:center;break-before:page}
+.back .msg{position:absolute;top:70mm;left:0;right:0}
+.back .msg h1{color:#fff;font-size:26pt;margin:0}
+.back .msg p{color:#cfe3f7;font-size:12pt;margin-top:3mm}
+.back svg.big{position:absolute;left:50%;bottom:40mm;width:100mm;transform:translateX(-50%)}

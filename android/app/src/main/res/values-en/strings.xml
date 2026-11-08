@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Textos nativos en inglés (notificación de reproducción y avisos). Android los elige según el idioma del teléfono;
+     el idioma de la interfaz de Nanuq se elige aparte, en Ajustes → Idioma (web/i18n.js). -->
+<resources>
+    <string name="app_name">Nanuq</string>
+    <string name="channel_name">Playback</string>
+    <string name="channel_desc">Controls for the music that\'s playing</string>
+    <string name="prev">Previous</string>
+    <string name="next">Next</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="notice_channel_name">Requested songs</string>
+    <string name="notice_channel_desc">Notices when a song you requested finishes downloading</string>
+</resources>

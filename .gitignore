@@ -1,0 +1,25 @@
+# Paquetes compilados (APK, Flatpak, AppImage, RPM): se generan con los scripts de build
+dist/
+*.apk
+*.aab
+*.flatpak
+*.AppImage
+*.rpm
+
+# Instaladores descargados del Android SDK y de Gradle (pesan cientos de MB)
+instaladores/
+
+# Firma de Android: nunca al repositorio (respáldalos aparte)
+keystore.properties
+*.jks
+*.keystore
+
+# Rutas locales de cada computadora
+local.properties
+
+# Varios
+.DS_Store
+*.log
+
+# Memoria de trabajo de Claude: solo local (la lee y actualiza cada sesión, ver CLAUDE.md)
+memoria-claude.md

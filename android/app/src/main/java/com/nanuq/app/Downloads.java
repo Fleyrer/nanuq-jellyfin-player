@@ -367,7 +367,7 @@ final class Downloads {
             // Límites: una canción no pasa de 1 GB y debe quedar espacio libre (un servidor malicioso no puede llenar el teléfono).
             if (len > MAX_AUDIO) throw new IOException("El archivo es demasiado grande");
             if (dir.getUsableSpace() < Math.max(len, 0) + 200L * 1024 * 1024) throw new IOException("No hay espacio suficiente en el teléfono");
-            synchronized (this) { e.total = len; if (ct != null && ct.startsWith("audio/")) e.mime = ct.split(";")[0].trim(); }
+            synchronized (this) { e.total = len; e.mime = OggCheck.mime(ct, e.mime); }
             long lastEmit = 0, lastNetCheck = SystemClock.elapsedRealtime(), n = 0;
             try (InputStream in = con.getInputStream(); OutputStream os = new FileOutputStream(part)) {
                 byte[] buf = new byte[64 * 1024];
@@ -389,11 +389,15 @@ final class Downloads {
                     }
                 }
             }
+            // Opus (Ogg): sin Content-Length, una descarga cortada o alterada solo se nota revisando sus páginas (fuera del candado:
+            // leer el archivo tarda un poco).
+            boolean ogg = paused || e.cancelled || OggCheck.valid(part);
             synchronized (this) {
                 if (e.cancelled || entries.get(e.id) != e) { part.delete(); return; }
                 if (paused) { part.delete(); e.state = "waiting"; emit(e); return; }
                 if (len > 0 && n < len) throw new IOException("La descarga quedó incompleta");
                 if (n == 0) throw new IOException("El servidor no envió audio");
+                if (!ogg) throw new IOException("La descarga llegó incompleta o dañada");
                 if (out.exists()) out.delete();
                 if (!part.renameTo(out)) throw new IOException("No se pudo guardar el archivo");
                 e.size = n;
@@ -508,7 +512,7 @@ final class Downloads {
                 e.url = o.optString("url");
                 e.coverUrl = o.optString("coverUrl", "");
                 e.hasCover = o.optBoolean("hasCover") && new File(dir, safe(e.id) + ".cover").isFile();
-                e.mime = o.optString("mime", "audio/mpeg");
+                e.mime = OggCheck.mime(o.optString("mime", null), "audio/mpeg");
                 e.state = o.optString("state", "pending");
                 e.auto = o.optBoolean("auto");
                 e.score = o.optInt("score");

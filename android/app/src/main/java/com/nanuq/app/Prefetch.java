@@ -176,7 +176,7 @@ final class Prefetch {
             if (len > MAX_FILE) throw new IOException("Demasiado grande");
             if (dir.getUsableSpace() < Math.max(len, 0) + KEEP_FREE) throw new IOException("Sin espacio");
             String ct = con.getContentType();
-            if (ct != null && ct.startsWith("audio/")) mime = ct.split(";")[0].trim();
+            mime = OggCheck.mime(ct, null);
             try (InputStream in = con.getInputStream(); OutputStream os = new FileOutputStream(part)) {
                 byte[] buf = new byte[64 * 1024];
                 int r;
@@ -187,7 +187,7 @@ final class Prefetch {
                     if (n > MAX_FILE) throw new IOException("Demasiado grande");
                 }
             }
-            ok = !it.cancelled && n > 0 && (len <= 0 || n >= len);
+            ok = !it.cancelled && n > 0 && (len <= 0 || n >= len) && OggCheck.valid(part); // Opus: páginas completas y sin cambios
         } catch (Exception ignored) {
         } finally {
             if (con != null) con.disconnect();

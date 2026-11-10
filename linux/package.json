@@ -1,7 +1,7 @@
 {
   "name": "nanuq",
   "productName": "Nanuq",
-  "version": "1.44.6",
+  "version": "1.46.1",
   "description": "Cliente de música para Jellyfin",
   "main": "main.js",
   "author": {

@@ -52,540 +52,552 @@ web/app.js	Jellyfin.views	332	Bibliotecas de música del usuario (raíz de Carpe
 web/app.js	Jellyfin.folder	336	Contenido de una carpeta.	A folder's contents.
 web/app.js	Jellyfin.search	337	Búsqueda de artistas, álbumes y canciones.	Search for artists, albums and songs.
 web/app.js	Jellyfin.img	344	URL de la carátula (local si está descargada en el teléfono).	Cover URL (local if it's downloaded on the phone).
-web/app.js	Jellyfin.streamUrl	349	URL de streaming universal con calidad, contenedores y sesión.	Universal streaming URL with quality, containers and session.
-web/app.js	Jellyfin.stream	354	URL para reproducir: descarga, caché por adelantado o streaming.	URL to play: download, ahead-of-time cache or streaming.
-web/app.js	Jellyfin.dlUrl	357	URL para descargar una canción al teléfono.	URL to download a song to the phone.
-web/app.js	Jellyfin.peaks	363	Baja una copia ligera y calcula la forma de onda real.	Downloads a light copy and computes the real waveform.
-web/app.js	Jellyfin.tracks	368	Canciones de la biblioteca paginadas y ordenadas.	Paginated, sorted library songs.
-web/app.js	Jellyfin.lyrics	372	Letra de una canción (Jellyfin 10.9+), normalizada.	A song's lyrics (Jellyfin 10.9+), normalized.
-web/app.js	Jellyfin.mix	377	Canciones para una mezcla (orden, filtros, géneros, años).	Songs for a mix (order, filters, genres, years).
-web/app.js	Jellyfin.uploadLyrics	384	Sube una letra (.lrc o .txt) a Jellyfin.	Uploads lyrics (.lrc or .txt) to Jellyfin.
-web/app.js	Jellyfin.searchLyrics	391	Busca letras en los proveedores de Jellyfin (LrcLib).	Searches for lyrics in Jellyfin's providers (LrcLib).
-web/app.js	Jellyfin.pickLyrics	395	Elige una de las letras encontradas para guardarla.	Picks one of the found lyrics to save it.
-web/app.js	Jellyfin.setFavorite	397	Marca o quita una favorita.	Marks or unmarks a favorite.
-web/app.js	Jellyfin.inFavorites	403	¿Está en la sección de favoritas de Jellyfin?	Is it in Jellyfin's favorites section?
-web/app.js	Jellyfin.isFavorite	404	¿Esta canción es favorita según sus datos de usuario?	Is this song a favorite according to its user data?
-web/app.js	Jellyfin.favPlaylist	411	Encuentra la playlist del plugin «Favorited Songs Playlist».	Finds the “Favorited Songs Playlist” plugin's playlist.
-web/app.js	Jellyfin.favorites	418	Tus favoritas (filtro IsFavorite), paginadas y ordenadas.	Your favorites (IsFavorite filter), paginated and sorted.
-web/app.js	Jellyfin.setFavoriteLegacy	436	Ruta antigua para guardar favoritas (segundo intento).	Old route to save favorites (second attempt).
-web/app.js	Jellyfin.instantMix	438	Mezcla instantánea de Jellyfin a partir de una canción (radio).	Jellyfin instant mix from a song (radio).
-web/app.js	Jellyfin.addToPlaylist	443	Agrega canciones a una playlist.	Adds songs to a playlist.
-web/app.js	Jellyfin.refreshLibrary	445	Pide a Jellyfin que vuelva a escanear las bibliotecas (administradores).	Asks Jellyfin to rescan the libraries (administrators).
-web/app.js	Jellyfin.savePlaylist	446	Crea una playlist nueva con canciones.	Creates a new playlist with songs.
-web/app.js	Jellyfin.report	447	Avisa a Jellyfin que empezó, avanza o terminó una canción (y reafirma favoritas).	Tells Jellyfin a song started, progressed or stopped (and reasserts favorites).
-web/app.js	Jellyfin.logout	453	Cierra la sesión en el servidor (revoca el token).	Logs out on the server (revokes the token).
-web/app.js	Jellyfin.wsUrl	456	URL del WebSocket de Jellyfin.	Jellyfin WebSocket URL.
-web/app.js	Jellyfin.postCapabilities	457	Anuncia que este Nanuq acepta órdenes de control remoto.	Announces that this Nanuq accepts remote-control commands.
-web/app.js	Jellyfin.sessions	459	Sesiones activas (para Mis dispositivos).	Active sessions (for My devices).
-web/app.js	Jellyfin.sessionCmd	460	Manda una orden de reproducción a otra sesión.	Sends a playback command to another session.
-web/app.js	Jellyfin.sessionPlay	461	Manda una cola para reproducir en otra sesión.	Sends a queue to play on another session.
-web/app.js	Jellyfin.sessionGeneral	462	Manda una orden general (repetir, mezclar) a otra sesión.	Sends a general command (repeat, shuffle) to another session.
-web/app.js	Jellyfin.itemsByIds	463	Pide varios elementos por id, de 100 en 100.	Requests several items by id, 100 at a time.
-web/app.js	netError	469	Mensaje claro cuando no hay conexión con el servidor.	Clear message when the server can't be reached.
-web/app.js	normLyrics	478	Normaliza una letra de Jellyfin (sincronizada o en texto).	Normalizes Jellyfin lyrics (synced or plain).
-web/app.js	actx	493	AudioContext compartido (creado al primer uso).	Shared AudioContext (created on first use).
-web/app.js	decode	494	Decodifica audio a un AudioBuffer.	Decodes audio into an AudioBuffer.
-web/app.js	peaksFromBuffer	495	Calcula los picos de la forma de onda de un AudioBuffer.	Computes waveform peaks from an AudioBuffer.
-web/app.js	rng	502	Generador pseudoaleatorio con semilla.	Seeded pseudo-random generator.
-web/app.js	wav	503	Convierte un AudioBuffer en un archivo WAV.	Converts an AudioBuffer into a WAV file.
-web/app.js	synth	510	Sintetiza una canción de prueba para el modo demo.	Synthesizes a test song for demo mode.
-web/app.js	Demo.constructor	554	Crea la biblioteca de demostración (artistas, álbumes, canciones y playlists).	Creates the demo library (artists, albums, songs and playlists).
-web/app.js	Demo.cfg	589	Sesión del modo demo.	Demo-mode session.
-web/app.js	Demo.wait	590	Simula la espera de la red.	Simulates network latency.
-web/app.js	Demo.albums	591	Versión demo de Jellyfin.albums.	Demo version of Jellyfin.albums.
-web/app.js	Demo.album	596	Versión demo de Jellyfin.album.	Demo version of Jellyfin.album.
-web/app.js	Demo.artists	597	Versión demo de Jellyfin.artists.	Demo version of Jellyfin.artists.
-web/app.js	Demo.artistBy	599	Busca un artista demo por id o por nombre.	Finds a demo artist by id or name.
-web/app.js	Demo.artist	600	Versión demo de Jellyfin.artist.	Demo version of Jellyfin.artist.
-web/app.js	Demo.artistTracks	601	Versión demo de Jellyfin.artistTracks.	Demo version of Jellyfin.artistTracks.
-web/app.js	Demo.genres	602	Versión demo de Jellyfin.genres.	Demo version of Jellyfin.genres.
-web/app.js	Demo.genreTracks	603	Versión demo de Jellyfin.genreTracks.	Demo version of Jellyfin.genreTracks.
-web/app.js	Demo.genre	604	Versión demo de Jellyfin.genre.	Demo version of Jellyfin.genre.
-web/app.js	Demo.playlists	605	Versión demo de Jellyfin.playlists.	Demo version of Jellyfin.playlists.
-web/app.js	Demo.playlist	606	Versión demo de Jellyfin.playlist.	Demo version of Jellyfin.playlist.
-web/app.js	Demo.views	607	Versión demo de Jellyfin.views.	Demo version of Jellyfin.views.
-web/app.js	Demo.folder	608	Versión demo de Jellyfin.folder.	Demo version of Jellyfin.folder.
-web/app.js	Demo.search	613	Versión demo de Jellyfin.search.	Demo version of Jellyfin.search.
-web/app.js	Demo.img	617	Dibuja una carátula SVG generada para el modo demo.	Draws a generated SVG cover for demo mode.
-web/app.js	Demo.buf	631	Audio sintetizado de una canción demo (en caché).	Synthesized audio for a demo song (cached).
-web/app.js	Demo.stream	632	URL blob del WAV de una canción demo.	Blob URL of a demo song's WAV.
-web/app.js	Demo.peaks	633	Forma de onda de una canción demo.	Waveform of a demo song.
-web/app.js	Demo.tracks	634	Versión demo de Jellyfin.tracks.	Demo version of Jellyfin.tracks.
-web/app.js	Demo.mix	640	Versión demo de Jellyfin.mix.	Demo version of Jellyfin.mix.
-web/app.js	Demo.lyrics	650	Letra sincronizada inventada para una canción demo.	Made-up synced lyrics for a demo song.
-web/app.js	Demo.setFavorite	662	Versión demo de Jellyfin.setFavorite.	Demo version of Jellyfin.setFavorite.
-web/app.js	Demo.isFavorite	663	Versión demo de Jellyfin.isFavorite.	Demo version of Jellyfin.isFavorite.
-web/app.js	Demo.inFavorites	664	Versión demo de Jellyfin.inFavorites.	Demo version of Jellyfin.inFavorites.
-web/app.js	Demo.favorites	665	Versión demo de Jellyfin.favorites.	Demo version of Jellyfin.favorites.
-web/app.js	Demo.instantMix	666	Versión demo de Jellyfin.instantMix.	Demo version of Jellyfin.instantMix.
-web/app.js	Demo.addToPlaylist	667	Versión demo de Jellyfin.addToPlaylist.	Demo version of Jellyfin.addToPlaylist.
-web/app.js	Demo.savePlaylist	668	Versión demo de Jellyfin.savePlaylist.	Demo version of Jellyfin.savePlaylist.
-web/app.js	Demo.report	669	No hace nada (el demo no reporta reproducciones).	Does nothing (demo doesn't report plays).
-web/app.js	Demo.logout	670	No hace nada (sin servidor).	Does nothing (no server).
-web/app.js	logoInner	675	HTML del oso del logo con el accesorio del tema.	HTML of the logo bear with the theme's accessory.
-web/app.js	bearHTML	691	HTML del Nanuq animable (logo + cara expresiva).	HTML of the animatable Nanuq (logo + expressive face).
-web/app.js	bearState	693	Estado actual del oso (bailando, contento, triste) para los osos nuevos.	Current bear state (dancing, happy, sad) for new bears.
-web/app.js	nqBurst	699	Activa una ráfaga de animaciones por unos segundos (ahorro de batería).	Turns on an animation burst for a few seconds (battery saving).
-web/app.js	nqBurstEnd	707	Termina la ráfaga: las animaciones se pausan y los osos quedan contentos.	Ends the burst: animations pause and bears stay happy.
-web/app.js	bearDance	712	Hace bailar a todos los Nanuqs un rato.	Makes every Nanuq dance for a while.
-web/app.js	bearInit	717	Pone el Nanuq en los logos de la barra lateral.	Puts Nanuq in the sidebar logos.
-web/app.js	bearMood	722	Cambia el ánimo de los osos al sonar o pausar la música.	Changes the bears' mood when music plays or pauses.
-web/app.js	showSplash	733	Pantalla de bienvenida con el Nanuq del tema.	Welcome screen with the theme's Nanuq.
-web/app.js	refreshBear	744	Cambia el accesorio de los osos al cambiar de tema.	Changes the bears' accessory when the theme changes.
-web/app.js	Settings.set	776	Cambia un ajuste y lo guarda.	Changes a setting and saves it.
-web/app.js	DL.init	800	Carga las descargas del teléfono desde la app nativa.	Loads the phone's downloads from the native app.
-web/app.js	DL.indexCovers	808	Índice de carátulas descargadas por id de imagen.	Index of downloaded covers by image id.
-web/app.js	DL.coverUrl	812	URL local de una carátula descargada.	Local URL of a downloaded cover.
-web/app.js	DL.backfillCovers	814	Completa carátulas y datos de descargas viejas o recuperadas.	Fills in covers and details of old or recovered downloads.
-web/app.js	DL.config	821	Manda a Android el máximo de canciones y si solo con Wi-Fi.	Sends Android the maximum songs and whether Wi-Fi only.
-web/app.js	DL.usable	822	¿Hay descargas en este dispositivo (Android con Jellyfin)?	Are downloads available on this device (Android with Jellyfin)?
-web/app.js	DL.get	823	La descarga de una canción, si existe.	A song's download, if any.
-web/app.js	DL.localUrl	824	URL local de una canción descargada y lista.	Local URL of a downloaded, ready song.
-web/app.js	DL.isLocal	825	¿Esta URL es del servidor local del teléfono?	Is this URL from the phone's local server?
-web/app.js	DL.add	827	Pide descargar una canción (manual o automática).	Requests downloading a song (manual or automatic).
-web/app.js	DL.remove	832	Quita una canción de las descargas.	Removes a song from downloads.
-web/app.js	DL.removeAll	833	Borra todas las descargas (o solo las automáticas).	Deletes all downloads (or only automatic ones).
-web/app.js	DL.list	834	Lista de descargas.	List of downloads.
-web/app.js	DL.bytes	835	Espacio total que ocupan las descargas.	Total space used by downloads.
-web/app.js	DL.net	836	Tipo de red actual según Android (wifi, datos, ninguna).	Current network type according to Android (wifi, cellular, none).
-web/app.js	__nanuqDl	838	Recibe de Android los cambios de una descarga y actualiza la vista.	Receives a download's changes from Android and updates the view.
-web/app.js	Plays.count	853	Veces que sonó una canción en este teléfono.	Times a song played on this phone.
-web/app.js	Plays.add	854	Cuenta una reproducción y guarda sola la canción a las 3.	Counts a play and auto-saves the song at 3.
-web/app.js	PF.usable	871	¿Se puede guardar por adelantado (Android con Jellyfin)?	Can it save ahead of time (Android with Jellyfin)?
-web/app.js	PF.isUrl	872	¿Esta URL es de lo guardado por adelantado?	Is this URL from the ahead-of-time cache?
-web/app.js	PF.url	873	URL local de una canción ya guardada por adelantado (o null).	Local URL of a song already saved ahead of time (or null).
-web/app.js	PF.soon	874	Programa una actualización de la ventana por adelantado.	Schedules an update of the ahead-of-time window.
-web/app.js	PF.sync	875	Calcula qué canciones de la cola guardar (N minutos) y se lo pide a Android.	Computes which queue songs to save (N minutes) and asks Android.
-web/app.js	fmtMB	890	Formatea bytes como MB o GB según el idioma.	Formats bytes as MB or GB according to the language.
-web/app.js	dlStatus	891	Texto del estado de una descarga.	Text of a download's state.
-web/app.js	dlStatusShort	902	Estado corto de una descarga para el botón del reproductor.	Short download state for the player button.
-web/app.js	dlSummary	908	Resumen de las descargas (cantidad, espacio, pendientes).	Downloads summary (count, space, pending).
-web/app.js	themeSummary	932	HTML del tema elegido en Ajustes.	HTML of the chosen theme in Settings.
-web/app.js	applyTheme	936	Aplica un tema (colores, barra del sistema, osos).	Applies a theme (colors, system bar, bears).
-web/app.js	regList	953	Registra una lista de canciones para que los botones la encuentren.	Registers a song list so buttons can find it.
-web/app.js	cur	962	Pantalla actual de la pila de navegación.	Current screen in the navigation stack.
-web/app.js	go	963	Navega a una pantalla (raíz o encima de la actual).	Navigates to a screen (root or on top of the current one).
-web/app.js	back	972	Vuelve atrás: cierra diálogos, el reproductor o la pantalla actual.	Goes back: closes dialogs, the player or the current screen.
-web/app.js	cacheDrop	982	Olvida las vistas en caché que empiezan con un prefijo.	Forgets cached views starting with a prefix.
-web/app.js	refreshIf	984	Redibuja la pantalla actual si cumple una condición.	Redraws the current screen if it meets a condition.
-web/app.js	playlistsChanged	987	Olvida y vuelve a pedir una playlist que cambió.	Forgets and re-requests a playlist that changed.
-web/app.js	cached	994	Caché de vistas con tope (las más viejas salen primero).	View cache with a cap (oldest go first).
-web/app.js	albumNorm	1003	Normaliza un nombre para comparar álbumes.	Normalizes a name to compare albums.
-web/app.js	albumKeyOf	1005	Clave del álbum de una canción según sus etiquetas (artista + álbum + disco).	Album key of a song from its tags (artist + album + disc).
-web/app.js	albumGid	1012	Id estable de un álbum armado por etiquetas.	Stable id of a tag-built album.
-web/app.js	LIB.who	1015	Identifica servidor y usuario del índice.	Identifies the index's server and user.
-web/app.js	LIB.index	1017	Índice de álbumes por etiquetas (desde caché cifrada o del servidor).	Tag-based album index (from the encrypted cache or the server).
-web/app.js	LIB.peek	1030	El índice si ya está listo, sin esperar.	The index if it's ready, without waiting.
-web/app.js	LIB.reset	1031	Marca el índice como viejo para renovarlo.	Marks the index as stale so it's rebuilt.
-web/app.js	LIB.refresh	1032	Vuelve a armar el índice con todas las canciones.	Rebuilds the index with every song.
-web/app.js	LIB.fetchAll	1038	Baja todas las canciones de la biblioteca (3 páginas a la vez).	Downloads every song in the library (3 pages at a time).
-web/app.js	LIB.pack	1048	Versión compacta de una canción para guardar el índice.	Compact version of a song to save the index.
-web/app.js	LIB.unpack	1049	Lee una canción compacta del índice guardado, limpiándola.	Reads a compact song from the saved index, cleaning it.
-web/app.js	LIB.save	1054	Guarda el índice cifrado (si cabe).	Saves the encrypted index (if it fits).
-web/app.js	LIB.build	1059	Agrupa las canciones en álbumes, sin repetidas.	Groups songs into albums, without duplicates.
-web/app.js	LIB.albumsOf	1084	Álbumes (por etiquetas) de un grupo de canciones.	Albums (by tags) of a group of songs.
-web/app.js	LIB.sorted	1089	Lista de álbumes ordenada.	Sorted album list.
-web/app.js	lyrNorm	1108	Normaliza texto de letras para buscar (sin acentos ni signos).	Normalizes lyrics text for searching (no accents or punctuation).
-web/app.js	LYRX.load	1111	Carga el índice de letras guardado.	Loads the saved lyrics index.
-web/app.js	LYRX.add	1120	Agrega la letra de una canción al índice.	Adds a song's lyrics to the index.
-web/app.js	LYRX.save	1121	Guarda el índice de letras cifrado (con espera).	Saves the encrypted lyrics index (debounced).
-web/app.js	LYRX.reset	1129	Borra el índice de letras.	Deletes the lyrics index.
-web/app.js	LYRX.build	1131	Arma o completa el índice leyendo letras de a 3.	Builds or completes the index reading lyrics 3 at a time.
-web/app.js	LYRX.search	1157	Busca canciones cuya letra contiene un texto.	Finds songs whose lyrics contain a text.
-web/app.js	lyrSnippetHTML	1174	Línea de letra con lo buscado resaltado (escapada).	Lyrics line with the search highlighted (escaped).
-web/app.js	lyricsHitsHTML	1179	Lista HTML de canciones encontradas por la letra.	HTML list of songs found by lyrics.
-web/app.js	lyricsSection	1184	Sección «En las letras» que se completa mientras se indexa.	“In the lyrics” section that fills in while indexing.
-web/app.js	coverHTML	1202	HTML de una carátula con su ícono de respaldo.	HTML of a cover with its fallback icon.
-web/app.js	head	1207	Encabezado de una pantalla (título, botones, oso, atrás).	Screen header (title, buttons, bear, back).
-web/app.js	albumCard	1211	Tarjeta de un álbum.	An album card.
-web/app.js	artistCard	1212	Tarjeta de un artista.	An artist card.
-web/app.js	trackRows	1213	Contenedor de filas de canciones.	Container of song rows.
-web/app.js	rowsHTML	1214	Filas de canciones (número, título, duración, menú).	Song rows (number, title, duration, menu).
-web/app.js	loading	1226	Indicador de carga.	Loading indicator.
-web/app.js	errBox	1227	Caja de error con «Reintentar».	Error box with “Retry”.
-web/app.js	V.albums	1233	Pantalla Álbumes (por etiquetas, de 120 en 120).	Albums screen (by tags, 120 at a time).
-web/app.js	V.album	1248	Pantalla de un álbum.	An album's screen.
-web/app.js	normTxt	1279	Normaliza texto (sin acentos, minúsculas).	Normalizes text (no accents, lowercase).
-web/app.js	mixDef	1280	Definición de una mezcla (consulta según géneros o años).	A mix's definition (query by genres or years).
-web/app.js	mixTracks	1294	Canciones de una mezcla (en caché).	A mix's songs (cached).
-web/app.js	greeting	1295	Saludo según la hora.	Greeting by time of day.
-web/app.js	djBearSVG	1303	SVG de DJ Nanuq con audífonos, bufanda y tornamesa.	SVG of DJ Nanuq with headphones, scarf and turntable.
-web/app.js	djMoment	1355	Momento del día y ánimo para la ronda «Para este momento».	Time of day and mood for the “For right now” round.
-web/app.js	pick	1356	Elige uno al azar.	Picks one at random.
-web/app.js	wpick	1358	Elige al azar con pesos.	Picks at random with weights.
-web/app.js	wshuffle	1360	Ordena al azar dando más chance a lo que pesa más.	Shuffles giving more chance to heavier items.
-web/app.js	djQid	1363	Id de cola que lleva la sesión y la ronda del DJ.	Queue id carrying the DJ session and round.
-web/app.js	djTag	1364	Lee sesión y ronda de un id de cola del DJ.	Reads session and round from a DJ queue id.
-web/app.js	djSame	1365	¿Dos ids son de la misma sesión del DJ?	Are two ids from the same DJ session?
-web/app.js	DJ.voiceOk	1368	¿Hay una voz del sistema en el idioma de la app?	Is there a system voice in the app's language?
-web/app.js	DJ.save	1369	Guarda la sesión del DJ y la comparte con tus dispositivos.	Saves the DJ session and shares it with your devices.
-web/app.js	DJ.restore	1374	Recupera la sesión del DJ al abrir la app.	Restores the DJ session when the app opens.
-web/app.js	DJ.sample	1381	Muestra al azar de la biblioteca para elegir géneros y décadas.	Random sample of the library to choose genres and decades.
-web/app.js	DJ.heavy	1387	Tus 60 canciones más escuchadas.	Your 60 most played songs.
-web/app.js	DJ.pickGenre	1393	Elige el género de una ronda (sin repetir los recientes).	Picks a round's genre (avoiding recent ones).
-web/app.js	DJ.pickDecade	1403	Elige la década de una ronda.	Picks a round's decade.
-web/app.js	DJ.rank	1415	Qué tan gastada está una canción (más bajo = va antes).	How worn out a song is (lower = goes first).
-web/app.js	DJ.pool	1424	Canciones candidatas para un tipo de ronda.	Candidate songs for a round type.
-web/app.js	DJ.build	1457	Arma una ronda de ~5 canciones con su presentación.	Builds a round of ~5 songs with its introduction.
-web/app.js	DJ.next	1484	Elige y arma la siguiente ronda (pesos y enfriamiento).	Picks and builds the next round (weights and cooldown).
-web/app.js	DJ.items	1498	Convierte una ronda en canciones de la cola y la anota.	Turns a round into queue songs and records it.
-web/app.js	DJ.lastKey	1506	Número de la última ronda.	Number of the last round.
-web/app.js	DJ.start	1507	Empieza una sesión del DJ (aquí o en el dispositivo que controlas).	Starts a DJ session (here or on the device you control).
-web/app.js	DJ.share	1533	Deja en Jellyfin el estado del DJ para otro dispositivo.	Leaves the DJ state in Jellyfin for another device.
-web/app.js	DJ.handedOff	1538	La sesión pasó a otro dispositivo: aquí se apaga.	The session moved to another device: it turns off here.
-web/app.js	DJ.adopt	1540	Sigue aquí una sesión que viene de otro dispositivo.	Continues here a session coming from another device.
-web/app.js	DJ.queueFromShare	1545	Reconstruye la cola del DJ desde el estado compartido.	Rebuilds the DJ queue from the shared state.
-web/app.js	DJ.queueFromTags	1547	Reconstruye la cola del DJ desde los ids de la cola.	Rebuilds the DJ queue from the queue ids.
-web/app.js	DJ.remoteTag	1549	¿Lo que suena en el dispositivo que controlas es el DJ?	Is what's playing on the device you control the DJ?
-web/app.js	DJ.shown	1550	¿Hay que mostrar el DJ?	Should the DJ be shown?
-web/app.js	DJ.remoteTrack	1552	Trae las rondas del DJ que suena en otro dispositivo.	Fetches the rounds of the DJ playing on another device.
-web/app.js	DJ.stop	1562	Apaga el DJ (la cola queda como está).	Turns the DJ off (the queue stays as is).
-web/app.js	DJ.onTrack	1564	Al cambiar de canción: presenta la ronda nueva y agrega la siguiente.	On song change: introduces the new round and adds the next.
-web/app.js	DJ.extend	1572	Agrega la siguiente ronda al final de la cola.	Adds the next round to the end of the queue.
-web/app.js	DJ.switchUp	1582	«Cambiar de onda»: otra ronda en lugar de lo que quedaba.	“Change the vibe”: another round instead of what was left.
-web/app.js	DJ.announce	1590	Presenta una ronda (globo, aviso y voz).	Introduces a round (bubble, notice and voice).
-web/app.js	DJ.show	1592	Muestra la presentación donde corresponda.	Shows the introduction where appropriate.
-web/app.js	DJ.speak	1597	Lee la presentación en voz alta y baja la música.	Reads the introduction aloud and lowers the music.
-web/app.js	DJ.visible	1615	¿La página está a la vista?	Is the page visible?
-web/app.js	DJ.bears	1616	Enciende o apaga el baile de los DJ.	Turns the DJs' dancing on or off.
-web/app.js	DJ.say	1620	Globo de diálogo del DJ en el reproductor.	DJ speech bubble in the player.
-web/app.js	DJ.scene	1625	Escena del disco en el reproductor (funda, vinilo, entradas y salidas).	Record scene in the player (sleeve, vinyl, entries and exits).
-web/app.js	DJ.paint	1644	Actualiza todo lo del DJ en pantalla.	Updates everything DJ-related on screen.
-web/app.js	DJSHARE.ok	1674	¿Se puede compartir el DJ (Jellyfin y sincronización activada)?	Can the DJ be shared (Jellyfin and sync on)?
-web/app.js	DJSHARE.state	1675	Estado del DJ para compartir (acotado).	DJ state to share (bounded).
-web/app.js	DJSHARE.push	1680	Guarda el estado del DJ en /DisplayPreferences.	Saves the DJ state in /DisplayPreferences.
-web/app.js	DJSHARE.pushRaw	1688	Guarda un estado ya armado.	Saves an already built state.
-web/app.js	DJSHARE.pushSoon	1692	Guarda el estado en 1.5 s.	Saves the state in 1.5 s.
-web/app.js	DJSHARE.offSoon	1694	Avisa que el DJ se apagó, si la sesión sigue siendo de aquí.	Announces the DJ turned off, if the session is still this device's.
-web/app.js	DJSHARE.pull	1698	Lee el estado compartido del DJ.	Reads the shared DJ state.
-web/app.js	djClean	1704	Limpia el estado del DJ leído (dato no confiable).	Cleans the read DJ state (untrusted data).
-web/app.js	djLiveSync	1719	Anima el DJ solo mientras se ve.	Animates the DJ only while it's visible.
-web/app.js	djTileHTML	1731	Tarjeta de DJ Nanuq en Inicio.	DJ Nanuq card on Home.
-web/app.js	V.dj	1734	Pantalla de DJ Nanuq.	DJ Nanuq screen.
-web/app.js	nanuqSceneSVG	1758	Escena de Nanuq para una celda vacía de Inicio.	Nanuq scene for an empty Home cell.
-web/app.js	nanuqBear	1774	Nanuq listo para colocar en una escena.	Nanuq ready to place in a scene.
-web/app.js	nanuqWideSVG	1778	Escena ancha de Nanuq (dos celdas).	Wide Nanuq scene (two cells).
-web/app.js	nanuqWideTileHTML	1795	Celda ancha con escena.	Wide cell with a scene.
-web/app.js	nanuqTileHTML	1800	Celda con escena.	Cell with a scene.
-web/app.js	nanuqVisit	1807	Un Nanuq de otro tema visita una celda.	A Nanuq from another theme visits a cell.
-web/app.js	nanuqVisits	1827	Programa visitas de vez en cuando.	Schedules visits every now and then.
-web/app.js	fillGaps	1835	Rellena los huecos de la cuadrícula de Inicio con escenas.	Fills Home's grid gaps with scenes.
-web/app.js	tileHTML	1848	Mosaico de una mezcla.	A mix tile.
-web/app.js	offlineBanner	1853	Aviso «Sin conexión» con acceso a Descargas.	“No connection” notice with access to Downloads.
-web/app.js	V.home	1858	Pantalla Inicio.	Home screen.
-web/app.js	V.mix	1903	Pantalla de una mezcla.	A mix's screen.
-web/app.js	V.songs	1913	Pantalla Canciones (paginada).	Songs screen (paginated).
-web/app.js	V.artists	1941	Pantalla Artistas.	Artists screen.
-web/app.js	fmtLong	1948	Duración larga («3 h 12 min»).	Long duration (“3 h 12 min”).
-web/app.js	V.artist	1950	Pantalla de un artista (canciones, álbumes, aparece en).	An artist's screen (songs, albums, appears on).
-web/app.js	V.genres	2030	Pantalla Géneros.	Genres screen.
-web/app.js	V.genre	2035	Pantalla de un género.	A genre's screen.
-web/app.js	V.playlists	2046	Pantalla Playlists.	Playlists screen.
-web/app.js	V.playlist	2051	Pantalla de una playlist.	A playlist's screen.
-web/app.js	V.favorites	2060	Pantalla Favoritas (confirmada con Jellyfin).	Favorites screen (confirmed with Jellyfin).
-web/app.js	V.folders	2086	Pantalla Carpetas.	Folders screen.
-web/app.js	V.search	2095	Pantalla Buscar (incluye la búsqueda en letras).	Search screen (includes lyrics search).
-web/app.js	songsBlock	2125	Bloque de canciones en lista o cuadrícula.	Songs block as a list or grid.
-web/app.js	V.queue	2132	Pestaña Cola (teléfono).	Queue tab (phone).
-web/app.js	V.more	2133	Pantalla Más.	More screen.
-web/app.js	V.settings	2136	Pantalla Ajustes.	Settings screen.
-web/app.js	V.downloads	2199	Pantalla Descargas.	Downloads screen.
-web/app.js	renderDownloadsSoon	2215	Redibuja Descargas en un momento.	Redraws Downloads shortly.
-web/app.js	History.purge	2229	Borra el historial local de versiones anteriores.	Deletes local history from earlier versions.
-web/app.js	ServerStats.available	2239	¿Está el plugin Playback Reporting y se puede leer?	Is the Playback Reporting plugin present and readable?
-web/app.js	ServerStats.plays	2247	Reproducciones entre dos fechas desde el plugin (día por día).	Plays between two dates from the plugin (day by day).
-web/app.js	Recap.total	2303	Duración total del video.	Total video length.
-web/app.js	Recap.setMode	2304	Cambia entre resumen del año y de la semana.	Switches between year and week recap.
-web/app.js	Recap.plays	2309	Reproducciones del periodo (plugin, datos básicos o demo).	Plays for the period (plugin, basic data or demo).
-web/app.js	Recap.tally	2326	Agrupa reproducciones: canciones, artistas, géneros, horas, días, racha.	Groups plays: songs, artists, genres, hours, days, streak.
-web/app.js	Recap.collect	2350	Datos del resumen del año.	Year recap data.
-web/app.js	Recap.collectWeek	2362	Datos del resumen de la semana pasada (lunes a domingo).	Data for last week's recap (Monday to Sunday).
-web/app.js	Recap.jellyfinYear	2378	Canciones escuchadas en un periodo según los datos básicos de Jellyfin.	Songs played in a period according to Jellyfin's basic data.
-web/app.js	Recap.assets	2391	Prepara imágenes del video: osos, DJ, carátulas y paleta.	Prepares the video's images: bears, DJ, covers and palette.
-web/app.js	Recap.loadImg	2413	Carga una imagen con topes (8 MB, reducida) para el canvas.	Loads an image with limits (8 MB, reduced) for the canvas.
-web/app.js	Recap.sceneAt	2427	Qué escena toca en un segundo del video.	Which scene plays at a given second of the video.
-web/app.js	Recap.frame	2428	Dibuja un cuadro del video (con transición entre escenas).	Draws a video frame (with transitions between scenes).
-web/app.js	Recap.transition	2437	Transición entre dos escenas (deslizar, círculo, zoom, barrido).	Transition between two scenes (slide, circle, zoom, wipe).
-web/app.js	Recap.bg	2447	Fondo de una escena: degradado, brillo al ritmo y copos.	A scene's background: gradient, beat glow and snowflakes.
-web/app.js	Recap.weather	2464	Dibuja el pronóstico musical (sol, tormenta, nieve, arcoíris…).	Draws the music forecast (sun, storm, snow, rainbow…).
-web/app.js	Recap.bear	2481	Dibuja un Nanuq que brinca al ritmo.	Draws a Nanuq hopping to the beat.
-web/app.js	Recap.text	2488	Texto ajustado al ancho, con sombra.	Text fitted to width, with a shadow.
-web/app.js	Recap.cover	2498	Carátula con esquinas redondeadas.	Cover with rounded corners.
-web/app.js	Recap.confetti	2504	Lluvia de confeti.	Confetti shower.
-web/app.js	Recap.scene	2512	Dibuja una escena del resumen.	Draws a recap scene.
-web/app.js	Recap.music	2759	Música del video generada con Web Audio (con redoble).	Video music generated with Web Audio (with a drumroll).
-web/app.js	Recap.stop	2788	Detiene la reproducción o grabación del video.	Stops playing or recording the video.
-web/app.js	Recap.play	2789	Reproduce el video en el canvas y, si se pide, lo graba (MediaRecorder).	Plays the video on the canvas and, if asked, records it (MediaRecorder).
-web/app.js	Recap.save	2817	Guarda el video (Android en trozos, escritorio como descarga).	Saves the video (Android in chunks, desktop as a download).
-web/app.js	mp4Finalize	2843	Escribe la duración real en el MP4 fragmentado.	Writes the real duration into the fragmented MP4.
-web/app.js	recapCloseAudio	2884	Cierra el audio del video una sola vez.	Closes the video's audio only once.
-web/app.js	ease.out	2885	Curva de animación (salida).	Animation curve (out).
-web/app.js	ease.inOut	2885	Curva de animación (entrada y salida).	Animation curve (in-out).
-web/app.js	ease.back	2885	Curva de animación con rebote.	Animation curve with overshoot.
-web/app.js	clamp01	2886	Limita un valor entre 0 y 1.	Clamps a value between 0 and 1.
-web/app.js	mixHex	2887	Mezcla dos colores hex.	Mixes two hex colors.
-web/app.js	hexA	2888	Color hex con transparencia.	Hex color with transparency.
-web/app.js	recapYearOpen	2890	¿Es la primera semana de diciembre?	Is it the first week of December?
-web/app.js	recapTileHTML	2891	Tarjeta «Tu año con Nanuq» en Inicio.	“Your year with Nanuq” card on Home.
-web/app.js	V.recap	2894	Pantalla de Tu semana / Tu año (ver y exportar).	Your week / Your year screen (view and export).
-web/app.js	__nanuqHttp	2943	Recibe la respuesta de una petición nativa a SomeDL (Android).	Receives a native SomeDL request's response (Android).
-web/app.js	reqNative	2944	¿Hay puente nativo para hablar con SomeDL sin CORS?	Is there a native bridge to talk to SomeDL without CORS?
-web/app.js	reqRawHttp	2945	Petición a SomeDL por el puente nativo o fetch.	Request to SomeDL through the native bridge or fetch.
-web/app.js	parseSomedl	2955	Interpreta la dirección de SomeDL (puerto 5000 por omisión).	Parses the SomeDL address (port 5000 by default).
-web/app.js	reqNetError	2964	Mensaje claro cuando SomeDL no responde.	Clear message when SomeDL doesn't respond.
-web/app.js	REQ.save	2979	Guarda la lista de pedidos.	Saves the request list.
-web/app.js	REQ.setCfg	2980	Guarda o quita la dirección de SomeDL.	Saves or clears the SomeDL address.
-web/app.js	REQ.pending	2981	Pedidos que siguen en camino.	Requests still on the way.
-web/app.js	REQ.visible	2982	¿La app está a la vista (para revisar más seguido)?	Is the app visible (to check more often)?
-web/app.js	REQ.http	2983	Petición a la API de SomeDL con manejo de errores.	Request to the SomeDL API with error handling.
-web/app.js	REQ.probe	2991	Comprueba que una dirección sea SomeDL.	Checks that an address is SomeDL.
-web/app.js	REQ.add	2997	Manda un pedido de canción a SomeDL.	Sends a song request to SomeDL.
-web/app.js	REQ.schedule	3009	Programa la siguiente revisión de pedidos.	Schedules the next request check.
-web/app.js	REQ.poll	3010	Revisa el estado de los pedidos en SomeDL.	Checks the requests' state in SomeDL.
-web/app.js	REQ.announce	3039	Avisa (y notifica) qué pedidos terminaron.	Announces (and notifies) which requests finished.
-web/app.js	REQ.retry	3054	Vuelve a pedir una canción que falló.	Requests a failed song again.
-web/app.js	sysNotify	3061	Notificación del sistema (Android o escritorio).	System notification (Android or desktop).
-web/app.js	askNotifyPermission	3067	Pide permiso de notificaciones en el navegador.	Asks for notification permission in the browser.
-web/app.js	reqRowHTML	3070	Fila de un pedido de SomeDL.	A SomeDL request row.
-web/app.js	reqListHTML	3079	Lista de pedidos.	Request list.
-web/app.js	renderReqSoon	3086	Redibuja la lista de pedidos en un momento.	Redraws the request list shortly.
-web/app.js	V.request	3090	Pantalla Solicitar canción.	Request a song screen.
-web/app.js	refreshFromJellyfin	3150	«Actualizar desde Jellyfin»: olvida cachés, rehace índices y refresca la cola.	“Refresh from Jellyfin”: forgets caches, rebuilds indexes and refreshes the queue.
-web/app.js	sessionGone	3173	Confirma si un 401 es de verdad la sesión vencida.	Confirms whether a 401 really is an expired session.
-web/app.js	sessionExpired	3184	Sesión vencida: detiene todo y pide entrar.	Expired session: stops everything and asks to log in.
-web/app.js	render	3192	Dibuja la pantalla actual con transición y manejo de errores.	Draws the current screen with a transition and error handling.
-web/app.js	P.pause	3238	Pausa marcando que la pidió Nanuq.	Pauses, marking that Nanuq requested it.
-web/app.js	saveQueue	3241	Guarda la cola y actualiza la ventana por adelantado.	Saves the queue and updates the ahead-of-time window.
-web/app.js	QPOS.save	3246	Guarda el segundo de la canción para retomarlo.	Saves the song's second to resume it.
-web/app.js	QPOS.restore	3252	Dónde retomar la canción al abrir la app.	Where to resume the song when the app opens.
-web/app.js	QPOS.clear	3256	Olvida la posición guardada.	Forgets the saved position.
-web/app.js	setQueue	3260	Reemplaza la cola y empieza a reproducir.	Replaces the queue and starts playing.
-web/app.js	addToQueue	3261	Agrega canciones al final o a continuación.	Adds songs at the end or next.
-web/app.js	ptime	3271	Segundo actual de la canción (aquí o en el otro dispositivo).	Current second of the song (here or on the other device).
-web/app.js	pdur	3272	Duración de la canción.	Song duration.
-web/app.js	setSrc	3278	Cambia la fuente del audio reiniciando su estado.	Changes the audio source resetting its state.
-web/app.js	seekTo	3282	Salta a un segundo (en conversiones en vivo pide desde ahí).	Seeks to a second (for live conversions it requests from there).
-web/app.js	playIndex	3303	Reproduce la canción N de la cola.	Plays song N of the queue.
-web/app.js	armStallWatch	3333	Avisa si una canción tarda demasiado en empezar.	Warns if a song takes too long to start.
-web/app.js	MP3.add	3347	Recuerda una canción que debe pedirse en MP3.	Remembers a song that must be requested as MP3.
-web/app.js	localFailed	3351	La copia local falló: suena del servidor (y se vuelve a descargar).	The local copy failed: it plays from the server (and is downloaded again).
-web/app.js	canFallback	3363	¿Se puede pedir esta canción en MP3?	Can this song be requested as MP3?
-web/app.js	fallbackMp3	3366	Pide la canción en MP3 320 kbps si la original no arranca.	Requests the song as MP3 320 kbps if the original won't start.
-web/app.js	armFallback	3376	Programa el paso a MP3 si no arranca en 6 s.	Schedules the switch to MP3 if it doesn't start in 6 s.
-web/app.js	playFailed	3382	Explica por qué no se pudo reproducir.	Explains why it couldn't play.
-web/app.js	audioDead	3403	¿El audio quedó muerto (error de red)?	Is the audio dead (network error)?
-web/app.js	replayHere	3404	Vuelve a pedir la canción desde el segundo en que iba.	Requests the song again from the second it was at.
-web/app.js	fadeStop	3412	Detiene un desvanecido en curso.	Stops a fade in progress.
-web/app.js	fadeTo	3413	Lleva el volumen a un valor con desvanecido.	Fades the volume to a value.
-web/app.js	userVol	3425	Volumen elegido por ti (bajado si habla el DJ).	The volume you chose (lowered if the DJ is talking).
-web/app.js	pauseSoft	3426	Pausa con desvanecido.	Pauses with a fade.
-web/app.js	playSoft	3431	Reanuda con desvanecido (o recarga si otra app pausó).	Resumes with a fade (or reloads if another app paused).
-web/app.js	partyNow	3440	¿Los controles manejan la fiesta ahora?	Do the controls handle the party right now?
-web/app.js	partyHostOpen	3443	¿Hay una sala de fiesta abierta en esta computadora?	Is a party room open on this computer?
-web/app.js	toggle	3444	Reproducir/pausar (fiesta, control remoto o aquí).	Play/pause (party, remote control or here).
-web/app.js	next	3453	Siguiente canción (respeta repetir y el fin de la cola).	Next song (respects repeat and the end of the queue).
-web/app.js	prev	3465	Canción anterior (o al inicio si van más de 3 s).	Previous song (or restart if past 3 s).
-web/app.js	seekFrac	3466	Salta a una fracción de la canción.	Seeks to a fraction of the song.
-web/app.js	removeAt	3467	Quita una canción de la cola.	Removes a song from the queue.
-web/app.js	clearQueue	3472	Vacía la cola.	Clears the queue.
-web/app.js	shuffleQueue	3473	Mezcla la cola (la actual queda primero).	Shuffles the queue (the current one stays first).
-web/app.js	setMode	3481	Cambia el modo de repetición.	Changes the repeat mode.
-web/app.js	updateModeBtn	3485	Actualiza el botón de repetición.	Updates the repeat button.
-web/app.js	loadPeaks	3487	Carga la forma de onda de una canción.	Loads a song's waveform.
-web/app.js	cssVar	3496	Lee una variable CSS del tema (en caché).	Reads a theme CSS variable (cached).
-web/app.js	drawWaves	3497	Dibuja las barras de progreso o la forma de onda.	Draws the progress bars or the waveform.
-web/app.js	roundRect	3525	Rectángulo redondeado en canvas.	Rounded rectangle on canvas.
-web/app.js	updateNow	3527	Actualiza todo lo que muestra la canción actual.	Updates everything that shows the current song.
-web/app.js	updatePlayState	3557	Íconos de reproducir/pausa y estado de los controles del sistema.	Play/pause icons and system controls state.
-web/app.js	DISC.can	3572	¿Hay puente de Discord (escritorio)?	Is there a Discord bridge (desktop)?
-web/app.js	DISC.update	3573	Programa el aviso a Discord.	Schedules the update to Discord.
-web/app.js	DISC.send	3574	Manda a Discord lo que suena (o lo quita).	Sends Discord what's playing (or clears it).
-web/app.js	dcStatusPaint	3590	Línea de estado de Discord en Ajustes.	Discord status line in Settings.
-web/app.js	rcKeep	3611	Audio en silencio para que el sistema mantenga los controles.	Silent audio so the system keeps the controls.
-web/app.js	sessionHold	3625	Mantiene los controles del sistema mientras carga o al terminar la cola.	Keeps the system controls while loading or when the queue ends.
-web/app.js	rcKeepOff	3631	Detiene el audio en silencio.	Stops the silent audio.
-web/app.js	stallCheck	3671	Detecta audio atorado a media canción y lo vuelve a pedir.	Detects audio stuck mid-song and requests it again.
-web/app.js	netBack	3680	Volvió la red: reanuda lo cortado y reconecta.	Network is back: resumes what was cut and reconnects.
-web/app.js	paintVol	3711	Dibuja la barra de volumen y su ícono.	Draws the volume bar and its icon.
-web/app.js	lrcKey	3719	Clave de una letra guardada en el dispositivo.	Key of lyrics saved on the device.
-web/app.js	lrcTime	3720	Formatea un tiempo como mm:ss.cc (LRC).	Formats a time as mm:ss.cc (LRC).
-web/app.js	parseLRC	3721	Lee un archivo LRC (marcas de tiempo y offset).	Reads an LRC file (timestamps and offset).
-web/app.js	toLRC	3735	Arma un archivo LRC limpio.	Builds a clean LRC file.
-web/app.js	cleanLyricsText	3746	Limpia una letra escrita o pegada (controles, HTML, tamaño).	Cleans typed or pasted lyrics (control chars, HTML, size).
-web/app.js	lyricsFromText	3755	Convierte texto (LRC o simple) en letra.	Converts text (LRC or plain) into lyrics.
-web/app.js	localLyrics	3756	Letra guardada en este dispositivo.	Lyrics saved on this device.
-web/app.js	lyrSame	3764	¿Dos letras son iguales (texto y tiempos)?	Are two lyrics the same (text and timing)?
-web/app.js	lyricsSaved	3772	Muestra la letra recién guardada hasta que Jellyfin la sirva.	Shows freshly saved lyrics until Jellyfin serves them.
-web/app.js	getLyrics	3787	Letra de una canción (local, pendiente, caché o servidor).	A song's lyrics (local, pending, cache or server).
-web/app.js	setLyricsMode	3795	Abre o cierra la letra con transición.	Opens or closes the lyrics with a transition.
-web/app.js	setQueueMode	3808	Abre o cierra la cola del reproductor con transición.	Opens or closes the player's queue with a transition.
-web/app.js	renderSheetQueue	3819	Lista de la cola dentro del reproductor.	Queue list inside the player.
-web/app.js	applyLyricsMode	3828	Aplica el modo letra sin transición.	Applies lyrics mode without a transition.
-web/app.js	reloadLyrics	3836	Vuelve a cargar la letra actual.	Reloads the current lyrics.
-web/app.js	renderLyrics	3837	Dibuja la letra de la canción actual.	Draws the current song's lyrics.
-web/app.js	estimateTimes	3861	Reparte tiempos aproximados para letras sin sincronizar.	Spreads approximate timing for unsynced lyrics.
-web/app.js	syncLyrics	3868	Resalta la línea que suena y desplaza la letra.	Highlights the playing line and scrolls the lyrics.
-web/app.js	refreshLyricsButtons	3904	Botón Letra o Buscar letra según haya letra.	Lyrics or Find lyrics button depending on whether there are lyrics.
-web/app.js	syncStart	3919	Abre el editor para sincronizar a mano.	Opens the editor to sync by hand.
-web/app.js	syncEnd	3933	Cierra el editor.	Closes the editor.
-web/app.js	syncCancel	3937	Cancela la sincronización.	Cancels syncing.
-web/app.js	renderSync	3938	Dibuja el editor de sincronización.	Draws the sync editor.
-web/app.js	syncEditorTick	3945	Marca en el editor la línea que suena.	Marks the playing line in the editor.
-web/app.js	syncMark	3952	Marca el inicio de la línea resaltada.	Marks the start of the highlighted line.
-web/app.js	syncUndo	3965	Deshace la última marca.	Undoes the last mark.
-web/app.js	syncNudge	3973	Mueve la última marca ¼ s.	Moves the last mark ¼ s.
-web/app.js	syncSave	3982	Completa los tiempos y guarda el LRC.	Fills in timing and saves the LRC.
-web/app.js	saveLyricsText	3999	Guarda una letra en Jellyfin (o en el dispositivo si no se puede).	Saves lyrics in Jellyfin (or on the device if it can't).
-web/app.js	lyricsSearch	4011	Busca letras en LrcLib y deja elegir una.	Searches LrcLib for lyrics and lets you choose one.
-web/app.js	lyricsPaste	4041	Diálogo para pegar o editar una letra.	Dialog to paste or edit lyrics.
-web/app.js	forgetLocalLyrics	4059	Quita la letra guardada en este dispositivo.	Removes the lyrics saved on this device.
-web/app.js	renderQueue	4064	Dibuja el panel de la cola.	Draws the queue panel.
-web/app.js	renderQueueAll	4073	Redibuja todas las vistas de la cola.	Redraws every queue view.
-web/app.js	moveQueue	4078	Mueve una canción de la cola (también en el control remoto).	Moves a song in the queue (also in remote control).
-web/app.js	markCurrent	4130	Resalta la canción que suena en las listas.	Highlights the playing song in lists.
-web/app.js	toast	4135	Aviso breve en pantalla.	Brief on-screen notice.
-web/app.js	menu	4136	Menú de opciones (hoja inferior).	Options menu (bottom sheet).
-web/app.js	devLabel	4149	Nombre amable de un dispositivo.	Friendly name of a device.
-web/app.js	devName	4151	Nombre de un dispositivo para frases.	Device name for sentences.
-web/app.js	expand6	4153	Expande una dirección IPv6.	Expands an IPv6 address.
-web/app.js	ipKey	4159	Red y privacidad de una dirección IP.	Network and privacy of an IP address.
-web/app.js	sameNetwork	4167	¿Dos direcciones están en la misma red?	Are two addresses on the same network?
-web/app.js	RC.on	4179	¿Mis dispositivos está activado?	Is My devices turned on?
-web/app.js	RC.start	4180	Arranca Mis dispositivos (WebSocket y búsqueda).	Starts My devices (WebSocket and polling).
-web/app.js	RC.stop	4181	Detiene Mis dispositivos.	Stops My devices.
-web/app.js	RC.connect	4187	Abre el WebSocket de Jellyfin con reintentos.	Opens Jellyfin's WebSocket with retries.
-web/app.js	RC.send	4200	Manda un mensaje por el WebSocket.	Sends a message over the WebSocket.
-web/app.js	RC.onMessage	4201	Atiende los mensajes del WebSocket (órdenes, favoritas, keep-alive).	Handles WebSocket messages (commands, favorites, keep-alive).
-web/app.js	RC.fromMe	4212	¿La orden viene de tu propio usuario?	Does the command come from your own user?
-web/app.js	RC.onPlaystate	4219	Ejecuta pausar, siguiente, buscar… recibidos.	Runs received pause, next, seek…
-web/app.js	RC.onPlay	4232	Ejecuta una orden de reproducir (y adopta el DJ si viene con él).	Runs a play command (and adopts the DJ if it comes with it).
-web/app.js	RC.onGeneral	4254	Ejecuta repetir o mezclar recibidos.	Runs received repeat or shuffle.
-web/app.js	RC.queueForReport	4261	Cola que se informa a Jellyfin.	Queue reported to Jellyfin.
-web/app.js	RC.reportSoon	4262	Informa el estado a Jellyfin en un momento.	Reports the state to Jellyfin shortly.
-web/app.js	RC.schedule	4268	Programa la siguiente búsqueda de dispositivos.	Schedules the next device poll.
-web/app.js	RC.poll	4269	Busca tus otros Nanuq y sigue al que controlas.	Looks for your other Nanuqs and follows the one you control.
-web/app.js	RC.maybeFollow	4292	Se conecta solo a otro Nanuq que suena en tu red.	Connects automatically to another Nanuq playing on your network.
-web/app.js	RC.enter	4298	Empieza a controlar otro dispositivo.	Starts controlling another device.
-web/app.js	RC.leave	4314	Deja de controlar y recupera tu cola.	Stops controlling and restores your queue.
-web/app.js	RC.apply	4322	Refleja aquí lo que suena en el otro dispositivo.	Mirrors here what's playing on the other device.
-web/app.js	RC.pos	4353	Segundo estimado de la canción en el otro dispositivo.	Estimated second of the song on the other device.
-web/app.js	RC.tick	4354	Actualiza barra, letra y controles del sistema en control remoto.	Updates bar, lyrics and system controls in remote control.
-web/app.js	RC.decorate	4361	Indica «Sonando en …» en el reproductor.	Shows “Playing on …” in the player.
-web/app.js	RC.fail	4367	Avisa que una orden no se pudo enviar.	Warns that a command couldn't be sent.
-web/app.js	RC.cmd	4368	Manda una orden al dispositivo que suena.	Sends a command to the playing device.
-web/app.js	RC.seek	4374	Salta en el otro dispositivo.	Seeks on the other device.
-web/app.js	RC.window	4375	Ventana de la cola que se manda (≤ 200).	Queue window that is sent (≤ 200).
-web/app.js	RC.playQueue	4376	Manda una cola para reproducir allá.	Sends a queue to play there.
-web/app.js	RC.add	4385	Agrega canciones a la cola de allá.	Adds songs to the queue there.
-web/app.js	RC.reorder	4395	Manda la cola reordenada (conservando el DJ).	Sends the reordered queue (keeping the DJ).
-web/app.js	RC.general	4406	Manda una orden general allá.	Sends a general command there.
-web/app.js	RC.here	4408	«Reproducir aquí»: trae la música (y el DJ) a este dispositivo.	“Play here”: brings the music (and the DJ) to this device.
-web/app.js	RC.there	4431	Pasa la música (y el DJ) a otro dispositivo.	Sends the music (and the DJ) to another device.
-web/app.js	__nanuqTick	4450	Latido cada 20 s desde Android (WebSocket, fiesta, audio atorado).	20-second heartbeat from Android (WebSocket, party, stuck audio).
-web/app.js	__nanuqVis	4458	Android avisa si la app está a la vista.	Android reports whether the app is visible.
-web/app.js	openDevices	4459	Menú Mis dispositivos.	My devices menu.
-web/app.js	updateFavBtn	4490	Botón de favorita del reproductor.	Player's favorite button.
-web/app.js	setFavLocal	4496	Marca la favorita en la cola local.	Marks the favorite in the local queue.
-web/app.js	favPending	4503	Recuerda un cambio de favorita reciente.	Remembers a recent favorite change.
-web/app.js	favMerge	4504	Aplica los cambios recientes sobre la lista del servidor.	Applies recent changes over the server's list.
-web/app.js	favHold	4522	Protege la favorita de la canción que suena (fallo de Jellyfin 12).	Protects the playing song's favorite (Jellyfin 12 bug).
-web/app.js	favHeld	4525	¿Se está protegiendo esta favorita?	Is this favorite being protected?
-web/app.js	favReassert	4526	Vuelve a guardar la favorita después de cada aviso de reproducción.	Saves the favorite again after each playback report.
-web/app.js	favRemote	4534	Atiende cambios de favoritas hechos en otro lado.	Handles favorite changes made elsewhere.
-web/app.js	refreshFav	4556	Confirma con el servidor si la canción es favorita.	Confirms with the server whether the song is a favorite.
-web/app.js	toggleFav	4567	Marca o quita la favorita y lo comprueba.	Marks or unmarks the favorite and verifies it.
-web/app.js	favConfirm	4587	Segunda confirmación contra la sección de favoritas.	Second confirmation against the favorites section.
-web/app.js	updateDlBtn	4601	Botón Descargar del reproductor.	Player's Download button.
-web/app.js	dlAddToast	4610	Aviso al pedir una descarga.	Notice when requesting a download.
-web/app.js	dlTap	4619	Toque en Descargar (pedir o administrar).	Tap on Download (request or manage).
-web/app.js	connTest	4632	«Probar conexión»: mide API, carátula, audio, saltos y reproductor.	“Test connection”: measures API, cover, audio, seeking and player.
-web/app.js	startRadio	4760	Radio a partir de una canción.	Radio from a song.
-web/app.js	addToPlaylistMenu	4774	Menú para agregar a una playlist (o crear una).	Menu to add to a playlist (or create one).
-web/app.js	songOptions	4789	Opciones comunes de una canción.	Common song options.
-web/app.js	queueMenu	4796	Menú de una canción de la cola.	Menu for a queue song.
-web/app.js	trackMenu	4809	Menú de una canción de una lista.	Menu for a song in a list.
-web/app.js	askConfirm	4817	Diálogo de confirmación.	Confirmation dialog.
-web/app.js	askName	4823	Diálogo para escribir un nombre.	Dialog to type a name.
-web/app.js	openSheet	4831	Abre el reproductor maximizado.	Opens the full-screen player.
-web/app.js	closeSheet	4839	Cierra el reproductor maximizado.	Closes the full-screen player.
-web/app.js	partyHost	4849	¿Este dispositivo puede ser anfitrión (escritorio)?	Can this device host (desktop)?
-web/app.js	partyGuest	4850	¿Este dispositivo es invitado (Android)?	Is this device a guest (Android)?
-web/app.js	partyOn	4851	¿Hay fiesta en este dispositivo?	Is the party available on this device?
-web/app.js	partySongUrl	4853	URL en MP3 320 kbps para mandar una canción a la fiesta.	MP3 320 kbps URL to send a song to the party.
-web/app.js	partyCover	4859	Miniatura JPEG de 240 px de la carátula.	240 px JPEG thumbnail of the cover.
-web/app.js	partyCoverOk	4869	¿La carátula viene de la sala (127.0.0.1 con token)?	Does the cover come from the room (127.0.0.1 with token)?
-web/app.js	partyClean	4872	Limpia el estado que manda la computadora (no confiable).	Cleans the state sent by the computer (untrusted).
-web/app.js	stopForParty	4884	Detiene tu música al abrir la sala.	Stops your music when opening the room.
-web/app.js	PH.active	4899	¿La fiesta maneja los controles?	Does the party handle the controls?
-web/app.js	PH.init	4900	Prepara el reproductor de la fiesta y escucha a main.js.	Prepares the party player and listens to main.js.
-web/app.js	PH.onEv	4912	Atiende los eventos de la sala (estado, llegó, salió).	Handles room events (state, joined, left).
-web/app.js	PH.apply	4918	Aplica el estado de la sala (modo fiesta de la computadora).	Applies the room state (computer party mode).
-web/app.js	PH.list	4930	Lista de canciones de la sala.	Room song list.
-web/app.js	PH.open	4931	Abre la sala.	Opens the room.
-web/app.js	PH.close	4937	Cierra la sala.	Closes the room.
-web/app.js	PH.jump	4939	Pone ya una canción de «A continuación».	Plays a song from “Up next” right now.
-web/app.js	PH.order	4945	Cambia el orden de la lista.	Changes the list order.
-web/app.js	PH.next	4947	Sigue la lista: pone la siguiente que ya llegó.	Follows the list: plays the next ready song.
-web/app.js	PH.play	4954	Reproduce una canción de la fiesta.	Plays a party song.
-web/app.js	PH.stopCur	4962	Detiene la canción actual de la fiesta.	Stops the current party song.
-web/app.js	PH.done	4970	Terminó una canción: la borra y pasa a la siguiente.	A song ended: deletes it and moves on.
-web/app.js	PH.toggle	4971	Pausa o reanuda la fiesta.	Pauses or resumes the party.
-web/app.js	PH.yieldTo	4984	Pusiste tu música: la fiesta se pausa y cede los controles.	You played your music: the party pauses and hands over the controls.
-web/app.js	PH.media	4991	Controles del sistema con la canción de la fiesta.	System controls with the party song.
-web/app.js	PH.report	5003	Avisa a la sala qué suena.	Tells the room what's playing.
-web/app.js	PH.loadLyrics	5008	Carga la letra de la canción de la fiesta.	Loads the party song's lyrics.
-web/app.js	PH.line	5018	Línea de letra actual y la siguiente.	Current and next lyrics line.
-web/app.js	PH.tick	5026	Karaoke: cada segundo, tiempo y línea a los teléfonos.	Karaoke: every second, time and line to the phones.
-web/app.js	PG.connect	5036	Entra a una sala (con código o llave) y reconecta solo.	Joins a room (with code or key) and reconnects on its own.
-web/app.js	PG.leave	5063	Sale de la fiesta.	Leaves the party.
-web/app.js	PG.joined	5073	¿Estás en una fiesta?	Are you at a party?
-web/app.js	PG.ui	5074	Modo fiesta del teléfono (oculta barras y reproductor).	Phone party mode (hides bars and player).
-web/app.js	PG.wake	5083	El teléfono despertó: vuelve a entrar si hace falta.	The phone woke up: rejoins if needed.
-web/app.js	PG.resume	5089	Al abrir la app, vuelve a la fiesta en curso.	When opening the app, returns to the ongoing party.
-web/app.js	PG.abortUp	5094	Cancela la subida en curso.	Cancels the upload in progress.
-web/app.js	PG.onMsg	5095	Atiende los mensajes de la sala.	Handles room messages.
-web/app.js	PG.add	5122	Manda una canción a la fiesta (letra, carátula y audio por partes).	Sends a song to the party (lyrics, cover and audio in chunks).
-web/app.js	PG.remove	5178	Cancela una canción que todavía llega.	Cancels a song that's still arriving.
-web/app.js	PG.find	5180	Busca salas en la red (UDP desde Android).	Finds rooms on the network (UDP from Android).
-web/app.js	partyAddr	5200	Convierte la dirección escrita en ws://…/fiesta.	Converts the typed address into ws://…/fiesta.
-web/app.js	iglooHTML	5211	HTML del iglú.	Igloo HTML.
-web/app.js	iglooBear	5227	Nanuq de un invitado con el disfraz de su tema.	A guest's Nanuq in their theme's costume.
-web/app.js	iglooHoldSVG	5234	Carátula en alto con destellos (quien escogió la canción).	Cover held up with sparkles (who picked the song).
-web/app.js	iglooHeldOnTop	5245	Pone encima de la carátula el objeto que traía el Nanuq.	Puts the object the Nanuq was holding on top of the cover.
-web/app.js	partyGuestColor	5256	Color de la etiqueta según el tema del invitado.	Label color from the guest's theme.
-web/app.js	partyCoverSrc	5264	URL de la carátula de una canción de la fiesta.	Cover URL of a party song.
-web/app.js	iglooSync	5272	Coloca a los invitados en el círculo sin redibujar.	Places guests in the circle without redrawing.
-web/app.js	iglooLive	5306	Anima el iglú solo mientras se ve.	Animates the igloo only while visible.
-web/app.js	iglooQueue	5311	Fila «A continuación» a pantalla completa.	“Up next” row in full screen.
-web/app.js	iglooQueueEdge	5323	Degradado si hay más canciones fuera de la vista.	Gradient if there are more songs out of view.
-web/app.js	partyVolumeStep	5399	Volumen con ↑ ↓ a pantalla completa y su aviso.	Volume with ↑ ↓ in full screen and its notice.
-web/app.js	iglooIdle	5412	Esconde el puntero tras 2.5 s quieto.	Hides the pointer after 2.5 s idle.
-web/app.js	iglooVinyl	5422	Funda y disco de vinilo de la canción que suena.	Sleeve and vinyl record of the playing song.
-web/app.js	iglooLine	5434	Letra en el techo con destello.	Lyrics on the ceiling with a sparkle.
-web/app.js	renderPartySoon	5441	Redibuja la fiesta en un momento.	Redraws the party shortly.
-web/app.js	partyPaintTick	5445	Actualiza el karaoke (línea, siguiente, tiempo).	Updates the karaoke (line, next, time).
-web/app.js	partyPaintUp	5451	Progreso de la canción que mandas.	Progress of the song you're sending.
-web/app.js	partyRowsHTML	5452	Lista de canciones de la fiesta.	Party song list.
-web/app.js	partyGuestsHTML	5461	Lista de invitados.	Guest list.
-web/app.js	partyNowHTML	5462	Lo que suena en la fiesta.	What's playing at the party.
-web/app.js	paintParty	5467	Dibuja la pantalla de la fiesta (anfitrión o invitado).	Draws the party screen (host or guest).
-web/app.js	partySongsHTML	5528	Canciones para mandar.	Songs to send.
-web/app.js	partySearch	5529	Buscador de la fiesta (playlists, artistas, álbumes, canciones, letras).	Party search (playlists, artists, albums, songs, lyrics).
-web/app.js	partyBrowse	5557	Canciones de un artista, álbum o playlist en la fiesta.	Songs of an artist, album or playlist in the party.
-web/app.js	V.party	5572	Pantalla Fiesta.	Party screen.
-web/app.js	d0	5588	Atajo del dataset de un elemento.	Shortcut for an element's dataset.
-web/app.js	recentServers	5749	Servidores usados antes.	Servers used before.
-web/app.js	rememberServer	5750	Recuerda un servidor.	Remembers a server.
-web/app.js	forgetServer	5756	Olvida un servidor.	Forgets a server.
-web/app.js	probeTimed	5758	Prueba un servidor midiendo cuánto tarda.	Tests a server measuring how long it takes.
-web/app.js	canDiscover	5769	¿Se pueden buscar servidores en la red?	Can servers be discovered on the network?
-web/app.js	discoverServers	5771	Busca Jellyfin en la red (UDP 7359).	Discovers Jellyfin on the network (UDP 7359).
-web/app.js	serverList	5790	Lista de servidores con su estado.	Server list with their status.
-web/app.js	cleartextRisk	5817	¿La contraseña viajaría sin cifrar por internet?	Would the password travel unencrypted over the internet?
-web/app.js	showLogin	5828	Pantalla de entrar.	Login screen.
-web/app.js	startApp	5894	Arranca la app con la sesión (cola, posición, DJ, Inicio).	Starts the app with the session (queue, position, DJ, Home).
-web/app.js	logout	5910	Cierra sesión y borra lo personal.	Logs out and deletes personal data.
-web/i18n.js	tx	995	Traduce un texto en español al idioma elegido y pone los valores {0}, {1}…	Translates a Spanish text into the chosen language and fills in the {0}, {1}… values.
+web/app.js	Jellyfin.streamUrl	351	URL de streaming universal: formatos que suenan tal cual y conversión a Opus o MP3.	Universal streaming URL: formats that play as-is and conversion to Opus or MP3.
+web/app.js	Jellyfin.stream	357	URL para reproducir: descarga, caché por adelantado o streaming.	URL to play: download, ahead-of-time cache or streaming.
+web/app.js	Jellyfin.dlUrl	360	URL para descargar una canción al teléfono (Opus o MP3, o el archivo tal cual).	URL to download a song to the phone (Opus or MP3, or the file as-is).
+web/app.js	Jellyfin.peaks	367	Baja una copia ligera y calcula la forma de onda real.	Downloads a light copy and computes the real waveform.
+web/app.js	Jellyfin.tracks	372	Canciones de la biblioteca paginadas y ordenadas.	Paginated, sorted library songs.
+web/app.js	Jellyfin.lyrics	376	Letra de una canción (Jellyfin 10.9+), normalizada.	A song's lyrics (Jellyfin 10.9+), normalized.
+web/app.js	Jellyfin.mix	381	Canciones para una mezcla (orden, filtros, géneros, años).	Songs for a mix (order, filters, genres, years).
+web/app.js	Jellyfin.uploadLyrics	388	Sube una letra (.lrc o .txt) a Jellyfin.	Uploads lyrics (.lrc or .txt) to Jellyfin.
+web/app.js	Jellyfin.searchLyrics	395	Busca letras en los proveedores de Jellyfin (LrcLib).	Searches for lyrics in Jellyfin's providers (LrcLib).
+web/app.js	Jellyfin.pickLyrics	399	Elige una de las letras encontradas para guardarla.	Picks one of the found lyrics to save it.
+web/app.js	Jellyfin.setFavorite	401	Marca o quita una favorita.	Marks or unmarks a favorite.
+web/app.js	Jellyfin.inFavorites	407	¿Está en la sección de favoritas de Jellyfin?	Is it in Jellyfin's favorites section?
+web/app.js	Jellyfin.isFavorite	408	¿Esta canción es favorita según sus datos de usuario?	Is this song a favorite according to its user data?
+web/app.js	Jellyfin.favPlaylist	415	Encuentra la playlist del plugin «Favorited Songs Playlist».	Finds the “Favorited Songs Playlist” plugin's playlist.
+web/app.js	Jellyfin.favorites	422	Tus favoritas (filtro IsFavorite), paginadas y ordenadas.	Your favorites (IsFavorite filter), paginated and sorted.
+web/app.js	Jellyfin.setFavoriteLegacy	440	Ruta antigua para guardar favoritas (segundo intento).	Old route to save favorites (second attempt).
+web/app.js	Jellyfin.instantMix	442	Mezcla instantánea de Jellyfin a partir de una canción (radio).	Jellyfin instant mix from a song (radio).
+web/app.js	Jellyfin.addToPlaylist	447	Agrega canciones a una playlist.	Adds songs to a playlist.
+web/app.js	Jellyfin.refreshLibrary	449	Pide a Jellyfin que vuelva a escanear las bibliotecas (administradores).	Asks Jellyfin to rescan the libraries (administrators).
+web/app.js	Jellyfin.savePlaylist	450	Crea una playlist nueva con canciones.	Creates a new playlist with songs.
+web/app.js	Jellyfin.report	451	Avisa a Jellyfin que empezó, avanza o terminó una canción (y reafirma favoritas).	Tells Jellyfin a song started, progressed or stopped (and reasserts favorites).
+web/app.js	Jellyfin.logout	457	Cierra la sesión en el servidor (revoca el token).	Logs out on the server (revokes the token).
+web/app.js	Jellyfin.wsUrl	460	URL del WebSocket de Jellyfin.	Jellyfin WebSocket URL.
+web/app.js	Jellyfin.postCapabilities	461	Anuncia que este Nanuq acepta órdenes de control remoto.	Announces that this Nanuq accepts remote-control commands.
+web/app.js	Jellyfin.sessions	463	Sesiones activas (para Mis dispositivos).	Active sessions (for My devices).
+web/app.js	Jellyfin.sessionCmd	464	Manda una orden de reproducción a otra sesión.	Sends a playback command to another session.
+web/app.js	Jellyfin.sessionPlay	465	Manda una cola para reproducir en otra sesión.	Sends a queue to play on another session.
+web/app.js	Jellyfin.sessionGeneral	466	Manda una orden general (repetir, mezclar) a otra sesión.	Sends a general command (repeat, shuffle) to another session.
+web/app.js	Jellyfin.itemsByIds	467	Pide varios elementos por id, de 100 en 100.	Requests several items by id, 100 at a time.
+web/app.js	netError	473	Mensaje claro cuando no hay conexión con el servidor.	Clear message when the server can't be reached.
+web/app.js	normLyrics	482	Normaliza una letra de Jellyfin (sincronizada o en texto).	Normalizes Jellyfin lyrics (synced or plain).
+web/app.js	actx	497	AudioContext compartido (creado al primer uso).	Shared AudioContext (created on first use).
+web/app.js	decode	498	Decodifica audio a un AudioBuffer.	Decodes audio into an AudioBuffer.
+web/app.js	peaksFromBuffer	499	Calcula los picos de la forma de onda de un AudioBuffer.	Computes waveform peaks from an AudioBuffer.
+web/app.js	rng	506	Generador pseudoaleatorio con semilla.	Seeded pseudo-random generator.
+web/app.js	wav	507	Convierte un AudioBuffer en un archivo WAV.	Converts an AudioBuffer into a WAV file.
+web/app.js	synth	514	Sintetiza una canción de prueba para el modo demo.	Synthesizes a test song for demo mode.
+web/app.js	Demo.constructor	558	Crea la biblioteca de demostración (artistas, álbumes, canciones y playlists).	Creates the demo library (artists, albums, songs and playlists).
+web/app.js	Demo.cfg	593	Sesión del modo demo.	Demo-mode session.
+web/app.js	Demo.wait	594	Simula la espera de la red.	Simulates network latency.
+web/app.js	Demo.albums	595	Versión demo de Jellyfin.albums.	Demo version of Jellyfin.albums.
+web/app.js	Demo.album	600	Versión demo de Jellyfin.album.	Demo version of Jellyfin.album.
+web/app.js	Demo.artists	601	Versión demo de Jellyfin.artists.	Demo version of Jellyfin.artists.
+web/app.js	Demo.artistBy	603	Busca un artista demo por id o por nombre.	Finds a demo artist by id or name.
+web/app.js	Demo.artist	604	Versión demo de Jellyfin.artist.	Demo version of Jellyfin.artist.
+web/app.js	Demo.artistTracks	605	Versión demo de Jellyfin.artistTracks.	Demo version of Jellyfin.artistTracks.
+web/app.js	Demo.genres	606	Versión demo de Jellyfin.genres.	Demo version of Jellyfin.genres.
+web/app.js	Demo.genreTracks	607	Versión demo de Jellyfin.genreTracks.	Demo version of Jellyfin.genreTracks.
+web/app.js	Demo.genre	608	Versión demo de Jellyfin.genre.	Demo version of Jellyfin.genre.
+web/app.js	Demo.playlists	609	Versión demo de Jellyfin.playlists.	Demo version of Jellyfin.playlists.
+web/app.js	Demo.playlist	610	Versión demo de Jellyfin.playlist.	Demo version of Jellyfin.playlist.
+web/app.js	Demo.views	611	Versión demo de Jellyfin.views.	Demo version of Jellyfin.views.
+web/app.js	Demo.folder	612	Versión demo de Jellyfin.folder.	Demo version of Jellyfin.folder.
+web/app.js	Demo.search	617	Versión demo de Jellyfin.search.	Demo version of Jellyfin.search.
+web/app.js	Demo.img	621	Dibuja una carátula SVG generada para el modo demo.	Draws a generated SVG cover for demo mode.
+web/app.js	Demo.buf	635	Audio sintetizado de una canción demo (en caché).	Synthesized audio for a demo song (cached).
+web/app.js	Demo.stream	636	URL blob del WAV de una canción demo.	Blob URL of a demo song's WAV.
+web/app.js	Demo.peaks	637	Forma de onda de una canción demo.	Waveform of a demo song.
+web/app.js	Demo.tracks	638	Versión demo de Jellyfin.tracks.	Demo version of Jellyfin.tracks.
+web/app.js	Demo.mix	644	Versión demo de Jellyfin.mix.	Demo version of Jellyfin.mix.
+web/app.js	Demo.lyrics	654	Letra sincronizada inventada para una canción demo.	Made-up synced lyrics for a demo song.
+web/app.js	Demo.setFavorite	666	Versión demo de Jellyfin.setFavorite.	Demo version of Jellyfin.setFavorite.
+web/app.js	Demo.isFavorite	667	Versión demo de Jellyfin.isFavorite.	Demo version of Jellyfin.isFavorite.
+web/app.js	Demo.inFavorites	668	Versión demo de Jellyfin.inFavorites.	Demo version of Jellyfin.inFavorites.
+web/app.js	Demo.favorites	669	Versión demo de Jellyfin.favorites.	Demo version of Jellyfin.favorites.
+web/app.js	Demo.instantMix	670	Versión demo de Jellyfin.instantMix.	Demo version of Jellyfin.instantMix.
+web/app.js	Demo.addToPlaylist	671	Versión demo de Jellyfin.addToPlaylist.	Demo version of Jellyfin.addToPlaylist.
+web/app.js	Demo.savePlaylist	672	Versión demo de Jellyfin.savePlaylist.	Demo version of Jellyfin.savePlaylist.
+web/app.js	Demo.report	673	No hace nada (el demo no reporta reproducciones).	Does nothing (demo doesn't report plays).
+web/app.js	Demo.logout	674	No hace nada (sin servidor).	Does nothing (no server).
+web/app.js	logoInner	679	HTML del oso del logo con el accesorio del tema.	HTML of the logo bear with the theme's accessory.
+web/app.js	bearHTML	695	HTML del Nanuq animable (logo + cara expresiva).	HTML of the animatable Nanuq (logo + expressive face).
+web/app.js	bearState	697	Estado actual del oso (bailando, contento, triste) para los osos nuevos.	Current bear state (dancing, happy, sad) for new bears.
+web/app.js	nqBurst	703	Activa una ráfaga de animaciones por unos segundos (ahorro de batería).	Turns on an animation burst for a few seconds (battery saving).
+web/app.js	nqBurstEnd	711	Termina la ráfaga: las animaciones se pausan y los osos quedan contentos.	Ends the burst: animations pause and bears stay happy.
+web/app.js	bearDance	716	Hace bailar a todos los Nanuqs un rato.	Makes every Nanuq dance for a while.
+web/app.js	bearInit	721	Pone el Nanuq en los logos de la barra lateral.	Puts Nanuq in the sidebar logos.
+web/app.js	bearMood	726	Cambia el ánimo de los osos al sonar o pausar la música.	Changes the bears' mood when music plays or pauses.
+web/app.js	showSplash	737	Pantalla de bienvenida con el Nanuq del tema.	Welcome screen with the theme's Nanuq.
+web/app.js	refreshBear	748	Cambia el accesorio de los osos al cambiar de tema.	Changes the bears' accessory when the theme changes.
+web/app.js	OPUS_OK	756	¿El reproductor abre Opus? Decide si se ofrece y si va por omisión.	Does the player open Opus? Decides whether it is offered and used by default.
+web/app.js	Settings.set	785	Cambia un ajuste y lo guarda.	Changes a setting and saves it.
+web/app.js	DL.init	810	Carga las descargas del teléfono desde la app nativa.	Loads the phone's downloads from the native app.
+web/app.js	DL.indexCovers	818	Índice de carátulas descargadas por id de imagen.	Index of downloaded covers by image id.
+web/app.js	DL.coverUrl	822	URL local de una carátula descargada.	Local URL of a downloaded cover.
+web/app.js	DL.backfillCovers	824	Completa carátulas y datos de descargas viejas o recuperadas.	Fills in covers and details of old or recovered downloads.
+web/app.js	DL.config	831	Manda a Android el máximo de canciones y si solo con Wi-Fi.	Sends Android the maximum songs and whether Wi-Fi only.
+web/app.js	DL.usable	832	¿Hay descargas en este dispositivo (Android con Jellyfin)?	Are downloads available on this device (Android with Jellyfin)?
+web/app.js	DL.get	833	La descarga de una canción, si existe.	A song's download, if any.
+web/app.js	DL.localUrl	834	URL local de una canción descargada y lista.	Local URL of a downloaded, ready song.
+web/app.js	DL.isLocal	835	¿Esta URL es del servidor local del teléfono?	Is this URL from the phone's local server?
+web/app.js	DL.add	837	Pide descargar una canción (manual o automática).	Requests downloading a song (manual or automatic).
+web/app.js	DL.remove	842	Quita una canción de las descargas.	Removes a song from downloads.
+web/app.js	DL.removeAll	843	Borra todas las descargas (o solo las automáticas).	Deletes all downloads (or only automatic ones).
+web/app.js	DL.list	844	Lista de descargas.	List of downloads.
+web/app.js	DL.bytes	845	Espacio total que ocupan las descargas.	Total space used by downloads.
+web/app.js	DL.net	846	Tipo de red actual según Android (wifi, datos, ninguna).	Current network type according to Android (wifi, cellular, none).
+web/app.js	__nanuqDl	848	Recibe de Android los cambios de una descarga y actualiza la vista.	Receives a download's changes from Android and updates the view.
+web/app.js	Plays.count	863	Veces que sonó una canción en este teléfono.	Times a song played on this phone.
+web/app.js	Plays.add	864	Cuenta una reproducción y guarda sola la canción a las 3.	Counts a play and auto-saves the song at 3.
+web/app.js	PF.usable	881	¿Se puede guardar por adelantado (Android con Jellyfin)?	Can it save ahead of time (Android with Jellyfin)?
+web/app.js	PF.isUrl	882	¿Esta URL es de lo guardado por adelantado?	Is this URL from the ahead-of-time cache?
+web/app.js	PF.url	883	URL local de una canción ya guardada por adelantado (o null).	Local URL of a song already saved ahead of time (or null).
+web/app.js	PF.soon	884	Programa una actualización de la ventana por adelantado.	Schedules an update of the ahead-of-time window.
+web/app.js	PF.sync	885	Calcula qué canciones de la cola guardar (N minutos) y se lo pide a Android.	Computes which queue songs to save (N minutes) and asks Android.
+web/app.js	fmtMB	900	Formatea bytes como MB o GB según el idioma.	Formats bytes as MB or GB according to the language.
+web/app.js	dlStatus	901	Texto del estado de una descarga.	Text of a download's state.
+web/app.js	dlStatusShort	912	Estado corto de una descarga para el botón del reproductor.	Short download state for the player button.
+web/app.js	dlSummary	918	Resumen de las descargas (cantidad, espacio, pendientes).	Downloads summary (count, space, pending).
+web/app.js	themeSummary	942	HTML del tema elegido en Ajustes.	HTML of the chosen theme in Settings.
+web/app.js	applyTheme	946	Aplica un tema (colores, barra del sistema, osos).	Applies a theme (colors, system bar, bears).
+web/app.js	regList	963	Registra una lista de canciones para que los botones la encuentren.	Registers a song list so buttons can find it.
+web/app.js	cur	972	Pantalla actual de la pila de navegación.	Current screen in the navigation stack.
+web/app.js	go	973	Navega a una pantalla (raíz o encima de la actual).	Navigates to a screen (root or on top of the current one).
+web/app.js	back	982	Vuelve atrás: cierra diálogos, el reproductor o la pantalla actual.	Goes back: closes dialogs, the player or the current screen.
+web/app.js	cacheDrop	992	Olvida las vistas en caché que empiezan con un prefijo.	Forgets cached views starting with a prefix.
+web/app.js	refreshIf	994	Redibuja la pantalla actual si cumple una condición.	Redraws the current screen if it meets a condition.
+web/app.js	playlistsChanged	997	Olvida y vuelve a pedir una playlist que cambió.	Forgets and re-requests a playlist that changed.
+web/app.js	cached	1004	Caché de vistas con tope (las más viejas salen primero).	View cache with a cap (oldest go first).
+web/app.js	albumNorm	1013	Normaliza un nombre para comparar álbumes.	Normalizes a name to compare albums.
+web/app.js	albumKeyOf	1015	Clave del álbum de una canción según sus etiquetas (artista + álbum + disco).	Album key of a song from its tags (artist + album + disc).
+web/app.js	albumGid	1022	Id estable de un álbum armado por etiquetas.	Stable id of a tag-built album.
+web/app.js	LIB.who	1025	Identifica servidor y usuario del índice.	Identifies the index's server and user.
+web/app.js	LIB.index	1027	Índice de álbumes por etiquetas (desde caché cifrada o del servidor).	Tag-based album index (from the encrypted cache or the server).
+web/app.js	LIB.peek	1040	El índice si ya está listo, sin esperar.	The index if it's ready, without waiting.
+web/app.js	LIB.reset	1041	Marca el índice como viejo para renovarlo.	Marks the index as stale so it's rebuilt.
+web/app.js	LIB.refresh	1042	Vuelve a armar el índice con todas las canciones.	Rebuilds the index with every song.
+web/app.js	LIB.fetchAll	1048	Baja todas las canciones de la biblioteca (3 páginas a la vez).	Downloads every song in the library (3 pages at a time).
+web/app.js	LIB.pack	1058	Versión compacta de una canción para guardar el índice.	Compact version of a song to save the index.
+web/app.js	LIB.unpack	1059	Lee una canción compacta del índice guardado, limpiándola.	Reads a compact song from the saved index, cleaning it.
+web/app.js	LIB.save	1064	Guarda el índice cifrado (si cabe).	Saves the encrypted index (if it fits).
+web/app.js	LIB.build	1069	Agrupa las canciones en álbumes, sin repetidas.	Groups songs into albums, without duplicates.
+web/app.js	LIB.albumsOf	1094	Álbumes (por etiquetas) de un grupo de canciones.	Albums (by tags) of a group of songs.
+web/app.js	LIB.sorted	1099	Lista de álbumes ordenada.	Sorted album list.
+web/app.js	lyrNorm	1118	Normaliza texto de letras para buscar (sin acentos ni signos).	Normalizes lyrics text for searching (no accents or punctuation).
+web/app.js	LYRX.load	1121	Carga el índice de letras guardado.	Loads the saved lyrics index.
+web/app.js	LYRX.add	1130	Agrega la letra de una canción al índice.	Adds a song's lyrics to the index.
+web/app.js	LYRX.save	1131	Guarda el índice de letras cifrado (con espera).	Saves the encrypted lyrics index (debounced).
+web/app.js	LYRX.reset	1139	Borra el índice de letras.	Deletes the lyrics index.
+web/app.js	LYRX.build	1141	Arma o completa el índice leyendo letras de a 3.	Builds or completes the index reading lyrics 3 at a time.
+web/app.js	LYRX.search	1167	Busca canciones cuya letra contiene un texto.	Finds songs whose lyrics contain a text.
+web/app.js	lyrSnippetHTML	1184	Línea de letra con lo buscado resaltado (escapada).	Lyrics line with the search highlighted (escaped).
+web/app.js	lyricsHitsHTML	1189	Lista HTML de canciones encontradas por la letra.	HTML list of songs found by lyrics.
+web/app.js	lyricsSection	1194	Sección «En las letras» que se completa mientras se indexa.	“In the lyrics” section that fills in while indexing.
+web/app.js	coverHTML	1212	HTML de una carátula con su ícono de respaldo.	HTML of a cover with its fallback icon.
+web/app.js	head	1217	Encabezado de una pantalla (título, botones, oso, atrás).	Screen header (title, buttons, bear, back).
+web/app.js	albumCard	1221	Tarjeta de un álbum.	An album card.
+web/app.js	artistCard	1222	Tarjeta de un artista.	An artist card.
+web/app.js	trackRows	1223	Contenedor de filas de canciones.	Container of song rows.
+web/app.js	rowsHTML	1224	Filas de canciones (número, título, duración, menú).	Song rows (number, title, duration, menu).
+web/app.js	loading	1236	Indicador de carga.	Loading indicator.
+web/app.js	errBox	1237	Caja de error con «Reintentar».	Error box with “Retry”.
+web/app.js	V.albums	1243	Pantalla Álbumes (por etiquetas, de 120 en 120).	Albums screen (by tags, 120 at a time).
+web/app.js	V.album	1258	Pantalla de un álbum.	An album's screen.
+web/app.js	normTxt	1289	Normaliza texto (sin acentos, minúsculas).	Normalizes text (no accents, lowercase).
+web/app.js	mixDef	1290	Definición de una mezcla (consulta según géneros o años).	A mix's definition (query by genres or years).
+web/app.js	mixTracks	1304	Canciones de una mezcla (en caché).	A mix's songs (cached).
+web/app.js	greeting	1305	Saludo según la hora.	Greeting by time of day.
+web/app.js	djBearSVG	1313	SVG de DJ Nanuq con audífonos, bufanda y tornamesa.	SVG of DJ Nanuq with headphones, scarf and turntable.
+web/app.js	djMoment	1365	Momento del día y ánimo para la ronda «Para este momento».	Time of day and mood for the “For right now” round.
+web/app.js	pick	1366	Elige uno al azar.	Picks one at random.
+web/app.js	wpick	1368	Elige al azar con pesos.	Picks at random with weights.
+web/app.js	wshuffle	1370	Ordena al azar dando más chance a lo que pesa más.	Shuffles giving more chance to heavier items.
+web/app.js	djQid	1373	Id de cola que lleva la sesión y la ronda del DJ.	Queue id carrying the DJ session and round.
+web/app.js	djTag	1374	Lee sesión y ronda de un id de cola del DJ.	Reads session and round from a DJ queue id.
+web/app.js	djSame	1375	¿Dos ids son de la misma sesión del DJ?	Are two ids from the same DJ session?
+web/app.js	DJ.voiceOk	1378	¿Hay una voz del sistema en el idioma de la app?	Is there a system voice in the app's language?
+web/app.js	DJ.save	1379	Guarda la sesión del DJ y la comparte con tus dispositivos.	Saves the DJ session and shares it with your devices.
+web/app.js	DJ.restore	1384	Recupera la sesión del DJ al abrir la app.	Restores the DJ session when the app opens.
+web/app.js	DJ.sample	1391	Muestra al azar de la biblioteca para elegir géneros y décadas.	Random sample of the library to choose genres and decades.
+web/app.js	DJ.heavy	1397	Tus 60 canciones más escuchadas.	Your 60 most played songs.
+web/app.js	DJ.pickGenre	1403	Elige el género de una ronda (sin repetir los recientes).	Picks a round's genre (avoiding recent ones).
+web/app.js	DJ.pickDecade	1413	Elige la década de una ronda.	Picks a round's decade.
+web/app.js	DJ.rank	1425	Qué tan gastada está una canción (más bajo = va antes).	How worn out a song is (lower = goes first).
+web/app.js	DJ.pool	1434	Canciones candidatas para un tipo de ronda.	Candidate songs for a round type.
+web/app.js	DJ.build	1467	Arma una ronda de ~5 canciones con su presentación.	Builds a round of ~5 songs with its introduction.
+web/app.js	DJ.next	1494	Elige y arma la siguiente ronda (pesos y enfriamiento).	Picks and builds the next round (weights and cooldown).
+web/app.js	DJ.items	1508	Convierte una ronda en canciones de la cola y la anota.	Turns a round into queue songs and records it.
+web/app.js	DJ.lastKey	1516	Número de la última ronda.	Number of the last round.
+web/app.js	DJ.start	1517	Empieza una sesión del DJ con su pantalla de carga (aquí o en el dispositivo que controlas).	Starts a DJ session with its loading screen (here or on the device you control).
+web/app.js	DJ.startNow	1522	Arma la primera ronda y espera a que suene (detrás de la pantalla de carga).	Builds the first round and waits until it plays (behind the loading screen).
+web/app.js	DJ.share	1547	Deja en Jellyfin el estado del DJ para otro dispositivo.	Leaves the DJ state in Jellyfin for another device.
+web/app.js	DJ.handedOff	1552	La sesión pasó a otro dispositivo: aquí se apaga.	The session moved to another device: it turns off here.
+web/app.js	DJ.adopt	1554	Sigue aquí una sesión que viene de otro dispositivo.	Continues here a session coming from another device.
+web/app.js	DJ.queueFromShare	1559	Reconstruye la cola del DJ desde el estado compartido.	Rebuilds the DJ queue from the shared state.
+web/app.js	DJ.queueFromTags	1561	Reconstruye la cola del DJ desde los ids de la cola.	Rebuilds the DJ queue from the queue ids.
+web/app.js	DJ.remoteTag	1563	¿Lo que suena en el dispositivo que controlas es el DJ?	Is what's playing on the device you control the DJ?
+web/app.js	DJ.shown	1564	¿Hay que mostrar el DJ?	Should the DJ be shown?
+web/app.js	DJ.remoteTrack	1566	Trae las rondas del DJ que suena en otro dispositivo.	Fetches the rounds of the DJ playing on another device.
+web/app.js	DJ.stop	1576	Apaga el DJ (la cola queda como está).	Turns the DJ off (the queue stays as is).
+web/app.js	DJ.onTrack	1578	Al cambiar de canción: presenta la ronda nueva y agrega la siguiente.	On song change: introduces the new round and adds the next.
+web/app.js	DJ.extend	1586	Agrega la siguiente ronda al final de la cola.	Adds the next round to the end of the queue.
+web/app.js	DJ.switchUp	1596	«Cambiar de onda»: otra ronda en lugar de lo que quedaba.	“Change the vibe”: another round instead of what was left.
+web/app.js	DJ.announce	1604	Presenta una ronda (globo, aviso y voz).	Introduces a round (bubble, notice and voice).
+web/app.js	DJ.show	1606	Muestra la presentación donde corresponda.	Shows the introduction where appropriate.
+web/app.js	DJ.speak	1611	Lee la presentación en voz alta y baja la música.	Reads the introduction aloud and lowers the music.
+web/app.js	DJ.visible	1629	¿La página está a la vista?	Is the page visible?
+web/app.js	DJ.bears	1630	Enciende o apaga el baile de los DJ.	Turns the DJs' dancing on or off.
+web/app.js	DJ.say	1634	Globo de diálogo del DJ en el reproductor.	DJ speech bubble in the player.
+web/app.js	DJ.scene	1639	Escena del disco en el reproductor (funda, vinilo, entradas y salidas).	Record scene in the player (sleeve, vinyl, entries and exits).
+web/app.js	DJ.paint	1658	Actualiza todo lo del DJ en pantalla.	Updates everything DJ-related on screen.
+web/app.js	DJSHARE.ok	1688	¿Se puede compartir el DJ (Jellyfin y sincronización activada)?	Can the DJ be shared (Jellyfin and sync on)?
+web/app.js	DJSHARE.state	1689	Estado del DJ para compartir (acotado).	DJ state to share (bounded).
+web/app.js	DJSHARE.push	1694	Guarda el estado del DJ en /DisplayPreferences.	Saves the DJ state in /DisplayPreferences.
+web/app.js	DJSHARE.pushRaw	1702	Guarda un estado ya armado.	Saves an already built state.
+web/app.js	DJSHARE.pushSoon	1706	Guarda el estado en 1.5 s.	Saves the state in 1.5 s.
+web/app.js	DJSHARE.offSoon	1708	Avisa que el DJ se apagó, si la sesión sigue siendo de aquí.	Announces the DJ turned off, if the session is still this device's.
+web/app.js	DJSHARE.pull	1712	Lee el estado compartido del DJ.	Reads the shared DJ state.
+web/app.js	djClean	1718	Limpia el estado del DJ leído (dato no confiable).	Cleans the read DJ state (untrusted data).
+web/app.js	djLiveSync	1733	Anima el DJ solo mientras se ve.	Animates the DJ only while it's visible.
+web/app.js	djTileHTML	1745	Tarjeta de DJ Nanuq en Inicio.	DJ Nanuq card on Home.
+web/app.js	DJL.show	1755	Muestra la pantalla de carga del DJ con frases que rotan.	Shows the DJ loading screen with rotating lines.
+web/app.js	DJL.hide	1765	Quita la pantalla de carga (al menos 1 s a la vista).	Hides the loading screen (at least 1 s on screen).
+web/app.js	V.dj	1770	Pantalla de DJ Nanuq.	DJ Nanuq screen.
+web/app.js	nanuqSceneSVG	1794	Escena de Nanuq para una celda vacía de Inicio.	Nanuq scene for an empty Home cell.
+web/app.js	nanuqBear	1810	Nanuq listo para colocar en una escena.	Nanuq ready to place in a scene.
+web/app.js	nanuqWideSVG	1814	Escena ancha de Nanuq (dos celdas).	Wide Nanuq scene (two cells).
+web/app.js	nanuqWideTileHTML	1831	Celda ancha con escena.	Wide cell with a scene.
+web/app.js	nanuqTileHTML	1836	Celda con escena.	Cell with a scene.
+web/app.js	nanuqVisit	1843	Un Nanuq de otro tema visita una celda.	A Nanuq from another theme visits a cell.
+web/app.js	nanuqVisits	1863	Programa visitas de vez en cuando.	Schedules visits every now and then.
+web/app.js	fillGaps	1871	Rellena los huecos de la cuadrícula de Inicio con escenas.	Fills Home's grid gaps with scenes.
+web/app.js	tileHTML	1884	Mosaico de una mezcla.	A mix tile.
+web/app.js	offlineBanner	1889	Aviso «Sin conexión» con acceso a Descargas.	“No connection” notice with access to Downloads.
+web/app.js	V.home	1894	Pantalla Inicio.	Home screen.
+web/app.js	V.mix	1939	Pantalla de una mezcla.	A mix's screen.
+web/app.js	V.songs	1949	Pantalla Canciones (paginada).	Songs screen (paginated).
+web/app.js	V.artists	1977	Pantalla Artistas.	Artists screen.
+web/app.js	fmtLong	1984	Duración larga («3 h 12 min»).	Long duration (“3 h 12 min”).
+web/app.js	V.artist	1986	Pantalla de un artista (canciones, álbumes, aparece en).	An artist's screen (songs, albums, appears on).
+web/app.js	V.genres	2066	Pantalla Géneros.	Genres screen.
+web/app.js	V.genre	2071	Pantalla de un género.	A genre's screen.
+web/app.js	V.playlists	2082	Pantalla Playlists.	Playlists screen.
+web/app.js	V.playlist	2087	Pantalla de una playlist.	A playlist's screen.
+web/app.js	V.favorites	2096	Pantalla Favoritas (confirmada con Jellyfin).	Favorites screen (confirmed with Jellyfin).
+web/app.js	V.folders	2122	Pantalla Carpetas.	Folders screen.
+web/app.js	V.search	2131	Pantalla Buscar (incluye la búsqueda en letras).	Search screen (includes lyrics search).
+web/app.js	songsBlock	2161	Bloque de canciones en lista o cuadrícula.	Songs block as a list or grid.
+web/app.js	V.queue	2168	Pestaña Cola (teléfono).	Queue tab (phone).
+web/app.js	V.more	2169	Pantalla Más.	More screen.
+web/app.js	V.settings	2172	Pantalla Ajustes.	Settings screen.
+web/app.js	V.downloads	2241	Pantalla Descargas.	Downloads screen.
+web/app.js	renderDownloadsSoon	2257	Redibuja Descargas en un momento.	Redraws Downloads shortly.
+web/app.js	History.purge	2271	Borra el historial local de versiones anteriores.	Deletes local history from earlier versions.
+web/app.js	ServerStats.available	2281	¿Está el plugin Playback Reporting y se puede leer?	Is the Playback Reporting plugin present and readable?
+web/app.js	ServerStats.plays	2289	Reproducciones entre dos fechas desde el plugin (día por día).	Plays between two dates from the plugin (day by day).
+web/app.js	Recap.total	2345	Duración total del video.	Total video length.
+web/app.js	Recap.setMode	2346	Cambia entre resumen del año y de la semana.	Switches between year and week recap.
+web/app.js	Recap.plays	2351	Reproducciones del periodo (plugin, datos básicos o demo).	Plays for the period (plugin, basic data or demo).
+web/app.js	Recap.tally	2368	Agrupa reproducciones: canciones, artistas, géneros, horas, días, racha.	Groups plays: songs, artists, genres, hours, days, streak.
+web/app.js	Recap.collect	2392	Datos del resumen del año.	Year recap data.
+web/app.js	Recap.collectWeek	2404	Datos del resumen de la semana pasada (lunes a domingo).	Data for last week's recap (Monday to Sunday).
+web/app.js	Recap.jellyfinYear	2420	Canciones escuchadas en un periodo según los datos básicos de Jellyfin.	Songs played in a period according to Jellyfin's basic data.
+web/app.js	Recap.assets	2433	Prepara imágenes del video: osos, DJ, carátulas y paleta.	Prepares the video's images: bears, DJ, covers and palette.
+web/app.js	Recap.loadImg	2455	Carga una imagen con topes (8 MB, reducida) para el canvas.	Loads an image with limits (8 MB, reduced) for the canvas.
+web/app.js	Recap.sceneAt	2469	Qué escena toca en un segundo del video.	Which scene plays at a given second of the video.
+web/app.js	Recap.frame	2470	Dibuja un cuadro del video (con transición entre escenas).	Draws a video frame (with transitions between scenes).
+web/app.js	Recap.transition	2479	Transición entre dos escenas (deslizar, círculo, zoom, barrido).	Transition between two scenes (slide, circle, zoom, wipe).
+web/app.js	Recap.bg	2489	Fondo de una escena: degradado, brillo al ritmo y copos.	A scene's background: gradient, beat glow and snowflakes.
+web/app.js	Recap.weather	2506	Dibuja el pronóstico musical (sol, tormenta, nieve, arcoíris…).	Draws the music forecast (sun, storm, snow, rainbow…).
+web/app.js	Recap.bear	2523	Dibuja un Nanuq que brinca al ritmo.	Draws a Nanuq hopping to the beat.
+web/app.js	Recap.text	2530	Texto ajustado al ancho, con sombra.	Text fitted to width, with a shadow.
+web/app.js	Recap.cover	2540	Carátula con esquinas redondeadas.	Cover with rounded corners.
+web/app.js	Recap.confetti	2546	Lluvia de confeti.	Confetti shower.
+web/app.js	Recap.scene	2554	Dibuja una escena del resumen.	Draws a recap scene.
+web/app.js	Recap.music	2801	Música del video generada con Web Audio (con redoble).	Video music generated with Web Audio (with a drumroll).
+web/app.js	Recap.stop	2830	Detiene la reproducción o grabación del video.	Stops playing or recording the video.
+web/app.js	Recap.play	2831	Reproduce el video en el canvas y, si se pide, lo graba (MediaRecorder).	Plays the video on the canvas and, if asked, records it (MediaRecorder).
+web/app.js	Recap.save	2859	Guarda el video (Android en trozos, escritorio como descarga).	Saves the video (Android in chunks, desktop as a download).
+web/app.js	mp4Finalize	2885	Escribe la duración real en el MP4 fragmentado.	Writes the real duration into the fragmented MP4.
+web/app.js	recapCloseAudio	2926	Cierra el audio del video una sola vez.	Closes the video's audio only once.
+web/app.js	ease.out	2927	Curva de animación (salida).	Animation curve (out).
+web/app.js	ease.inOut	2927	Curva de animación (entrada y salida).	Animation curve (in-out).
+web/app.js	ease.back	2927	Curva de animación con rebote.	Animation curve with overshoot.
+web/app.js	clamp01	2928	Limita un valor entre 0 y 1.	Clamps a value between 0 and 1.
+web/app.js	mixHex	2929	Mezcla dos colores hex.	Mixes two hex colors.
+web/app.js	hexA	2930	Color hex con transparencia.	Hex color with transparency.
+web/app.js	recapYearOpen	2932	¿Es la primera semana de diciembre?	Is it the first week of December?
+web/app.js	recapTileHTML	2933	Tarjeta «Tu año con Nanuq» en Inicio.	“Your year with Nanuq” card on Home.
+web/app.js	V.recap	2936	Pantalla de Tu semana / Tu año (ver y exportar).	Your week / Your year screen (view and export).
+web/app.js	__nanuqHttp	2985	Recibe la respuesta de una petición nativa a SomeDL (Android).	Receives a native SomeDL request's response (Android).
+web/app.js	reqNative	2986	¿Hay puente nativo para hablar con SomeDL sin CORS?	Is there a native bridge to talk to SomeDL without CORS?
+web/app.js	reqRawHttp	2987	Petición a SomeDL por el puente nativo o fetch.	Request to SomeDL through the native bridge or fetch.
+web/app.js	parseSomedl	2997	Interpreta la dirección de SomeDL (puerto 5000 por omisión).	Parses the SomeDL address (port 5000 by default).
+web/app.js	reqNetError	3006	Mensaje claro cuando SomeDL no responde.	Clear message when SomeDL doesn't respond.
+web/app.js	REQ.save	3021	Guarda la lista de pedidos.	Saves the request list.
+web/app.js	REQ.setCfg	3022	Guarda o quita la dirección de SomeDL.	Saves or clears the SomeDL address.
+web/app.js	REQ.pending	3023	Pedidos que siguen en camino.	Requests still on the way.
+web/app.js	REQ.visible	3024	¿La app está a la vista (para revisar más seguido)?	Is the app visible (to check more often)?
+web/app.js	REQ.http	3025	Petición a la API de SomeDL con manejo de errores.	Request to the SomeDL API with error handling.
+web/app.js	REQ.probe	3033	Comprueba que una dirección sea SomeDL.	Checks that an address is SomeDL.
+web/app.js	REQ.add	3039	Manda un pedido de canción a SomeDL.	Sends a song request to SomeDL.
+web/app.js	REQ.schedule	3051	Programa la siguiente revisión de pedidos.	Schedules the next request check.
+web/app.js	REQ.poll	3052	Revisa el estado de los pedidos en SomeDL.	Checks the requests' state in SomeDL.
+web/app.js	REQ.announce	3081	Avisa (y notifica) qué pedidos terminaron.	Announces (and notifies) which requests finished.
+web/app.js	REQ.retry	3096	Vuelve a pedir una canción que falló.	Requests a failed song again.
+web/app.js	sysNotify	3103	Notificación del sistema (Android o escritorio).	System notification (Android or desktop).
+web/app.js	askNotifyPermission	3109	Pide permiso de notificaciones en el navegador.	Asks for notification permission in the browser.
+web/app.js	reqRowHTML	3112	Fila de un pedido de SomeDL.	A SomeDL request row.
+web/app.js	reqListHTML	3121	Lista de pedidos.	Request list.
+web/app.js	renderReqSoon	3128	Redibuja la lista de pedidos en un momento.	Redraws the request list shortly.
+web/app.js	V.request	3132	Pantalla Solicitar canción.	Request a song screen.
+web/app.js	refreshFromJellyfin	3192	«Actualizar desde Jellyfin»: olvida cachés, rehace índices y refresca la cola.	“Refresh from Jellyfin”: forgets caches, rebuilds indexes and refreshes the queue.
+web/app.js	sessionGone	3215	Confirma si un 401 es de verdad la sesión vencida.	Confirms whether a 401 really is an expired session.
+web/app.js	sessionExpired	3226	Sesión vencida: detiene todo y pide entrar.	Expired session: stops everything and asks to log in.
+web/app.js	render	3234	Dibuja la pantalla actual con transición y manejo de errores.	Draws the current screen with a transition and error handling.
+web/app.js	P.pause	3280	Pausa marcando que la pidió Nanuq.	Pauses, marking that Nanuq requested it.
+web/app.js	onAudio	3285	Escucha un evento en los dos <audio> pero solo atiende al de la canción actual.	Listens to an event on both <audio> elements but only handles the current song's.
+web/app.js	saveQueue	3287	Guarda la cola y actualiza la ventana por adelantado.	Saves the queue and updates the ahead-of-time window.
+web/app.js	QPOS.save	3292	Guarda el segundo de la canción para retomarlo.	Saves the song's second to resume it.
+web/app.js	QPOS.restore	3298	Dónde retomar la canción al abrir la app.	Where to resume the song when the app opens.
+web/app.js	QPOS.clear	3302	Olvida la posición guardada.	Forgets the saved position.
+web/app.js	setQueue	3306	Reemplaza la cola y empieza a reproducir.	Replaces the queue and starts playing.
+web/app.js	addToQueue	3307	Agrega canciones al final o a continuación.	Adds songs at the end or next.
+web/app.js	ptime	3317	Segundo actual de la canción (aquí o en el otro dispositivo).	Current second of the song (here or on the other device).
+web/app.js	pdur	3318	Duración de la canción.	Song duration.
+web/app.js	setSrc	3324	Cambia la fuente del audio reiniciando su estado.	Changes the audio source resetting its state.
+web/app.js	seekTo	3328	Salta a un segundo (en conversiones en vivo pide desde ahí).	Seeks to a second (for live conversions it requests from there).
+web/app.js	playIndex	3349	Reproduce la canción N de la cola.	Plays song N of the queue.
+web/app.js	armStallWatch	3380	Avisa si una canción tarda demasiado en empezar.	Warns if a song takes too long to start.
+web/app.js	MP3.add	3394	Recuerda una canción que debe pedirse en MP3.	Remembers a song that must be requested as MP3.
+web/app.js	localFailed	3398	La copia local falló: suena del servidor (y se vuelve a descargar).	The local copy failed: it plays from the server (and is downloaded again).
+web/app.js	canFallback	3410	¿Se puede pedir esta canción en MP3 (en «Original» o con Opus)?	Can this song be requested as MP3 (in “Original” or with Opus)?
+web/app.js	fallbackMp3	3413	Pide la canción en MP3 si la original o la de Opus no arranca.	Requests the song as MP3 if the original or Opus one won't start.
+web/app.js	armFallback	3423	Programa el paso a MP3 si no arranca en 6 s.	Schedules the switch to MP3 if it doesn't start in 6 s.
+web/app.js	playFailed	3429	Explica por qué no se pudo reproducir.	Explains why it couldn't play.
+web/app.js	audioDead	3450	¿El audio quedó muerto (error de red)?	Is the audio dead (network error)?
+web/app.js	replayHere	3451	Vuelve a pedir la canción desde el segundo en que iba.	Requests the song again from the second it was at.
+web/app.js	rampStop	3464	Detiene una rampa de volumen.	Stops a volume ramp.
+web/app.js	ramp	3468	Rampa de volumen (en decibelios, o de potencia constante para el crossfade) con temporizador.	Timer-driven volume ramp (in decibels, or constant-power for the crossfade).
+web/app.js	fadeStop	3477	Detiene un desvanecido en curso.	Stops a fade in progress.
+web/app.js	fadeTo	3478	Lleva el volumen a un valor con desvanecido.	Fades the volume to a value.
+web/app.js	softMs	3479	Duración del desvanecido de pausa/play (0 si está apagado).	Pause/play fade length (0 when off).
+web/app.js	userVol	3483	Volumen elegido por ti (bajado si habla el DJ).	The volume you chose (lowered if the DJ is talking).
+web/app.js	pauseSoft	3484	Pausa con desvanecido.	Pauses with a fade.
+web/app.js	playSoft	3492	Reanuda con desvanecido, o vuelve a subir si estaba bajando (recarga si otra app pausó).	Resumes with a fade, or fades back up if it was fading out (reloads if another app paused).
+web/app.js	partyNow	3502	¿Los controles manejan la fiesta ahora?	Do the controls handle the party right now?
+web/app.js	partyHostOpen	3505	¿Hay una sala de fiesta abierta en esta computadora?	Is a party room open on this computer?
+web/app.js	toggle	3506	Reproducir/pausar (fiesta, control remoto o aquí).	Play/pause (party, remote control or here).
+web/app.js	next	3515	Siguiente canción (respeta repetir y el fin de la cola).	Next song (respects repeat and the end of the queue).
+web/app.js	prev	3527	Canción anterior (o al inicio si van más de 3 s).	Previous song (or restart if past 3 s).
+web/app.js	seekFrac	3528	Salta a una fracción de la canción.	Seeks to a fraction of the song.
+web/app.js	removeAt	3529	Quita una canción de la cola.	Removes a song from the queue.
+web/app.js	clearQueue	3534	Vacía la cola.	Clears the queue.
+web/app.js	shuffleQueue	3535	Mezcla la cola (la actual queda primero).	Shuffles the queue (the current one stays first).
+web/app.js	setMode	3543	Cambia el modo de repetición.	Changes the repeat mode.
+web/app.js	xfDrop	3551	Libera el <audio> de la canción que se fue.	Releases the <audio> of the song that left.
+web/app.js	xfKill	3553	Apaga la canción que se iba en la transición (al pausar o cambiar de canción).	Stops the outgoing crossfade song (on pause or song change).
+web/app.js	xfCheck	3557	Decide si empieza la transición del DJ (a 3–5 s del final).	Decides whether the DJ crossfade starts (3–5 s before the end).
+web/app.js	xfStart	3566	Cruza la canción que termina con la siguiente usando los dos <audio>.	Crosses the ending song with the next one using both <audio> elements.
+web/app.js	updateModeBtn	3580	Actualiza el botón de repetición.	Updates the repeat button.
+web/app.js	loadPeaks	3582	Carga la forma de onda de una canción.	Loads a song's waveform.
+web/app.js	cssVar	3591	Lee una variable CSS del tema (en caché).	Reads a theme CSS variable (cached).
+web/app.js	drawWaves	3592	Dibuja las barras de progreso o la forma de onda.	Draws the progress bars or the waveform.
+web/app.js	roundRect	3620	Rectángulo redondeado en canvas.	Rounded rectangle on canvas.
+web/app.js	updateNow	3622	Actualiza todo lo que muestra la canción actual.	Updates everything that shows the current song.
+web/app.js	updatePlayState	3652	Íconos de reproducir/pausa y estado de los controles del sistema.	Play/pause icons and system controls state.
+web/app.js	DISC.can	3667	¿Hay puente de Discord (escritorio)?	Is there a Discord bridge (desktop)?
+web/app.js	DISC.update	3668	Programa el aviso a Discord.	Schedules the update to Discord.
+web/app.js	DISC.send	3669	Manda a Discord lo que suena (o lo quita).	Sends Discord what's playing (or clears it).
+web/app.js	dcStatusPaint	3685	Línea de estado de Discord en Ajustes.	Discord status line in Settings.
+web/app.js	rcKeep	3706	Audio en silencio para que el sistema mantenga los controles.	Silent audio so the system keeps the controls.
+web/app.js	sessionHold	3720	Mantiene los controles del sistema mientras carga o al terminar la cola.	Keeps the system controls while loading or when the queue ends.
+web/app.js	rcKeepOff	3726	Detiene el audio en silencio.	Stops the silent audio.
+web/app.js	stallCheck	3766	Detecta audio atorado a media canción y lo vuelve a pedir.	Detects audio stuck mid-song and requests it again.
+web/app.js	netBack	3775	Volvió la red: reanuda lo cortado y reconecta.	Network is back: resumes what was cut and reconnects.
+web/app.js	paintVol	3818	Dibuja la barra de volumen y su ícono.	Draws the volume bar and its icon.
+web/app.js	lrcKey	3826	Clave de una letra guardada en el dispositivo.	Key of lyrics saved on the device.
+web/app.js	lrcTime	3827	Formatea un tiempo como mm:ss.cc (LRC).	Formats a time as mm:ss.cc (LRC).
+web/app.js	parseLRC	3828	Lee un archivo LRC (marcas de tiempo y offset).	Reads an LRC file (timestamps and offset).
+web/app.js	toLRC	3842	Arma un archivo LRC limpio.	Builds a clean LRC file.
+web/app.js	cleanLyricsText	3853	Limpia una letra escrita o pegada (controles, HTML, tamaño).	Cleans typed or pasted lyrics (control chars, HTML, size).
+web/app.js	lyricsFromText	3862	Convierte texto (LRC o simple) en letra.	Converts text (LRC or plain) into lyrics.
+web/app.js	localLyrics	3863	Letra guardada en este dispositivo.	Lyrics saved on this device.
+web/app.js	lyrSame	3871	¿Dos letras son iguales (texto y tiempos)?	Are two lyrics the same (text and timing)?
+web/app.js	lyricsSaved	3879	Muestra la letra recién guardada hasta que Jellyfin la sirva.	Shows freshly saved lyrics until Jellyfin serves them.
+web/app.js	getLyrics	3894	Letra de una canción (local, pendiente, caché o servidor).	A song's lyrics (local, pending, cache or server).
+web/app.js	setLyricsMode	3902	Abre o cierra la letra con transición.	Opens or closes the lyrics with a transition.
+web/app.js	setQueueMode	3915	Abre o cierra la cola del reproductor con transición.	Opens or closes the player's queue with a transition.
+web/app.js	renderSheetQueue	3926	Lista de la cola dentro del reproductor.	Queue list inside the player.
+web/app.js	applyLyricsMode	3935	Aplica el modo letra sin transición.	Applies lyrics mode without a transition.
+web/app.js	reloadLyrics	3943	Vuelve a cargar la letra actual.	Reloads the current lyrics.
+web/app.js	renderLyrics	3944	Dibuja la letra de la canción actual.	Draws the current song's lyrics.
+web/app.js	estimateTimes	3968	Reparte tiempos aproximados para letras sin sincronizar.	Spreads approximate timing for unsynced lyrics.
+web/app.js	syncLyrics	3975	Resalta la línea que suena y desplaza la letra.	Highlights the playing line and scrolls the lyrics.
+web/app.js	refreshLyricsButtons	4011	Botón Letra o Buscar letra según haya letra.	Lyrics or Find lyrics button depending on whether there are lyrics.
+web/app.js	syncStart	4026	Abre el editor para sincronizar a mano.	Opens the editor to sync by hand.
+web/app.js	syncEnd	4040	Cierra el editor.	Closes the editor.
+web/app.js	syncCancel	4044	Cancela la sincronización.	Cancels syncing.
+web/app.js	renderSync	4045	Dibuja el editor de sincronización.	Draws the sync editor.
+web/app.js	syncEditorTick	4052	Marca en el editor la línea que suena.	Marks the playing line in the editor.
+web/app.js	syncMark	4059	Marca el inicio de la línea resaltada.	Marks the start of the highlighted line.
+web/app.js	syncUndo	4072	Deshace la última marca.	Undoes the last mark.
+web/app.js	syncNudge	4080	Mueve la última marca ¼ s.	Moves the last mark ¼ s.
+web/app.js	syncSave	4089	Completa los tiempos y guarda el LRC.	Fills in timing and saves the LRC.
+web/app.js	saveLyricsText	4106	Guarda una letra en Jellyfin (o en el dispositivo si no se puede).	Saves lyrics in Jellyfin (or on the device if it can't).
+web/app.js	lyricsSearch	4118	Busca letras en LrcLib y deja elegir una.	Searches LrcLib for lyrics and lets you choose one.
+web/app.js	lyricsPaste	4148	Diálogo para pegar o editar una letra.	Dialog to paste or edit lyrics.
+web/app.js	forgetLocalLyrics	4166	Quita la letra guardada en este dispositivo.	Removes the lyrics saved on this device.
+web/app.js	renderQueue	4171	Dibuja el panel de la cola.	Draws the queue panel.
+web/app.js	renderQueueAll	4180	Redibuja todas las vistas de la cola.	Redraws every queue view.
+web/app.js	moveQueue	4185	Mueve una canción de la cola (también en el control remoto).	Moves a song in the queue (also in remote control).
+web/app.js	markCurrent	4237	Resalta la canción que suena en las listas.	Highlights the playing song in lists.
+web/app.js	toast	4242	Aviso breve en pantalla.	Brief on-screen notice.
+web/app.js	menu	4243	Menú de opciones (hoja inferior).	Options menu (bottom sheet).
+web/app.js	devLabel	4256	Nombre amable de un dispositivo.	Friendly name of a device.
+web/app.js	devName	4258	Nombre de un dispositivo para frases.	Device name for sentences.
+web/app.js	expand6	4260	Expande una dirección IPv6.	Expands an IPv6 address.
+web/app.js	ipKey	4266	Red y privacidad de una dirección IP.	Network and privacy of an IP address.
+web/app.js	sameNetwork	4274	¿Dos direcciones están en la misma red?	Are two addresses on the same network?
+web/app.js	RC.on	4286	¿Mis dispositivos está activado?	Is My devices turned on?
+web/app.js	RC.start	4287	Arranca Mis dispositivos (WebSocket y búsqueda).	Starts My devices (WebSocket and polling).
+web/app.js	RC.stop	4288	Detiene Mis dispositivos.	Stops My devices.
+web/app.js	RC.connect	4294	Abre el WebSocket de Jellyfin con reintentos.	Opens Jellyfin's WebSocket with retries.
+web/app.js	RC.send	4307	Manda un mensaje por el WebSocket.	Sends a message over the WebSocket.
+web/app.js	RC.onMessage	4308	Atiende los mensajes del WebSocket (órdenes, favoritas, keep-alive).	Handles WebSocket messages (commands, favorites, keep-alive).
+web/app.js	RC.fromMe	4319	¿La orden viene de tu propio usuario?	Does the command come from your own user?
+web/app.js	RC.onPlaystate	4326	Ejecuta pausar, siguiente, buscar… recibidos.	Runs received pause, next, seek…
+web/app.js	RC.onPlay	4339	Ejecuta una orden de reproducir (y adopta el DJ si viene con él).	Runs a play command (and adopts the DJ if it comes with it).
+web/app.js	RC.onGeneral	4361	Ejecuta repetir o mezclar recibidos.	Runs received repeat or shuffle.
+web/app.js	RC.queueForReport	4368	Cola que se informa a Jellyfin.	Queue reported to Jellyfin.
+web/app.js	RC.reportSoon	4369	Informa el estado a Jellyfin en un momento.	Reports the state to Jellyfin shortly.
+web/app.js	RC.schedule	4375	Programa la siguiente búsqueda de dispositivos.	Schedules the next device poll.
+web/app.js	RC.poll	4376	Busca tus otros Nanuq y sigue al que controlas.	Looks for your other Nanuqs and follows the one you control.
+web/app.js	RC.maybeFollow	4399	Se conecta solo a otro Nanuq que suena en tu red.	Connects automatically to another Nanuq playing on your network.
+web/app.js	RC.enter	4405	Empieza a controlar otro dispositivo.	Starts controlling another device.
+web/app.js	RC.leave	4421	Deja de controlar y recupera tu cola.	Stops controlling and restores your queue.
+web/app.js	RC.apply	4429	Refleja aquí lo que suena en el otro dispositivo.	Mirrors here what's playing on the other device.
+web/app.js	RC.pos	4460	Segundo estimado de la canción en el otro dispositivo.	Estimated second of the song on the other device.
+web/app.js	RC.tick	4461	Actualiza barra, letra y controles del sistema en control remoto.	Updates bar, lyrics and system controls in remote control.
+web/app.js	RC.decorate	4468	Indica «Sonando en …» en el reproductor.	Shows “Playing on …” in the player.
+web/app.js	RC.fail	4474	Avisa que una orden no se pudo enviar.	Warns that a command couldn't be sent.
+web/app.js	RC.cmd	4475	Manda una orden al dispositivo que suena.	Sends a command to the playing device.
+web/app.js	RC.seek	4481	Salta en el otro dispositivo.	Seeks on the other device.
+web/app.js	RC.window	4482	Ventana de la cola que se manda (≤ 200).	Queue window that is sent (≤ 200).
+web/app.js	RC.playQueue	4483	Manda una cola para reproducir allá.	Sends a queue to play there.
+web/app.js	RC.add	4492	Agrega canciones a la cola de allá.	Adds songs to the queue there.
+web/app.js	RC.reorder	4502	Manda la cola reordenada (conservando el DJ).	Sends the reordered queue (keeping the DJ).
+web/app.js	RC.general	4513	Manda una orden general allá.	Sends a general command there.
+web/app.js	RC.here	4515	«Reproducir aquí»: trae la música (y el DJ) a este dispositivo.	“Play here”: brings the music (and the DJ) to this device.
+web/app.js	RC.there	4538	Pasa la música (y el DJ) a otro dispositivo.	Sends the music (and the DJ) to another device.
+web/app.js	__nanuqTick	4557	Latido cada 20 s desde Android (WebSocket, fiesta, audio atorado).	20-second heartbeat from Android (WebSocket, party, stuck audio).
+web/app.js	__nanuqVis	4565	Android avisa si la app está a la vista.	Android reports whether the app is visible.
+web/app.js	openDevices	4566	Menú Mis dispositivos.	My devices menu.
+web/app.js	updateFavBtn	4597	Botón de favorita del reproductor.	Player's favorite button.
+web/app.js	setFavLocal	4603	Marca la favorita en la cola local.	Marks the favorite in the local queue.
+web/app.js	favPending	4610	Recuerda un cambio de favorita reciente.	Remembers a recent favorite change.
+web/app.js	favMerge	4611	Aplica los cambios recientes sobre la lista del servidor.	Applies recent changes over the server's list.
+web/app.js	favHold	4629	Protege la favorita de la canción que suena (fallo de Jellyfin 12).	Protects the playing song's favorite (Jellyfin 12 bug).
+web/app.js	favHeld	4632	¿Se está protegiendo esta favorita?	Is this favorite being protected?
+web/app.js	favReassert	4633	Vuelve a guardar la favorita después de cada aviso de reproducción.	Saves the favorite again after each playback report.
+web/app.js	favRemote	4641	Atiende cambios de favoritas hechos en otro lado.	Handles favorite changes made elsewhere.
+web/app.js	refreshFav	4663	Confirma con el servidor si la canción es favorita.	Confirms with the server whether the song is a favorite.
+web/app.js	toggleFav	4674	Marca o quita la favorita y lo comprueba.	Marks or unmarks the favorite and verifies it.
+web/app.js	favConfirm	4694	Segunda confirmación contra la sección de favoritas.	Second confirmation against the favorites section.
+web/app.js	updateDlBtn	4708	Botón Descargar del reproductor.	Player's Download button.
+web/app.js	dlAddToast	4717	Aviso al pedir una descarga.	Notice when requesting a download.
+web/app.js	dlTap	4726	Toque en Descargar (pedir o administrar).	Tap on Download (request or manage).
+web/app.js	connTest	4739	«Probar conexión»: mide API, carátula, audio, saltos y reproductor.	“Test connection”: measures API, cover, audio, seeking and player.
+web/app.js	startRadio	4867	Radio a partir de una canción.	Radio from a song.
+web/app.js	addToPlaylistMenu	4881	Menú para agregar a una playlist (o crear una).	Menu to add to a playlist (or create one).
+web/app.js	songOptions	4896	Opciones comunes de una canción.	Common song options.
+web/app.js	queueMenu	4903	Menú de una canción de la cola.	Menu for a queue song.
+web/app.js	trackMenu	4916	Menú de una canción de una lista.	Menu for a song in a list.
+web/app.js	askConfirm	4924	Diálogo de confirmación.	Confirmation dialog.
+web/app.js	askName	4930	Diálogo para escribir un nombre.	Dialog to type a name.
+web/app.js	openSheet	4938	Abre el reproductor maximizado.	Opens the full-screen player.
+web/app.js	closeSheet	4946	Cierra el reproductor maximizado.	Closes the full-screen player.
+web/app.js	partyHost	4956	¿Este dispositivo puede ser anfitrión (escritorio)?	Can this device host (desktop)?
+web/app.js	partyGuest	4957	¿Este dispositivo es invitado (Android)?	Is this device a guest (Android)?
+web/app.js	partyOn	4958	¿Hay fiesta en este dispositivo?	Is the party available on this device?
+web/app.js	partySongUrl	4960	URL en MP3 320 kbps para mandar una canción a la fiesta.	MP3 320 kbps URL to send a song to the party.
+web/app.js	partyCover	4966	Miniatura JPEG de 240 px de la carátula.	240 px JPEG thumbnail of the cover.
+web/app.js	partyCoverOk	4976	¿La carátula viene de la sala (127.0.0.1 con token)?	Does the cover come from the room (127.0.0.1 with token)?
+web/app.js	partyClean	4979	Limpia el estado que manda la computadora (no confiable).	Cleans the state sent by the computer (untrusted).
+web/app.js	stopForParty	4991	Detiene tu música al abrir la sala.	Stops your music when opening the room.
+web/app.js	PH.active	5006	¿La fiesta maneja los controles?	Does the party handle the controls?
+web/app.js	PH.init	5007	Prepara el reproductor de la fiesta y escucha a main.js.	Prepares the party player and listens to main.js.
+web/app.js	PH.onEv	5019	Atiende los eventos de la sala (estado, llegó, salió).	Handles room events (state, joined, left).
+web/app.js	PH.apply	5025	Aplica el estado de la sala (modo fiesta de la computadora).	Applies the room state (computer party mode).
+web/app.js	PH.list	5037	Lista de canciones de la sala.	Room song list.
+web/app.js	PH.open	5038	Abre la sala.	Opens the room.
+web/app.js	PH.close	5044	Cierra la sala.	Closes the room.
+web/app.js	PH.jump	5046	Pone ya una canción de «A continuación».	Plays a song from “Up next” right now.
+web/app.js	PH.order	5052	Cambia el orden de la lista.	Changes the list order.
+web/app.js	PH.next	5054	Sigue la lista: pone la siguiente que ya llegó.	Follows the list: plays the next ready song.
+web/app.js	PH.play	5061	Reproduce una canción de la fiesta.	Plays a party song.
+web/app.js	PH.stopCur	5069	Detiene la canción actual de la fiesta.	Stops the current party song.
+web/app.js	PH.done	5077	Terminó una canción: la borra y pasa a la siguiente.	A song ended: deletes it and moves on.
+web/app.js	PH.toggle	5078	Pausa o reanuda la fiesta.	Pauses or resumes the party.
+web/app.js	PH.yieldTo	5091	Pusiste tu música: la fiesta se pausa y cede los controles.	You played your music: the party pauses and hands over the controls.
+web/app.js	PH.media	5098	Controles del sistema con la canción de la fiesta.	System controls with the party song.
+web/app.js	PH.report	5110	Avisa a la sala qué suena.	Tells the room what's playing.
+web/app.js	PH.loadLyrics	5115	Carga la letra de la canción de la fiesta.	Loads the party song's lyrics.
+web/app.js	PH.line	5125	Línea de letra actual y la siguiente.	Current and next lyrics line.
+web/app.js	PH.tick	5133	Karaoke: cada segundo, tiempo y línea a los teléfonos.	Karaoke: every second, time and line to the phones.
+web/app.js	PG.connect	5143	Entra a una sala (con código o llave) y reconecta solo.	Joins a room (with code or key) and reconnects on its own.
+web/app.js	PG.leave	5170	Sale de la fiesta.	Leaves the party.
+web/app.js	PG.joined	5180	¿Estás en una fiesta?	Are you at a party?
+web/app.js	PG.ui	5181	Modo fiesta del teléfono (oculta barras y reproductor).	Phone party mode (hides bars and player).
+web/app.js	PG.wake	5190	El teléfono despertó: vuelve a entrar si hace falta.	The phone woke up: rejoins if needed.
+web/app.js	PG.resume	5196	Al abrir la app, vuelve a la fiesta en curso.	When opening the app, returns to the ongoing party.
+web/app.js	PG.abortUp	5201	Cancela la subida en curso.	Cancels the upload in progress.
+web/app.js	PG.onMsg	5202	Atiende los mensajes de la sala.	Handles room messages.
+web/app.js	PG.add	5229	Manda una canción a la fiesta (letra, carátula y audio por partes).	Sends a song to the party (lyrics, cover and audio in chunks).
+web/app.js	PG.remove	5285	Cancela una canción que todavía llega.	Cancels a song that's still arriving.
+web/app.js	PG.find	5287	Busca salas en la red (UDP desde Android).	Finds rooms on the network (UDP from Android).
+web/app.js	partyAddr	5307	Convierte la dirección escrita en ws://…/fiesta.	Converts the typed address into ws://…/fiesta.
+web/app.js	iglooHTML	5318	HTML del iglú.	Igloo HTML.
+web/app.js	iglooBear	5334	Nanuq de un invitado con el disfraz de su tema.	A guest's Nanuq in their theme's costume.
+web/app.js	iglooHoldSVG	5341	Carátula en alto con destellos (quien escogió la canción).	Cover held up with sparkles (who picked the song).
+web/app.js	iglooHeldOnTop	5352	Pone encima de la carátula el objeto que traía el Nanuq.	Puts the object the Nanuq was holding on top of the cover.
+web/app.js	partyGuestColor	5363	Color de la etiqueta según el tema del invitado.	Label color from the guest's theme.
+web/app.js	partyCoverSrc	5371	URL de la carátula de una canción de la fiesta.	Cover URL of a party song.
+web/app.js	iglooSync	5379	Coloca a los invitados en el círculo sin redibujar.	Places guests in the circle without redrawing.
+web/app.js	iglooLive	5413	Anima el iglú solo mientras se ve.	Animates the igloo only while visible.
+web/app.js	iglooQueue	5418	Fila «A continuación» a pantalla completa.	“Up next” row in full screen.
+web/app.js	iglooQueueEdge	5430	Degradado si hay más canciones fuera de la vista.	Gradient if there are more songs out of view.
+web/app.js	partyVolumeStep	5506	Volumen con ↑ ↓ a pantalla completa y su aviso.	Volume with ↑ ↓ in full screen and its notice.
+web/app.js	iglooIdle	5519	Esconde el puntero tras 2.5 s quieto.	Hides the pointer after 2.5 s idle.
+web/app.js	iglooVinyl	5529	Funda y disco de vinilo de la canción que suena.	Sleeve and vinyl record of the playing song.
+web/app.js	iglooLine	5541	Letra en el techo con destello.	Lyrics on the ceiling with a sparkle.
+web/app.js	renderPartySoon	5548	Redibuja la fiesta en un momento.	Redraws the party shortly.
+web/app.js	partyPaintTick	5552	Actualiza el karaoke (línea, siguiente, tiempo).	Updates the karaoke (line, next, time).
+web/app.js	partyPaintUp	5558	Progreso de la canción que mandas.	Progress of the song you're sending.
+web/app.js	partyRowsHTML	5559	Lista de canciones de la fiesta.	Party song list.
+web/app.js	partyGuestsHTML	5568	Lista de invitados.	Guest list.
+web/app.js	partyNowHTML	5569	Lo que suena en la fiesta.	What's playing at the party.
+web/app.js	paintParty	5574	Dibuja la pantalla de la fiesta (anfitrión o invitado).	Draws the party screen (host or guest).
+web/app.js	partySongsHTML	5635	Canciones para mandar.	Songs to send.
+web/app.js	partySearch	5636	Buscador de la fiesta (playlists, artistas, álbumes, canciones, letras).	Party search (playlists, artists, albums, songs, lyrics).
+web/app.js	partyBrowse	5664	Canciones de un artista, álbum o playlist en la fiesta.	Songs of an artist, album or playlist in the party.
+web/app.js	V.party	5679	Pantalla Fiesta.	Party screen.
+web/app.js	d0	5695	Atajo del dataset de un elemento.	Shortcut for an element's dataset.
+web/app.js	recentServers	5856	Servidores usados antes.	Servers used before.
+web/app.js	rememberServer	5857	Recuerda un servidor.	Remembers a server.
+web/app.js	forgetServer	5863	Olvida un servidor.	Forgets a server.
+web/app.js	probeTimed	5865	Prueba un servidor midiendo cuánto tarda.	Tests a server measuring how long it takes.
+web/app.js	canDiscover	5876	¿Se pueden buscar servidores en la red?	Can servers be discovered on the network?
+web/app.js	discoverServers	5878	Busca Jellyfin en la red (UDP 7359).	Discovers Jellyfin on the network (UDP 7359).
+web/app.js	serverList	5897	Lista de servidores con su estado.	Server list with their status.
+web/app.js	cleartextRisk	5924	¿La contraseña viajaría sin cifrar por internet?	Would the password travel unencrypted over the internet?
+web/app.js	showLogin	5935	Pantalla de entrar.	Login screen.
+web/app.js	startApp	6001	Arranca la app con la sesión (cola, posición, DJ, Inicio).	Starts the app with the session (queue, position, DJ, Home).
+web/app.js	logout	6017	Cierra sesión y borra lo personal.	Logs out and deletes personal data.
+web/i18n.js	tx	1015	Traduce un texto en español al idioma elegido y pone los valores {0}, {1}…	Translates a Spanish text into the chosen language and fills in the {0}, {1}… values.
 linux/main.js	serve	47	Servidor interno 127.0.0.1:47863 que entrega la app a la ventana (y la fiesta), endurecido.	Hardened internal 127.0.0.1:47863 server that hands the app to the window (and the party).
 linux/main.js	broadcastOf	79	Dirección de difusión de una red IPv4.	Broadcast address of an IPv4 network.
 linux/main.js	discover	80	Busca servidores Jellyfin por UDP 7359.	Discovers Jellyfin servers over UDP 7359.
@@ -682,18 +694,18 @@ android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.kick	316	Arranc
 android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.kickLocked	318	Arranca la cola (ya con el candado).	Starts the queue (already locked).
 android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.loop	324	Baja las pendientes de una en una.	Downloads pending ones one at a time.
 android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.nextPending	344	La siguiente (primero las pedidas por ti).	The next one (yours first).
-android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.download	354	Baja una canción con topes y espacio libre.	Downloads a song with limits and free space.
-android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.victim	427	La automática menos escuchada (para hacer lugar).	The least-played automatic one (to make room).
-android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.removeEntry	436	Borra una descarga y sus archivos.	Deletes a download and its files.
-android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.caps	450	Capacidades de la red activa.	Active network capabilities.
-android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.unmetered	455	¿La red es sin medición (Wi-Fi, Ethernet)?	Is the network unmetered (Wi-Fi, Ethernet)?
-android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.networkAllowed	460	¿Se puede descargar con esta red?	Can it download on this network?
-android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.safe	468	Nombre de archivo seguro para un id.	Safe file name for an id.
-android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.toJson	470	Descarga en JSON para la página.	Download as JSON for the page.
-android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.emit	488	Avisa a la página un cambio.	Notifies the page of a change.
-android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.ensureLoaded	494	Lee el índice cuando el almacén se abre.	Reads the index when the store opens.
-android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.load	496	Lee el índice cifrado (o recupera desde los archivos).	Reads the encrypted index (or recovers from files).
-android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.save	562	Guarda el índice cifrado.	Saves the encrypted index.
+android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.download	354	Baja una canción con topes y espacio libre; Opus solo si está completo (OggCheck).	Downloads a song with limits and free space; Opus only if complete (OggCheck).
+android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.victim	431	La automática menos escuchada (para hacer lugar).	The least-played automatic one (to make room).
+android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.removeEntry	440	Borra una descarga y sus archivos.	Deletes a download and its files.
+android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.caps	454	Capacidades de la red activa.	Active network capabilities.
+android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.unmetered	459	¿La red es sin medición (Wi-Fi, Ethernet)?	Is the network unmetered (Wi-Fi, Ethernet)?
+android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.networkAllowed	464	¿Se puede descargar con esta red?	Can it download on this network?
+android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.safe	472	Nombre de archivo seguro para un id.	Safe file name for an id.
+android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.toJson	474	Descarga en JSON para la página.	Download as JSON for the page.
+android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.emit	492	Avisa a la página un cambio.	Notifies the page of a change.
+android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.ensureLoaded	498	Lee el índice cuando el almacén se abre.	Reads the index when the store opens.
+android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.load	500	Lee el índice cifrado (o recupera desde los archivos).	Reads the encrypted index (or recovers from files).
+android/app/src/main/java/com/nanuq/app/Downloads.java	Downloads.save	566	Guarda el índice cifrado.	Saves the encrypted index.
 android/app/src/main/java/com/nanuq/app/LocalServer.java	LocalServer.LocalServer	46	Abre el servidor en 127.0.0.1 con token aleatorio.	Opens the server on 127.0.0.1 with a random token.
 android/app/src/main/java/com/nanuq/app/LocalServer.java	LocalServer.base	60	Dirección base con el token.	Base address with the token.
 android/app/src/main/java/com/nanuq/app/LocalServer.java	LocalServer.acceptLoop	62	Acepta conexiones (máx. 32 a la vez).	Accepts connections (max. 32 at a time).
@@ -804,7 +816,7 @@ android/app/src/main/java/com/nanuq/app/Prefetch.java	Prefetch.kick	139	Arranca 
 android/app/src/main/java/com/nanuq/app/Prefetch.java	Prefetch.kickLocked	141	Arranca (ya con el candado).	Starts (already locked).
 android/app/src/main/java/com/nanuq/app/Prefetch.java	Prefetch.loop	147	Baja las pendientes de una en una (respeta el tope total).	Downloads pending ones one at a time (respects the total cap).
 android/app/src/main/java/com/nanuq/app/Prefetch.java	Prefetch.online	160	¿Hay red?	Is there a network?
-android/app/src/main/java/com/nanuq/app/Prefetch.java	Prefetch.fetch	166	Baja una canción con topes.	Downloads a song with limits.
+android/app/src/main/java/com/nanuq/app/Prefetch.java	Prefetch.fetch	166	Baja una canción con topes; Opus solo si está completo (OggCheck).	Downloads a song with limits; Opus only if complete (OggCheck).
 android/app/src/main/java/com/nanuq/app/Prefetch.java	Prefetch.trim	211	Si se pasa del tope total, suelta las más lejanas.	If over the total cap, drops the farthest ones.
 android/app/src/main/java/com/nanuq/app/SecureStore.java	SecureStore.get	44	Instancia única (o lee un valor si recibe una clave).	Single instance (or reads a value if given a key).
 android/app/src/main/java/com/nanuq/app/SecureStore.java	SecureStore.SecureStore	58	Abre el almacén al crearse.	Opens the store when created.
@@ -845,3 +857,5 @@ linux/collect.js	(script)	3	Mueve los paquetes compilados a dist/<versión>/.	Mo
 scripts/build.sh	(script)	1	Sube la versión y compila Android, Linux, Flatpak y Windows.	Bumps the version and builds Android, Linux, Flatpak and Windows.
 android/build-apk.sh	(script)	1	Compila el APK y lo deja en dist/<versión>/.	Builds the APK and leaves it in dist/<version>/.
 linux/flatpak/build-flatpak.sh	(script)	1	Arma el Flatpak, lo publica en el repositorio local firmado y lo instala o actualiza.	Builds the Flatpak, publishes it to the signed local repository and installs or updates it.
+android/app/src/main/java/com/nanuq/app/OggCheck.java	OggCheck.valid	42	Revisa que un Ogg (Opus) tenga todas sus páginas completas, con CRC correcto y fin del flujo.	Checks that an Ogg (Opus) file has all its pages complete, with correct CRC and end of stream.
+android/app/src/main/java/com/nanuq/app/OggCheck.java	OggCheck.mime	70	Acepta el tipo de audio del servidor solo con la forma audio/….	Accepts the server's audio type only in the audio/… form.

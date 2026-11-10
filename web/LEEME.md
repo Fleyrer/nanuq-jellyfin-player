@@ -67,7 +67,7 @@ También puedes ir a ⋮ → *Buscar otra letra (LrcLib)* para elegir una versi�
 
 ## DJ Nanuq
 
-En **Inicio → Tu música**, la tarjeta **DJ Nanuq** arma una sesión que no se acaba, como un DJ de radio, sin IA: solo reglas sobre tu biblioteca y tu historial de Jellyfin. La sesión va por rondas de unas 5 canciones. Lo principal son los temas y lo olvidado:
+En **Inicio → Tu música**, la tarjeta **DJ Nanuq** arma una sesión que no se acaba, como un DJ de radio, sin IA: solo reglas sobre tu biblioteca y tu historial de Jellyfin. La sesión va por rondas de unas 5 canciones. Lo principal son los temas y lo olvidado: Mientras arma la primera ronda verás a Nanuq en su tornamesa con frases como «Preparando mezclas…»; la pantalla se quita cuando empieza a sonar.
 
 - **por género**: Pop, Rock, Pop Punk… cualquiera que tengas en la biblioteca, sin repetir los de hace poco
 - **por década**: un viaje a los 70, los 80, etc., según los años que hay en tu biblioteca
@@ -150,7 +150,15 @@ Jellyfin no busca dentro de las letras, así que Nanuq arma su propio índice: l
 
 ## Desvanecer al pausar
 
-Al pausar, la música baja suave antes de detenerse; al reanudar, sube suave. Funciona con el botón, el teclado, la notificación y los controles de tus otros dispositivos. Se apaga en **Ajustes → Desvanecer al pausar**. Si la app no está a la vista (pantalla apagada, ventana oculta), pausa al instante.
+Al pausar, la música baja suave antes de detenerse; al reanudar, sube suave. Funciona con el botón, el teclado, la notificación y los controles de tus otros dispositivos, también con la pantalla apagada. Dura de 0,5 a 5 s (**Ajustes → Duración del desvanecido**, 1 s por omisión); al tocar ▶ mientras baja, vuelve a subir y la curva va en decibelios, como la oye el oído. Se apaga en **Ajustes → Desvanecer al pausar**.
+
+## Transición entre canciones del DJ
+
+Con DJ Nanuq, en los últimos segundos de una canción la siguiente ya empieza: la que termina baja mientras la nueva sube (curva de potencia constante, sin hueco a la mitad). Se elige en **Ajustes → Transición entre canciones del DJ**: 3, 4 (por omisión) o 5 s, o apagada. No se hace con «Repetir una», al controlar otro dispositivo, en la fiesta ni mientras sincronizas una letra.
+
+## Formatos y calidad
+
+Con calidad **Original**, tus archivos suenan tal cual: FLAC, Opus, AAC/M4A, MP3, WAV, OGG. Si eliges un bitrate menor (o el archivo lo supera), Jellyfin lo convierte a **Opus** (mejor sonido que MP3 con el mismo bitrate) o a MP3: **Ajustes → Formato al convertir** (solo aparece si tu reproductor abre Opus). Si una canción no arranca en Opus, Nanuq la pide en MP3 y lo recuerda. Las descargas del teléfono se guardan en ese mismo formato (o el archivo tal cual con «Original»). Mientras arrastras la barra de progreso, la canción queda en silencio y vuelve a sonar donde la sueltas.
 
 ## Cola en el reproductor
 

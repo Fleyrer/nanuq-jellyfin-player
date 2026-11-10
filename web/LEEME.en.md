@@ -67,7 +67,7 @@ You can also go to ⋮ → *Find other lyrics (LrcLib)* to choose a synced versi
 
 ## DJ Nanuq
 
-In **Home → Your music**, the **DJ Nanuq** card builds a never-ending session, like a radio DJ, without AI: just rules about your library and your Jellyfin history. The session goes in rounds of about 5 songs. The main ones are themes and forgotten songs:
+In **Home → Your music**, the **DJ Nanuq** card builds a never-ending session, like a radio DJ, without AI: just rules about your library and your Jellyfin history. The session goes in rounds of about 5 songs. The main ones are themes and forgotten songs: While it builds the first round you see Nanuq at the turntable with lines like “Preparing mixes…”; the screen goes away as soon as the music starts.
 
 - **by genre**: Pop, Rock, Pop Punk… any you have in your library, without repeating recent ones
 - **by decade**: a trip to the 70s, the 80s, etc., according to the years in your library
@@ -150,7 +150,15 @@ Jellyfin doesn't search inside lyrics, so Nanuq builds its own index: the first 
 
 ## Fade on pause
 
-When you pause, the music fades out before stopping; when you resume, it fades in. It works with the button, the keyboard, the notification and the controls of your other devices. Turn it off in **Settings → Fade on pause**. If the app isn't on screen (screen off, window hidden), it pauses immediately.
+When you pause, the music fades out before stopping; when you resume, it fades in. It works with the button, the keyboard, the notification and the controls of your other devices, also with the screen off. It lasts 0.5 to 5 s (**Settings → Fade length**, 1 s by default); tapping ▶ while it fades out brings it back up and the curve follows decibels, the way the ear hears it. Turn it off in **Settings → Fade on pause**.
+
+## Crossfade between DJ songs
+
+With DJ Nanuq, in the last seconds of a song the next one already starts: the ending song fades out while the new one fades in (constant-power curve, no dip in the middle). Choose it in **Settings → Crossfade between DJ songs**: 3, 4 (default) or 5 s, or off. It doesn't happen with “Repeat one”, while controlling another device, at a party or while you sync lyrics.
+
+## Formats and quality
+
+With **Original** quality, your files play as they are: FLAC, Opus, AAC/M4A, MP3, WAV, OGG. If you pick a lower bitrate (or the file goes over it), Jellyfin converts it to **Opus** (better sound than MP3 at the same bitrate) or MP3: **Settings → Conversion format** (only shown if your player opens Opus). If a song won't start in Opus, Nanuq asks for it in MP3 and remembers. Phone downloads are saved in that same format (or the file as-is with “Original”). While you drag the progress bar, the song stays silent and plays again where you let go.
 
 ## Queue in the player
 

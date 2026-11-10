@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Fleyrer y colaboradores de Nanuq
 // SPDX-License-Identifier: GPL-3.0-or-later
 'use strict';
-const VERSION = '1.44.6';
+const VERSION = '1.46.1';
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 // JSON que llega de afuera (Jellyfin, SomeDL, la fiesta, tus otros dispositivos): sin claves «toString»/«valueOf»/«__proto__».
@@ -346,18 +346,22 @@ class Jellyfin {
     if (!remote) { const c = DL.coverUrl(it.imgId); if (c) return c; } // carátula guardada en el teléfono
     return `${this.base}/Items/${encodeURIComponent(it.imgId)}/Images/Primary?fillHeight=${num(size)}&fillWidth=${num(size)}&quality=90${it.imgTag ? '&tag=' + encodeURIComponent(it.imgTag) : ''}`;
   }
-  streamUrl(t, br, session = P.session) {
-    const q = new URLSearchParams({ UserId: this.userId, DeviceId: deviceId(), ApiKey: this.token, api_key: this.token, MaxStreamingBitrate: br, Container: 'opus,webm|opus,mp3,aac,m4a|aac,m4b|aac,flac,webma,webm|webma,wav,ogg', TranscodingContainer: 'mp3', TranscodingProtocol: 'http', AudioCodec: 'mp3', PlaySessionId: session });
+  // Los formatos de Container suenan tal cual (FLAC incluido) si no pasan del bitrate; si no, Jellyfin convierte a Opus
+  // (mejor sonido que MP3 con el mismo bitrate) o a MP3. Las canciones que fallaron antes van siempre en MP3 (ver MP3.ids).
+  streamUrl(t, br, session = P.session, codec = MP3.ids.has(t.id) ? 'mp3' : Settings.codec) {
+    const opus = codec === 'opus';
+    const q = new URLSearchParams({ UserId: this.userId, DeviceId: deviceId(), ApiKey: this.token, api_key: this.token, MaxStreamingBitrate: br, Container: 'opus,webm|opus,mp3,aac,m4a|aac,m4b|aac,flac,webma,webm|webma,wav,ogg', TranscodingContainer: opus ? 'ogg' : 'mp3', TranscodingProtocol: 'http', AudioCodec: opus ? 'opus' : 'mp3', PlaySessionId: session });
     return `${this.base}/Audio/${sid(t.id)}/universal?${q}`;
   }
   // Con calidad «Original», las canciones que no arrancaron en este reproductor se piden directo en MP3 (ver fallbackMp3).
   async stream(t) { return DL.localUrl(t.id) || PF.url(t.id) || this.streamUrl(t, +Settings.quality >= 1e7 && MP3.ids.has(t.id) ? 320000 : Settings.quality); }
   // Copia para guardar en el teléfono; Android la descarga con su propia sesión de reproducción.
-  // Las descargas se guardan en MP3 (se reproduce en cualquier lado); con «Original», el archivo tal cual.
+  // Las descargas se guardan en Opus o MP3 (según «Formato al convertir»); con «Original», el archivo tal cual.
   dlUrl(t) {
     const br = +Settings.dlQuality;
     if (br >= 1e7) return this.streamUrl(t, br, 'dl' + uid());
-    const q = new URLSearchParams({ UserId: this.userId, DeviceId: deviceId(), ApiKey: this.token, api_key: this.token, MaxStreamingBitrate: br, Container: 'mp3', TranscodingContainer: 'mp3', TranscodingProtocol: 'http', AudioCodec: 'mp3', PlaySessionId: 'dl' + uid() });
+    const opus = Settings.codec === 'opus' && !MP3.ids.has(t.id); // en el formato de «Formato al convertir»
+    const q = new URLSearchParams({ UserId: this.userId, DeviceId: deviceId(), ApiKey: this.token, api_key: this.token, MaxStreamingBitrate: br, Container: opus ? 'ogg' : 'mp3', TranscodingContainer: opus ? 'ogg' : 'mp3', TranscodingProtocol: 'http', AudioCodec: opus ? 'opus' : 'mp3', PlaySessionId: 'dl' + uid() });
     return `${this.base}/Audio/${sid(t.id)}/universal?${q}`;
   }
   async peaks(t) {
@@ -748,6 +752,8 @@ function refreshBear() {
 /* =========================================================
    Settings & theme
    ========================================================= */
+// ¿Este reproductor abre Opus? (Chromium, Electron y el WebView de Android sí; algunos Safari no.)
+const OPUS_OK = (() => { try { return !!new Audio().canPlayType('audio/ogg; codecs="opus"'); } catch { return false; } })();
 const Settings = {
   theme: store.get('theme', 'navy'),
   quality: store.get('quality', 140000000),
@@ -769,6 +775,9 @@ const Settings = {
   pfMin: store.get('pfMin', 10),   // … cuántos minutos
   djVoice: store.get('djVoice', false),
   fade: store.get('fade', true),   // desvanecer al pausar y al reanudar
+  fadeMs: store.get('fadeMs', 1000),   // … cuánto dura (0.5–5 s)
+  xfade: store.get('xfade', 4),   // segundos de transición entre canciones del DJ (0 = apagada)
+  codec: store.get('codec', OPUS_OK ? 'opus' : 'mp3'),   // formato al que Jellyfin convierte: opus | mp3
   discord: store.get('discord', false),          // «Escuchando Nanuq» en Discord (apps de escritorio)
   discordCover: store.get('discordCover', false),  // con la portada (comparte la dirección de tu servidor)
   playerAnim: store.get('playerAnim', 'all'),   // con el DJ, en el reproductor: all (Nanuq y el disco) | disc (solo el disco) | none (la portada de siempre)
@@ -782,7 +791,8 @@ const Settings = {
   const numIn = (k, a, b, d) => { const v = +Settings[k]; Settings[k] = Number.isFinite(v) && v >= a && v <= b ? v : d; };
   const bool = k => { if (typeof Settings[k] !== 'boolean') Settings[k] = !!Settings[k]; };
   numIn('volume', 0, 1, 1); numIn('quality', 32000, 140000000, 140000000); numIn('dlQuality', 32000, 140000000, 320000);
-  numIn('dlMax', 1, 100000, 100); numIn('pfMin', 1, 240, 10);
+  numIn('dlMax', 1, 100000, 100); numIn('pfMin', 1, 240, 10); numIn('fadeMs', 500, 5000, 1000);
+  one('xfade', [0, 3, 4, 5], 4); one('codec', OPUS_OK ? ['opus', 'mp3'] : ['mp3'], OPUS_OK ? 'opus' : 'mp3');
   one('albumSort', ['name', 'artist', 'recent', 'year', 'random'], 'name'); one('songView', ['list', 'grid'], 'list');
   one('songSort', ['name', 'artist', 'album', 'recent', 'plays', 'random'], 'name'); one('artistView', ['songs', 'albums'], 'songs');
   one('artistSort', ['album', 'name', 'plays'], 'album'); one('playerAnim', ['all', 'disc', 'none'], 'all');
@@ -1505,9 +1515,12 @@ const DJ = {
   },
   lastKey() { const k = Object.keys(this.segs).map(Number); return k.length ? Math.max(...k) : -1; },
   async start() {
-    if (!api) return;
+    if (!api || DJL.el) return;
+    DJL.show();
+    try { await this.startNow(); } finally { DJL.hide(); }
+  },
+  async startNow() {
     const peer = RC.remote; // controlando otro dispositivo: la sesión se arma aquí y suena allá
-    toast(tx('Nanuq está armando tu sesión…'), 2500);
     Object.assign(this, { session: uid().slice(0, 12), segs: {}, used: new Set(), pools: {}, lastI: -1, recentTypes: [], themes: [], recentSet: new Set(this.hist) });
     let seg = null;
     for (const t of ['genre', 'decade', 'forgotten']) if ((seg = await this.build(t))) break;
@@ -1524,8 +1537,9 @@ const DJ = {
       return;
     }
     this.active = true; this.save();
-    P.queue = items; playIndex(0); renderQueueAll();
+    P.queue = items; const p = playIndex(0); renderQueueAll();
     this.extend();
+    await p; // la pantalla de carga se quita cuando ya suena
   },
   // ---- El DJ entre tus dispositivos ----
   // Antes de pasarle la música a otro dispositivo se deja en tu Jellyfin el estado de la sesión y qué ronda es cada
@@ -1603,7 +1617,7 @@ const DJ = {
       u.lang = u.voice ? u.voice.lang : LANG; u.rate = 1.03;
       // Como en la radio: la música baja mientras habla. Si interrumpe otra presentación, el volumen de referencia es
       // el de antes de la primera (no el ya bajado), y solo la última presentación lo devuelve.
-      const v = this.duckV ?? P.audio.volume; this.duckV = v; this.duckU = u; P.audio.volume = v * 0.3;
+      const v = this.duckV ?? Settings.volume; this.duckV = v; // tu volumen (no el de ese instante: podía estar a media rampa) this.duckU = u; P.audio.volume = v * 0.3;
       u.onend = u.onerror = () => {
         if (this.duckU !== u) return; // la interrumpió una presentación más nueva
         this.duckU = null; this.duckV = null;
@@ -1613,7 +1627,7 @@ const DJ = {
     } catch { }
   },
   visible: () => document.visibilityState === 'visible',
-  bears(playing) { const on = !!playing && this.shown(); $$('.djbear').forEach(b => b.classList.toggle('on', on)); $('#sDj')?.classList.toggle('playing', on); },
+  bears(playing) { const on = !!playing && this.shown(); $$('.djbear:not(.keep)').forEach(b => b.classList.toggle('on', on)); $('#sDj')?.classList.toggle('playing', on); },
   // Reproductor maximizado: en lugar de la carátula, Nanuq pone la portada como un disco y la cambia
   // hacia la siguiente, la anterior o, si saltaste a otra canción, deja caer la nueva desde arriba.
   stage: { qid: null, i: -1 },
@@ -1731,6 +1745,28 @@ let djLiveT = 0; addEventListener('resize', () => { clearTimeout(djLiveT); djLiv
 function djTileHTML() {
   return `<button class="tile djtile${DJ.active ? ' live' : ''}" data-act="open" data-r="dj"><div class="djart">${djBearSVG()}</div><span class="djkick">${DJ.active ? tx('Al aire') : tx('Nuevo')}</span><b>DJ Nanuq</b><small>${tx('Tu música, presentada por Nanuq')}</small><span class="tp" data-act="dj-start" role="button" aria-label="${tx('Empezar DJ')}">${ic('play', 1)}</span></button>`;
 }
+// ---- Pantalla de carga del DJ: mientras arma la primera ronda (con bibliotecas grandes tarda unos segundos) ----
+const DJ_LOAD_SAYS = [tx('Preparando mezclas…'), tx('Sacando los discos del iglú…'), tx('Calentando la tornamesa sin derretir el hielo…'), tx('Puliendo los vinilos con la patita…'),
+  tx('Probando el micrófono: uno, dos… ¡brrr!'), tx('Pidiéndoles a las focas que hagan espacio en la pista…'), tx('Buscando la canción perfecta para abrir…'),
+  tx('Acomodando los audífonos en las orejas peludas…'), tx('Revisando qué no has escuchado en mucho tiempo…'), tx('Ordenando tus géneros por témpanos…'),
+  tx('Encendiendo la bola de disco… de nieve…'), tx('Afinando el pescado… digo, el ecualizador…')];
+const DJL = {
+  el: null, iv: 0, t0: 0,
+  show() {
+    const el = this.el = document.createElement('div');
+    el.className = 'djload'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite');
+    el.innerHTML = `<div class="djl-in">${djBearSVG('on keep')}<div class="djl-say"></div><div class="djl-dots" aria-hidden="true"><i></i><i></i><i></i></div></div>`;
+    document.body.appendChild(el); this.t0 = Date.now();
+    const say = el.querySelector('.djl-say'), rest = DJ_LOAD_SAYS.slice(1).sort(() => Math.random() - 0.5);
+    say.textContent = DJ_LOAD_SAYS[0]; let k = 0;
+    this.iv = setInterval(() => { say.classList.add('fade'); setTimeout(() => { say.textContent = rest[k++ % rest.length]; say.classList.remove('fade'); }, 300); }, 2400);
+  },
+  // Se queda al menos 1 s (si no, parpadea cuando la ronda ya estaba lista).
+  hide() {
+    const el = this.el; if (!el) return;
+    setTimeout(() => { clearInterval(this.iv); el.classList.add('out'); setTimeout(() => { el.remove(); if (this.el === el) this.el = null; }, 350); }, Math.max(0, 1000 - (Date.now() - this.t0)));
+  }
+};
 V.dj = async (el) => {
   el.innerHTML = head('DJ Nanuq') + `<section class="djhero">
       <div class="djstage">${djBearSVG('big')}<div class="djbubble" id="djBubble"></div></div>
@@ -2142,9 +2178,12 @@ V.settings = async (el) => {
     <h2>${tx('Reproducción')}</h2>
     ${DISC.can() ? `<div class="row"><div class="l">${tx('Mostrar en Discord lo que escuchas')}<small>${tx('Tu perfil dice «Escuchando Nanuq» con la canción, el artista y el tiempo, como con Spotify. Necesita Discord abierto en esta computadora (o Vesktop/Equibop con Rich Presence activado).')}</small><small class="dcst" id="dcSt"${Settings.discord ? '' : ' hidden'}></small></div><button class="sw${Settings.discord ? ' on' : ''}" data-act="discord" aria-label="${tx('Mostrar en Discord lo que escuchas')}"></button></div>
     <div class="row" id="dcCoverRow"${Settings.discord ? '' : ' hidden'}><div class="l">${tx('Con la portada')}<small>${tx('Discord solo muestra imágenes que puede descargar de internet, así que solo funciona si tu Jellyfin está en internet por https (y su dirección queda a la vista de quien vea tu perfil). Si no, se muestra el logo de Nanuq.')}</small></div><button class="sw${Settings.discordCover ? ' on' : ''}" data-act="discord-cover" aria-label="${tx('Mostrar la portada en Discord')}"></button></div>` : ''}
-    <div class="row"><div class="l">${tx('Calidad del streaming')}<small>${tx('Si tu archivo supera este bitrate, Jellyfin lo convierte a MP3. En «Original», si una canción no arranca, Nanuq la pide en MP3 sola.')}</small></div><select class="sel" id="qSel">${q.map(([v, n]) => `<option value="${v}"${+Settings.quality === v ? ' selected' : ''}>${n}</option>`).join('')}</select></div>
+    <div class="row"><div class="l">${tx('Calidad del streaming')}<small>${tx('En «Original» tus archivos suenan tal cual (FLAC, Opus, AAC, MP3…). Si tu archivo supera el bitrate elegido, Jellyfin lo convierte al formato de abajo. Si una canción no arranca, Nanuq la pide en MP3 sola.')}</small></div><select class="sel" id="qSel">${q.map(([v, n]) => `<option value="${v}"${+Settings.quality === v ? ' selected' : ''}>${n}</option>`).join('')}</select></div>
+    ${OPUS_OK ? `<div class="row"><div class="l">${tx('Formato al convertir')}<small>${tx('Opus suena mejor que MP3 con el mismo bitrate. Si tu Jellyfin no logra convertir una canción a Opus, Nanuq la pide en MP3.')}</small></div><select class="sel" id="codecSel">${[['opus', 'Opus'], ['mp3', 'MP3']].map(([v, n]) => `<option value="${v}"${Settings.codec === v ? ' selected' : ''}>${n}</option>`).join('')}</select></div>` : ''}
     <div class="row"><div class="l">${tx('Animaciones del reproductor')}<small>${tx('Con el DJ activo: Nanuq con su tornamesa y el disco girando, solo el disco de vinilo, o la portada de siempre.')}</small></div><select class="sel" id="paSel">${[['all', tx('Todas')], ['disc', tx('Solo el disco de vinilo')], ['none', tx('Ninguna')]].map(([v, n]) => `<option value="${v}"${Settings.playerAnim === v ? ' selected' : ''}>${n}</option>`).join('')}</select></div>
     <div class="row"><div class="l">${tx('Desvanecer al pausar')}<small>${tx('La música baja suave al pausar y sube suave al reanudar.')}</small></div><button class="sw${Settings.fade ? ' on' : ''}" data-act="fade" aria-label="${tx('Desvanecer al pausar')}"></button></div>
+    <div class="row" id="fadeRow"${Settings.fade ? '' : ' hidden'}><div class="l">${tx('Duración del desvanecido')}<small>${tx('Más corto se siente inmediato; más largo, más suave.')}</small></div><select class="sel" id="fadeSel" aria-label="${tx('Duración del desvanecido')}">${[500, 1000, 1500, 2000, 3000, 4000, 5000].map(v => `<option value="${v}"${+Settings.fadeMs === v ? ' selected' : ''}>${(v / 1000).toLocaleString(LOC)} s</option>`).join('')}</select></div>
+    <div class="row"><div class="l">${tx('Transición entre canciones del DJ')}<small>${tx('Con DJ Nanuq, la canción que termina baja mientras la siguiente ya sube.')}</small></div><select class="sel" id="xfSel" aria-label="${tx('Transición entre canciones del DJ')}">${[[0, tx('Apagada')], [3, '3 s'], [4, '4 s'], [5, '5 s']].map(([v, n]) => `<option value="${v}"${+Settings.xfade === v ? ' selected' : ''}>${n}</option>`).join('')}</select></div>
     <div class="row"><div class="l">${tx('Forma de onda real')}<small>${tx('Descarga una copia ligera de cada canción para dibujarla (≈2 MB por pista).')}</small></div><button class="sw${Settings.wave ? ' on' : ''}" data-act="wave" aria-label="${tx('Forma de onda')}"></button></div>
     ${PF.usable() ? `<div class="row"><div class="l">${tx('Guardar por adelantado lo que sigue')}<small>${tx('El teléfono baja las próximas canciones de tu cola mientras escuchas, así suenan aunque la red se ponga lenta o se corte un momento. Se guardan solo un rato y no cuentan como descargas.')}</small></div><button class="sw${Settings.pfOn ? ' on' : ''}" data-act="pf" aria-label="${tx('Guardar por adelantado lo que sigue')}"></button></div>
     <div class="row" id="pfRow"${Settings.pfOn ? '' : ' hidden'}><div class="l">${tx('Cuánto guardar por adelantado')}<small>${tx('Minutos de música de tu cola, a partir de la que suena.')}</small></div><select class="sel" id="pfSel">${[5, 10, 15, 20, 30, 60].map(v => `<option value="${v}"${+Settings.pfMin === v ? ' selected' : ''}>${tx('{0} minutos', [v])}</option>`).join('')}</select></div>` : ''}
@@ -2170,6 +2209,9 @@ V.settings = async (el) => {
   </div>`;
   dcStatusPaint();
   $('#qSel', el).onchange = e => Settings.set('quality', +e.target.value);
+  if ($('#codecSel', el)) $('#codecSel', el).onchange = e => Settings.set('codec', e.target.value === 'mp3' ? 'mp3' : 'opus');
+  $('#fadeSel', el).onchange = e => Settings.set('fadeMs', +e.target.value);
+  $('#xfSel', el).onchange = e => Settings.set('xfade', +e.target.value);
   // Cambiar de idioma: se guarda y la página se vuelve a abrir (así todo, hasta lo que se arma al cargar, sale en el idioma
   // nuevo). La posición de la canción se guarda antes para seguir en el mismo segundo.
   $('#langSel', el).onchange = e => {
@@ -3228,15 +3270,19 @@ async function render(restore) {
    Player
    ========================================================= */
 const P = {
-  audio: new Audio(), queue: [], i: -1, cur: null, mode: ['once', 'all', 'one'].includes(store.get('mode', 'once')) ? store.get('mode', 'once') : 'once', session: uid(), seq: 0, peaks: new Map(), lastReport: 0,
+  audio: new Audio(), scrubN: 0, queue: [], i: -1, cur: null, mode: ['once', 'all', 'one'].includes(store.get('mode', 'once')) ? store.get('mode', 'once') : 'once', session: uid(), seq: 0, peaks: new Map(), lastReport: 0,
 };
 P.audio.preload = 'auto';
 // Pausas que hace Nanuq (tus botones, la barra espaciadora, los controles del sistema, la fiesta, cambiar de canción…)
 // se marcan. Una pausa que Nanuq NO pidió (otra app tomó la salida de audio y Chromium detuvo la canción) deja la
 // salida de audio de esa canción muerta: al reanudar no se oía nada hasta reiniciar Nanuq. Por eso, tras una pausa
 // así, reanudar vuelve a cargar la canción en el mismo segundo (con una salida de audio nueva). Ver playSoft.
-P.pause = () => { P.ownPauseAt = Date.now(); P.audio.pause(); };
-P.audio.volume = Settings.volume;
+P.pause = () => { P.ownPauseAt = Date.now(); xfKill(0); if (FADE.out) fadeStop(); P.audio.pause(); };
+// Dos <audio>: en la transición entre canciones del DJ (crossfade) la que termina sigue sonando en el otro mientras baja.
+// P.audio es siempre el de la canción actual; los eventos del otro se ignoran (onAudio).
+P.els = [P.audio, new Audio()]; P.els[1].preload = 'auto';
+P.els.forEach(a => { a.volume = Settings.volume; });
+const onAudio = (ev, fn) => P.els.forEach(a => a.addEventListener(ev, e => { if (e.target === P.audio) fn(e); }));
 // Como control remoto, P.queue es la cola del OTRO dispositivo: no se guarda como tuya.
 function saveQueue() { PF.soon(); if (RC.remote) return; store.set('queue', { q: P.queue.slice(0, 3000), i: P.i }); RC.reportSoon(600); }
 // Posición de la canción para retomarla tras un cierre (el sistema mató la app, se apagó el teléfono…). Solo se
@@ -3304,7 +3350,8 @@ async function playIndex(i, autoplay = true, quiet = false) {
   if (i < 0 || i >= P.queue.length) return;
   if (partyHostOpen()) return; // con la fiesta abierta, tu música no suena
   if (RC.remote) { RC.playQueue(P.queue, i); return; }
-  if (P.cur && !quiet) api.report('stop', P.cur, ptime());
+  if (!P.xfGo) xfKill(300); // cambiaste de canción a media transición: la que se iba se apaga ya
+  if (P.cur && !quiet && !P.xfGo) api.report('stop', P.cur, ptime());
   P.i = i; P.cur = P.queue[i]; const n = ++P.seq;
   saveQueue(); updateNow(); renderQueueAll(); markCurrent(); DJ.onTrack();
   try {
@@ -3356,21 +3403,21 @@ function localFailed(n) {
   const e = DL.get(t.id);
   setSrc(api.streamUrl(t, 320000));
   P.audio.play().catch(() => { });
-  if (e) { DL.remove(t.id); setTimeout(() => DL.add(t, !!e.auto), 300); }
+  if (e) { MP3.add(t.id); DL.remove(t.id); setTimeout(() => DL.add(t, !!e.auto), 300); } // la copia nueva, en MP3
   toast(tx('La copia descargada de «') + t.name + tx('» no se pudo reproducir: suena desde el servidor y se volverá a descargar en MP3.'), 5500);
   return true;
 }
 function canFallback(n) {
-  return n === P.seq && !!P.cur && api.kind === 'jellyfin' && +Settings.quality >= 1e7 && P.fbSeq !== n && !MP3.ids.has(P.cur.id) && !DL.localUrl(P.cur.id);
+  return n === P.seq && !!P.cur && api.kind === 'jellyfin' && (+Settings.quality >= 1e7 || Settings.codec === 'opus') && P.fbSeq !== n && !MP3.ids.has(P.cur.id) && !DL.localUrl(P.cur.id);
 }
 function fallbackMp3(n) {
   if (!canFallback(n)) return false;
   P.fbSeq = n; clearTimeout(P.fbT); MP3.add(P.cur.id);
   const t = P.cur;
-  setSrc(api.streamUrl(t, 320000));
+  setSrc(api.streamUrl(t, Math.min(320000, +Settings.quality)));
   armStallWatch(n);
   P.audio.play().then(() => { if (n === P.seq) api.report('start', t, 0); }).catch(() => { });
-  if (!fallbackMp3.told) { fallbackMp3.told = true; toast('«' + t.name + tx('» no arrancaba en calidad original; se pidió en MP3 320 kbps.'), 4500); }
+  if (!fallbackMp3.told) { fallbackMp3.told = true; toast('«' + t.name + (+Settings.quality >= 1e7 ? tx('» no arrancaba en calidad original; se pidió en MP3 320 kbps.') : tx('» no arrancaba en Opus; se pidió en MP3.')), 4500); }
   return true;
 }
 function armFallback(n) {
@@ -3406,19 +3453,30 @@ function replayHere(autoplay = true) {
   const sec = ptime(); P.resume = sec > 1 ? { qid: P.cur.qid, sec } : null; P.netLost = false;
   playIndex(P.i, autoplay, true);
 }
-// Desvanecer al pausar y al reanudar: el volumen baja (0.3 s) antes de pausar y sube (0.4 s) al reanudar. Si la app no
-// está a la vista (pantalla apagada, ventana oculta) los cuadros de animación se detienen: ahí se pausa al instante.
-const FADE = { raf: 0, t: 0, on: false, base: 1, run: 0 };
-function fadeStop() { cancelAnimationFrame(FADE.raf); clearTimeout(FADE.t); FADE.on = false; FADE.run++; }
-function fadeTo(to, ms, done) {
-  fadeStop(); const run = FADE.run, from = P.audio.volume, t0 = performance.now();
-  let fin = false; const end = () => { if (fin || run !== FADE.run) return; fin = true; FADE.on = false; P.audio.volume = to; if (done) done(); };
-  if (document.hidden || ms <= 0 || P.audio.muted || !Settings.fade) { end(); return; }
-  FADE.on = true;
-  const step = () => { if (run !== FADE.run) return; const k = Math.min(1, (performance.now() - t0) / ms); P.audio.volume = from + (to - from) * k; if (k < 1) FADE.raf = requestAnimationFrame(step); else end(); };
-  FADE.raf = requestAnimationFrame(step);
-  FADE.t = setTimeout(end, ms + 300); // por si los cuadros de animación se frenan a medio camino
+// Desvanecer al pausar y al reanudar (0.5–5 s, Ajustes) y en la transición entre canciones del DJ (3–5 s).
+// La curva va en decibelios a ritmo constante (lineal en dB, no en amplitud): el oído oye el volumen en dB, así que una
+// rampa lineal de amplitud parecía cambiar casi todo al principio al bajar y al final al subir.
+// Con temporizadores y no requestAnimationFrame: los cuadros se detienen con la pantalla apagada, y una página que suena no
+// se frena. El tope (ms + 300) asegura que termine aunque el temporizador se atrase.
+const FADE = { iv: 0, t: 0, on: false, base: 1, run: 0 }, FADE_DB = -50; // por debajo de −50 dB, silencio
+const toDb = v => v > 0 ? Math.max(FADE_DB, 20 * Math.log10(v)) : FADE_DB;
+const fromDb = d => d <= FADE_DB ? 0 : 10 ** (d / 20);
+function rampStop(st) { clearInterval(st.iv); clearTimeout(st.t); st.on = false; st.run++; }
+// to: volumen final, o una función (se lee en cada paso: si el DJ empieza a hablar a media rampa, se adapta).
+// pow: curva de potencia constante (seno/coseno) para el crossfade: con dos rampas en dB a la vez, a la mitad las dos
+// canciones quedaban cerca de −20 dB y se oía un hueco; así la suma se mantiene pareja.
+function ramp(st, el, to, ms, done, pow = false) {
+  rampStop(st); const run = st.run, v0 = el.volume, a = toDb(v0), t0 = performance.now(), goal = () => Math.max(0, Math.min(1, typeof to === 'function' ? to() : to));
+  const at = k => { const g = goal(); return !pow ? fromDb(a + (toDb(g) - a) * k) : g < v0 ? g + (v0 - g) * Math.cos(k * Math.PI / 2) : v0 + (g - v0) * Math.sin(k * Math.PI / 2); };
+  let fin = false; const end = () => { if (fin || run !== st.run) return; fin = true; rampStop(st); el.volume = goal(); if (done) done(); };
+  if (ms <= 0 || el.muted) { end(); return; }
+  st.on = true;
+  st.iv = setInterval(() => { const k = (performance.now() - t0) / ms; if (k >= 1) end(); else el.volume = Math.min(1, at(k)); }, 4);
+  st.t = setTimeout(end, ms + 300);
 }
+function fadeStop() { rampStop(FADE); FADE.out = false; }
+function fadeTo(to, ms, done, pow) { ramp(FADE, P.audio, to, ms, done, pow); }
+const softMs = () => Settings.fade ? Settings.fadeMs : 0;
 // El volumen al que se vuelve tras desvanecer: SIEMPRE el que elegiste (y, si el DJ está hablando, el bajado de su voz).
 // Antes se tomaba el volumen de ese instante: con dos «play» seguidos (p. ej. tras la pausa que manda una extensión de GNOME
 // o los controles del sistema), el segundo leía el 0 del desvanecido y la canción quedaba sonando muda hasta reiniciar.
@@ -3426,14 +3484,18 @@ const userVol = () => DJ.duckU ? Settings.volume * 0.3 : Settings.volume;
 function pauseSoft() {
   if (P.audio.paused) return;
   const base = userVol(); FADE.base = base;
-  fadeTo(0, 300, () => { P.pause(); P.audio.volume = base; });
+  xfKill(softMs());
+  // FADE.out: ya cuenta como pausa (el botón cambia al instante) aunque siga bajando; tocar ▶ lo cancela (playSoft).
+  fadeTo(0, softMs(), () => { FADE.out = false; P.pause(); P.audio.volume = base; });
+  FADE.out = !P.audio.paused; updatePlayState();
 }
 function playSoft() {
   // Después de una pausa que no hizo Nanuq, la salida de audio puede haber quedado muerta: se vuelve a cargar la canción.
   if (P.extPause && P.extPause.seq === P.seq && P.cur && !RC.remote) { P.extPause = null; replayHere(); return; }
   const base = userVol(); FADE.base = base;
-  if (Settings.fade && !document.hidden && !P.audio.muted) { fadeStop(); P.audio.volume = 0; }
-  P.audio.play().then(() => fadeTo(base, 400)).catch(() => { P.audio.volume = base; });
+  if (FADE.out && !P.audio.paused) { FADE.out = false; fadeTo(base, softMs()); updatePlayState(); return; } // a media bajada: vuelve a subir
+  if (softMs() && !P.audio.muted) { fadeStop(); P.audio.volume = 0; }
+  P.audio.play().then(() => fadeTo(base, softMs())).catch(() => { P.audio.volume = base; });
 }
 // Fiesta abierta en esta computadora y sonando (o en pausa) su canción: el play, siguiente, anterior, la barra espaciadora,
 // el volumen y los controles del sistema manejan la fiesta, no tu cola. Si pones tu propia música, vuelven a tu cola.
@@ -3448,7 +3510,7 @@ function toggle() {
   if (!P.cur) { if (P.queue.length) playIndex(0); return; }
   if (!P.audio.src) { playIndex(P.i); return; }
   if (audioDead()) { replayHere(); return; }
-  if (P.audio.paused) playSoft(); else pauseSoft();
+  if (P.audio.paused || FADE.out) playSoft(); else pauseSoft();
 }
 function next(auto) {
   if (!auto && partyNow()) { PH.done(); return; }
@@ -3481,6 +3543,39 @@ const MODES = { once: [tx('Reproducir una vez'), 'once'], all: [tx('Repetir todo
 function setMode(m) {
   if (RC.remote) { P.mode = m; renderQueueAll(); updateModeBtn(); RC.general('SetRepeatMode', { RepeatMode: REPEAT[m] }); return; }
   P.mode = m; store.set('mode', m); renderQueueAll(); updateModeBtn(); RC.reportSoon();
+}
+// ---- Transición entre canciones del DJ (crossfade) ----
+// A los últimos segundos de una canción del DJ (si la que sigue también es suya), la siguiente empieza en el otro <audio>
+// subiendo mientras la que termina baja. No con «Repetir una», como control remoto, en la fiesta ni sincronizando letras.
+const XF = { iv: 0, t: 0, on: false, run: 0, el: null, seq: -1 };
+function xfDrop(g) { if (XF.el === g) XF.el = null; g.pause(); g.removeAttribute('src'); try { g.load(); } catch { } }
+// Apaga la canción que se iba (en ms, o de golpe).
+function xfKill(ms = 0) {
+  const g = XF.el; if (!g) return;
+  if (ms > 0 && !g.paused) ramp(XF, g, 0, ms, () => xfDrop(g)); else { rampStop(XF); xfDrop(g); }
+}
+function xfCheck() {
+  const sec = +Settings.xfade, nx = P.queue[P.i + 1];
+  if (!sec || P.scrub || XF.seq === P.seq || !DJ.active || RC.remote || partyHostOpen() || SY.on || P.mode === 'one' || P.audio.paused || FADE.on) return;
+  if (!P.cur || P.cur.djS !== DJ.session || !nx || nx.djS !== DJ.session) return;
+  const d = pdur(), left = d - ptime();
+  // +0.5 s: lo que tarda en arrancar la siguiente (las rampas empiezan cuando ya suena).
+  if (!d || d < sec * 3 || left > sec + 0.5 || left < 1) return;
+  xfStart(sec, left);
+}
+function xfStart(sec, left) {
+  const old = P.audio, nu = P.els.find(a => a !== old), endAt = performance.now() + left * 1000;
+  XF.seq = P.seq; xfKill(0);
+  api.report('stop', P.cur, ptime());
+  rampStop(FADE); XF.el = old; P.audio = nu; nu.volume = 0; nu.muted = old.muted;
+  P.xfGo = true; const p = playIndex(P.i + 1); P.xfGo = false;
+  const n = P.seq;
+  p.then(() => {
+    if (XF.el !== old) return; // ya se apagó (pausaste, cambiaste de canción…)
+    if (n !== P.seq || P.audio.paused) { xfKill(300); return; } // la siguiente no arrancó
+    ramp(XF, old, 0, Math.max(300, endAt - performance.now()), () => xfDrop(old), true);
+    fadeTo(userVol, sec * 1000, null, true);
+  });
 }
 function updateModeBtn() { const b = $('#sMode'); b.innerHTML = ic(MODES[P.mode][1]); b.classList.toggle('on', P.mode !== 'once'); b.title = MODES[P.mode][0]; }
 
@@ -3555,7 +3650,7 @@ function updateNow() {
   DJ.scene();
 }
 function updatePlayState() {
-  const party = partyNow(), playing = party ? !PH.audio.paused : RC.remote ? !RC.paused : !P.audio.paused && !!P.audio.src;
+  const party = partyNow(), playing = party ? !PH.audio.paused : RC.remote ? !RC.paused : !P.audio.paused && !!P.audio.src && !FADE.out;
   $$('use.pp').forEach(u => u.setAttribute('href', playing ? '#i-pause' : '#i-play'));
   DJ.bears(playing);
   if ('mediaSession' in navigator) try { navigator.mediaSession.playbackState = party ? (playing ? 'playing' : 'paused') : (!P.cur || partyHostOpen()) ? 'none' : (playing ? 'playing' : 'paused'); } catch { }
@@ -3630,8 +3725,8 @@ function sessionHold(state) { // 'loading' | 'parked' | 'off'
 }
 function rcKeepOff() { if (RCK.el) { RCK.el.pause(); try { RCK.el.currentTime = 0; } catch { } } }
 let rafPending = false;
-P.audio.addEventListener('timeupdate', () => {
-  syncLyrics();
+onAudio('timeupdate', () => {
+  syncLyrics(); xfCheck();
   // Cuenta como escuchada al pasar la mitad (o 4 minutos), una vez por reproducción.
   const dd = pdur();
   if (P.cur && P.counted !== P.seq && dd && ptime() >= Math.min(dd * 0.5, 240)) { P.counted = P.seq; Plays.add(P.cur); }
@@ -3640,12 +3735,12 @@ P.audio.addEventListener('timeupdate', () => {
   const now = Date.now(); if (now - P.lastReport > (RC.on() && RC.peers.length ? 4000 : 10000)) { P.lastReport = now; if (api) api.report('progress', P.cur, ptime(), P.audio.paused); }
   if ('mediaSession' in navigator && navigator.mediaSession.setPositionState && pdur()) { try { const dd = pdur(); navigator.mediaSession.setPositionState({ duration: dd, position: Math.min(ptime(), dd), playbackRate: 1 }); } catch { } }
 });
-P.audio.addEventListener('play', () => { updatePlayState(); syncLyrics(true); clearTimeout(BEAR.pauseT); if (BEAR.playing && P.danced !== P.seq) bearDance(); bearMood(true); P.danced = P.seq; if (P.audio.readyState < 3) armFallback(P.seq); RC.reportSoon(300); });
+onAudio('play', () => { updatePlayState(); syncLyrics(true); clearTimeout(BEAR.pauseT); if (BEAR.playing && P.danced !== P.seq) bearDance(); bearMood(true); P.danced = P.seq; if (P.audio.readyState < 3) armFallback(P.seq); RC.reportSoon(300); });
 // Cuando otro dispositivo pasa la música a este: empezar en el mismo segundo.
-P.audio.addEventListener('canplay', () => { const ps = P.pendingSeek; if (ps && ps.seq === P.seq) { P.pendingSeek = null; seekTo(ps.sec); } });
-P.audio.addEventListener('playing', () => { setTimeout(() => { if (!P.audio.paused && !FADE.on && P.audio.volume < 0.01 && userVol() > 0.01) P.audio.volume = userVol(); }, 900); });
-P.audio.addEventListener('playing', () => { clearTimeout(P.fbT); if (!RC.remote && RCK.el && !RCK.el.paused) RCK.el.pause(); }); // ya suena la canción: el silencio se pausa
-P.audio.addEventListener('pause', () => {
+onAudio('canplay', () => { const ps = P.pendingSeek; if (ps && ps.seq === P.seq) { P.pendingSeek = null; seekTo(ps.sec); } });
+onAudio('playing', () => { setTimeout(() => { if (!P.audio.paused && !FADE.on && !P.scrub && P.audio.volume < 0.01 && userVol() > 0.01) P.audio.volume = userVol(); }, 900); });
+onAudio('playing', () => { clearTimeout(P.fbT); if (!RC.remote && RCK.el && !RCK.el.paused) RCK.el.pause(); }); // ya suena la canción: el silencio se pausa
+onAudio('pause', () => {
   // ¿La pidió Nanuq? Si no (otra app tomó el audio), se recuerda para reanudar con la canción recargada.
   if (!P.audio.ended && !RC.remote && P.audio.getAttribute('src') && Date.now() - (P.ownPauseAt || 0) > 1500) P.extPause = { seq: P.seq, at: Date.now() };
   QPOS.save(true);
@@ -3653,11 +3748,11 @@ P.audio.addEventListener('pause', () => {
   // Entre canciones también hay una pausa breve: solo se pone triste si la música de verdad se detuvo.
   clearTimeout(BEAR.pauseT); BEAR.pauseT = setTimeout(() => { if (P.audio.paused && !RC.remote) bearMood(false); }, 900);
 });
-P.audio.addEventListener('ended', () => next(true));
-P.audio.addEventListener('play', () => { if (typeof PH !== 'undefined') PH.yieldTo(); }); // tu música pausa la de la fiesta
-P.audio.addEventListener('loadedmetadata', drawWaves);
-P.audio.addEventListener('seeked', () => { LY.hold = 0; syncLyrics(true); DISC.update(); });
-P.audio.addEventListener('error', () => {
+onAudio('ended', () => next(true));
+onAudio('play', () => { if (typeof PH !== 'undefined') PH.yieldTo(); }); // tu música pausa la de la fiesta
+onAudio('loadedmetadata', drawWaves);
+onAudio('seeked', () => { LY.hold = 0; syncLyrics(true); DISC.update(); });
+onAudio('error', () => {
   if (!P.audio.getAttribute('src') || !P.cur) return;
   // Error de red: se recuerda para reintentar sola en cuanto vuelva la conexión (evento «online» o al volver a la app).
   if (P.audio.error && P.audio.error.code === MediaError.MEDIA_ERR_NETWORK) P.netLost = { seq: P.seq, at: Date.now() };
@@ -3699,9 +3794,21 @@ document.addEventListener('pointerdown', e => {
   e.preventDefault(); s.setPointerCapture(e.pointerId);
   const r = s.getBoundingClientRect(), f = x => Math.max(0, Math.min(1, (x - r.left) / r.width));
   let last = f(e.clientX), moved = false;
+  // Mientras arrastras, la canción queda en silencio (bajada rápida, sin chasquido) y vuelve a sonar donde la sueltes.
+  const mute = !RC.remote && !partyNow() && !P.audio.paused && !FADE.out, tok = ++P.scrubN;
+  if (mute) { P.scrub = true; fadeTo(0, 30); } // 30/40 ms: solo para que no truene; no es el desvanecido de pausa
   seekFrac(last);
   const mv = ev => { last = f(ev.clientX); moved = true; seekFrac(last, true); };
-  const up = () => { s.removeEventListener('pointermove', mv); s.removeEventListener('pointerup', up); s.removeEventListener('pointercancel', up); if (moved) seekFrac(last); };
+  const up = () => {
+    s.removeEventListener('pointermove', mv); s.removeEventListener('pointerup', up); s.removeEventListener('pointercancel', up); if (moved) seekFrac(last);
+    if (!mute) return;
+    // Vuelve a sonar en cuanto el audio está en el punto nuevo. Si el salto ya terminó antes de soltar (un toque rápido), ya:
+    // antes se esperaba un aviso que ya había pasado y quedaba en silencio 1.5 s y luego subía como un desvanecido.
+    const back = () => { if (tok !== P.scrubN || !P.scrub) return; P.scrub = false; if (!P.audio.paused && !FADE.out) fadeTo(userVol, 40); };
+    if (!P.audio.seeking && P.audio.readyState >= 3) { back(); return; }
+    for (const ev of ['seeked', 'playing', 'canplay']) P.audio.addEventListener(ev, back, { once: true });
+    setTimeout(back, 4000);
+  };
   s.addEventListener('pointermove', mv); s.addEventListener('pointerup', up); s.addEventListener('pointercancel', up);
 });
 addEventListener('resize', () => requestAnimationFrame(drawWaves));
@@ -5638,7 +5745,7 @@ document.addEventListener('click', async e => {
     case 'toggle': toggle(); break;
     case 'next': next(false); break;
     case 'prev': prev(); break;
-    case 'mute': P.audio.muted = !P.audio.muted; if (typeof PH !== 'undefined') PH.audio.muted = P.audio.muted; paintVol(); break;
+    case 'mute': { const m = !P.audio.muted; P.els.forEach(a => { a.muted = m; }); } if (typeof PH !== 'undefined') PH.audio.muted = P.audio.muted; paintVol(); break;
     case 'sheet': if (document.body.classList.contains('party-host')) break; openSheet(); break;
     case 'sheet-close': if (!back()) closeSheet(); break;
     case 'queue': if (document.body.classList.contains('party-host')) break; $('#queue').classList.toggle('open'); break;
@@ -5701,7 +5808,7 @@ document.addEventListener('click', async e => {
     case 'dl-wifi': Settings.set('dlWifi', !Settings.dlWifi); el.classList.toggle('on', Settings.dlWifi); DL.config(); toast(Settings.dlWifi ? tx('Solo se descargará con Wi-Fi') : tx('También se descargará con datos móviles')); break;
     case 'pf': Settings.set('pfOn', !Settings.pfOn); el.classList.toggle('on', Settings.pfOn); { const r = $('#pfRow'); if (r) r.hidden = !Settings.pfOn; } PF.sync(); break;
     case 'dl-auto': Settings.set('dlAuto', !Settings.dlAuto); el.classList.toggle('on', Settings.dlAuto); break;
-    case 'fade': Settings.set('fade', !Settings.fade); el.classList.toggle('on', Settings.fade); break;
+    case 'fade': Settings.set('fade', !Settings.fade); el.classList.toggle('on', Settings.fade); { const r = $('#fadeRow'); if (r) r.hidden = !Settings.fade; } break;
     case 'discord': Settings.set('discord', !Settings.discord); el.classList.toggle('on', Settings.discord); { const r = $('#dcCoverRow'); if (r) r.hidden = !Settings.discord; } DISC.key = '-'; DISC.update(); { const x = $('#dcSt'); if (x) x.hidden = !Settings.discord; } dcStatusPaint(); setTimeout(dcStatusPaint, 2500); setTimeout(dcStatusPaint, 7000); break;
     case 'discord-cover': Settings.set('discordCover', !Settings.discordCover); el.classList.toggle('on', Settings.discordCover); DISC.key = '-'; DISC.update(); break;
     case 'wave': Settings.set('wave', !Settings.wave); el.classList.toggle('on', Settings.wave); if (Settings.wave) loadPeaks(P.cur); break;

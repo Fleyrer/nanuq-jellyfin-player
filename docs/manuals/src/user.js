@@ -113,7 +113,7 @@ ${shot('queue', 'El botón Cola cambia la portada por lo que sigue.')}
 <h2>Opciones de una canción</h2>
 <ul><li><b>Iniciar radio</b>: canciones parecidas por artista, álbum y género.</li><li><b>Agregar a una playlist</b> (o crear una nueva).</li>
 <li><b>Favorita</b> ♥: se guarda en Jellyfin y Nanuq lo comprueba con el servidor.</li><li><b>Ir al álbum / al artista</b>.</li></ul>
-${tip('Al pausar, la música baja suave y al reanudar sube suave. Si prefieres que se detenga de golpe, apaga <b>Ajustes → Desvanecer al pausar</b>.', 'leaf')}
+${tip('Al pausar, la música baja suave y al reanudar sube suave; eliges cuánto dura (de 0,5 a 5 s) en <b>Ajustes → Duración del desvanecido</b>. Si tocas ▶ mientras baja, vuelve a subir. Si prefieres que se detenga de golpe, apaga <b>Ajustes → Desvanecer al pausar</b>. Al arrastrar la barra de progreso, la canción queda en silencio y suena donde la sueltas.', 'leaf')}
 <p>Nanuq recuerda la canción y el segundo en que ibas: si cierras la app, al volver toca ▶ y sigue donde estaba.</p>`, `
 <p>Tap any song to play it. The player shows up at the bottom; tap it to open the <b>full-screen player</b>, with the cover, the waveform (drag it to seek), the controls, <b>shuffle</b> and the <b>repeat</b> mode (play once, repeat all, repeat one).</p>
 <h2>The queue</h2>
@@ -123,7 +123,7 @@ ${shot('queue', 'The Queue button swaps the cover for what\'s next.')}
 <h2>Song options</h2>
 <ul><li><b>Start song radio</b>: similar songs by artist, album and genre.</li><li><b>Add to a playlist</b> (or create a new one).</li>
 <li><b>Favorite</b> ♥: saved in Jellyfin and Nanuq checks it with the server.</li><li><b>Go to album / artist</b>.</li></ul>
-${tip('When you pause, the music fades out, and when you resume it fades in. If you\'d rather it stop instantly, turn off <b>Settings → Fade on pause</b>.', 'leaf')}
+${tip('When you pause, the music fades out, and when you resume it fades in; choose how long (0.5 to 5 s) in <b>Settings → Fade length</b>. Tap ▶ while it fades out and it comes back up. If you\'d rather it stop instantly, turn off <b>Settings → Fade on pause</b>. While you drag the progress bar, the song stays silent and plays where you let go.', 'leaf')}
 <p>Nanuq remembers the song and the second you were at: if you close the app, when you come back tap ▶ and it continues where it was.</p>`));
 
   add('letras', t('Letras', 'Lyrics'), t('La letra que sigue la canción, y cómo conseguirla.', 'Lyrics that follow the song, and how to get them.'), t(`
@@ -180,6 +180,7 @@ ${tip('Changed tags or added music on the server? <b>Settings → Refresh from J
 <li>De vez en cuando: algo según la hora, recién llegadas y favoritas.</li></ul>
 <p><b>Cambiar de onda</b> salta a otra ronda; <b>Terminar</b> apaga el DJ y deja la cola. Si pasas la música a otro dispositivo, la sesión del DJ se va con ella.</p>
 ${tip('Con una voz del sistema instalada (escritorio), activa <b>Voz del DJ</b>: Nanuq lee sus presentaciones y baja la música mientras habla.', 'aurora')}
+<p>Mientras arma la primera ronda verás a Nanuq en su tornamesa con frases como «Preparando mezclas…»; se quita en cuanto empieza a sonar. Entre canciones del DJ, una baja mientras la siguiente sube (<b>Ajustes → Transición entre canciones del DJ</b>: 3, 4 o 5 s, o apagada).</p>
 <p>En <b>Ajustes → Animaciones del reproductor</b> eliges: Nanuq con su tornamesa, solo el disco de vinilo o la portada de siempre.</p>`, `
 <div class="shots-row">${shot('dj-player', 'With the DJ, the cover spins like a record.')}${shot('dj', 'The DJ screen and what\'s next.')}</div>
 <p>Tap the <b>DJ Nanuq</b> card on Home (or its ▶). Nanuq builds rounds of about 5 songs and introduces each one:</p>
@@ -188,6 +189,7 @@ ${tip('Con una voz del sistema instalada (escritorio), activa <b>Voz del DJ</b>:
 <li>Every now and then: something for the time of day, new arrivals and favorites.</li></ul>
 <p><b>Change the vibe</b> jumps to another round; <b>End</b> turns the DJ off and keeps the queue. If you send the music to another device, the DJ session goes with it.</p>
 ${tip('With a system voice installed (desktop), turn on <b>DJ voice</b>: Nanuq reads its introductions and lowers the music while it talks.', 'aurora')}
+<p>While it builds the first round you see Nanuq at the turntable with lines like “Preparing mixes…”; it goes away as soon as the music starts. Between DJ songs, one fades out while the next fades in (<b>Settings → Crossfade between DJ songs</b>: 3, 4 or 5 s, or off).</p>
 <p>In <b>Settings → Player animations</b> you choose: Nanuq with its turntable, just the vinyl record or the usual cover.</p>`));
 
   add('resumen', t('Tu semana y Tu año', 'Your week and Your year'), t('Lo que escuchaste, en un video para compartir.', 'What you listened to, in a video to share.'), t(`
@@ -259,16 +261,16 @@ ${shot('settings', 'Ajustes en la computadora.')}
 ${table(['Ajuste', 'Qué hace'], [
     ['Idioma', 'Español, inglés o (Android) el del sistema.'], ['Tema', '18 temas, cada uno con su Nanuq.'],
     ['Mostrar en Discord', 'Escritorio: «Escuchando Nanuq» en tu perfil. Si no aparece, la línea de estado dice por qué.'],
-    ['Calidad del streaming', 'Original o 320/192/128/96 kbps (MP3).'], ['Guardar por adelantado', 'Android: cuántos minutos de la cola bajar antes.'],
-    ['Animaciones del reproductor', 'Todas, solo el disco o ninguna.'], ['Desvanecer al pausar', 'Bajada y subida suave.'], ['Forma de onda real', 'Dibuja la onda de cada canción (usa algo de datos).'],
+    ['Calidad del streaming', 'Original (FLAC, Opus, AAC, MP3… tal cual) o 320/192/128/96 kbps.'], ['Formato al convertir', 'Opus (mejor sonido) o MP3; también para las descargas.'], ['Guardar por adelantado', 'Android: cuántos minutos de la cola bajar antes.'],
+    ['Animaciones del reproductor', 'Todas, solo el disco o ninguna.'], ['Desvanecer al pausar', 'Bajada y subida suave, de 0,5 a 5 s.'], ['Transición entre canciones del DJ', 'Apagada o 3/4/5 s: una canción baja mientras la otra sube.'], ['Forma de onda real', 'Dibuja la onda de cada canción (usa algo de datos).'],
     ['Descargas', 'Android: máximo, solo Wi-Fi, guardar las más escuchadas y calidad.'], ['Mis dispositivos', 'Sincronizar, solo misma red, órdenes de otros usuarios.'],
     ['Servidor', 'Salir, Actualizar desde Jellyfin, Tu semana, datos guardados y Probar conexión.']])}`, `
 ${shot('settings', 'Settings on the computer.')}
 ${table(['Setting', 'What it does'], [
     ['Language', 'Spanish, English or (Android) the system\'s.'], ['Theme', '18 themes, each with its Nanuq.'],
     ['Show on Discord', 'Desktop: “Listening to Nanuq” on your profile. If it doesn\'t show, the status line says why.'],
-    ['Streaming quality', 'Original or 320/192/128/96 kbps (MP3).'], ['Save ahead of time', 'Android: how many minutes of the queue to download early.'],
-    ['Player animations', 'All, just the record or none.'], ['Fade on pause', 'Smooth fade out and in.'], ['Real waveform', 'Draws each song\'s waveform (uses some data).'],
+    ['Streaming quality', 'Original (FLAC, Opus, AAC, MP3… as-is) or 320/192/128/96 kbps.'], ['Conversion format', 'Opus (better sound) or MP3; also for downloads.'], ['Save ahead of time', 'Android: how many minutes of the queue to download early.'],
+    ['Player animations', 'All, just the record or none.'], ['Fade on pause', 'Smooth fade out and in, 0.5 to 5 s.'], ['Crossfade between DJ songs', 'Off or 3/4/5 s: one song fades out as the next fades in.'], ['Real waveform', 'Draws each song\'s waveform (uses some data).'],
     ['Downloads', 'Android: maximum, Wi-Fi only, save the most played and quality.'], ['My devices', 'Sync, same network only, commands from other users.'],
     ['Server', 'Log out, Refresh from Jellyfin, Your week, saved data and Test connection.']])}`));
 

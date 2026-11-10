@@ -11,6 +11,6 @@
   <launchable type="desktop-id">com.nanuq.app.desktop</launchable>
   <content_rating type="oars-1.1"/>
   <releases>
-    <release version="1.44.6" date="2026-11-08"/>
+    <release version="1.46.1" date="2026-11-09"/>
   </releases>
 </component>

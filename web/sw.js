@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Nanuq service worker: guarda la app para abrirla sin conexión.
 // La música y la API de Jellyfin siempre van directo a la red.
-const CACHE = 'nanuq-v1.47.4';
+const CACHE = 'nanuq-v1.48.0';
 const SHELL = ['./', 'index.html', 'i18n.js', 'app.js', 'app.css', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/logo.webp'];
 
 self.addEventListener('install', e => {

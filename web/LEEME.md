@@ -54,7 +54,7 @@ Los textos están en español dentro de `app.js`, envueltos en `tx('…')`, y su
 
 ## Letras
 
-El botón **Letra** (en la pantalla de reproducción o en la barra inferior en computadora) muestra la letra sincronizada y la resalta línea por línea; toca una línea para saltar a ese momento. Requiere Jellyfin 10.9 o más nuevo y letras disponibles:
+El botón **Letra** (en la pantalla de reproducción o en la barra inferior en computadora) muestra la letra sincronizada y la resalta línea por línea; toca una línea para saltar a ese momento. Requiere Jellyfin 10.9 o más nuevo y letras disponibles: Mientras la letra está a la vista en el reproductor y la canción suena, la pantalla no se apaga (en pausa sí, para no gastar batería).
 
 - Archivos `.lrc` (sincronizadas) o `.txt` con el mismo nombre que la canción, en la misma carpeta, o
 - El plugin **LrcLib**: Panel → Plugins → Catálogo → LrcLib, y luego vuelve a escanear la biblioteca.

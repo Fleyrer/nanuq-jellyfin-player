@@ -56,6 +56,12 @@ public class MainActivity extends Activity {
         super.onDestroy();
     }
 
+    /** Pantalla encendida (FLAG_KEEP_SCREEN_ON) mientras la página lo pida: la letra a la vista y sonando. */
+    void setKeepOn(boolean on) {
+        if (on) getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        else getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
     void setBarColor(int color) {
         Window w = getWindow();
         w.setStatusBarColor(color);

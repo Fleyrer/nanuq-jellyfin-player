@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Fleyrer y colaboradores de Nanuq
 // SPDX-License-Identifier: GPL-3.0-or-later
 'use strict';
-const VERSION = '1.47.4';
+const VERSION = '1.48.0';
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 // JSON que llega de afuera (Jellyfin, SomeDL, la fiesta, tus otros dispositivos): sin claves «toString»/«valueOf»/«__proto__».
@@ -3691,7 +3691,7 @@ function updatePlayState() {
   // Como control remoto aquí no suena nada, pero los controles del sistema (barra de tareas, MPRIS, teclas
   // multimedia) deben seguir: manejan lo que suena en el otro dispositivo.
   if (RC.remote) rcKeep(playing);
-  DISC.update();
+  DISC.update(); screenAwake();
 }
 // «Escuchando Nanuq» en tu perfil de Discord (solo en las apps de escritorio, si lo activas en Ajustes). Se avisa al
 // cambiar de canción, pausar, reanudar o saltar (no en cada segundo: Discord admite pocas actualizaciones). En pausa se
@@ -3972,6 +3972,26 @@ function renderSheetQueue(scroll) {
     + (P.queue.length - P.i - 1 > 100 ? `<div class="sqh">${tx('y {0} más', [P.queue.length - P.i - 101])}</div>` : '');
   if (scroll) box.scrollTop = 0;
 }
+// Pantalla encendida mientras lees la letra: reproductor maximizado abierto, con la letra de una canción que la tiene, y
+// sonando (en pausa se apaga normal, para no gastar batería); también al sincronizar una letra a mano. En Android, la
+// marca de la ventana (NanuqAndroid.keepScreen); en la computadora y el navegador, la API Wake Lock.
+const AWAKE = { on: false, lock: null };
+function screenAwake() {
+  const sh = $('#sheet').classList, playing = RC.remote ? !RC.paused : !P.audio.paused && !!P.audio.src && !FADE.out;
+  const want = sh.contains('open') && (SY.on || (LY.mode && !!LY.data && playing));
+  if (want === AWAKE.on) return;
+  AWAKE.on = want;
+  if (window.NanuqAndroid && NanuqAndroid.keepScreen) { try { NanuqAndroid.keepScreen(want); } catch { } return; }
+  if (!navigator.wakeLock) return;
+  if (want) navigator.wakeLock.request('screen').then(l => {
+    l.addEventListener('release', () => { if (AWAKE.lock === l) AWAKE.lock = null; }); // el navegador lo suelta al ocultarse: al volver se pide otro
+    if (AWAKE.on) AWAKE.lock = l; else l.release().catch(() => { });
+  }).catch(() => { });
+  else { if (AWAKE.lock) AWAKE.lock.release().catch(() => { }); AWAKE.lock = null; }
+}
+new MutationObserver(screenAwake).observe($('#sheet'), { attributes: true, attributeFilter: ['class'] }); // abrir/cerrar, letra, sincronizar
+// El navegador suelta el Wake Lock al ocultarse la página: al volver se pide otra vez.
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && AWAKE.on && !AWAKE.lock && !window.NanuqAndroid) { AWAKE.on = false; screenAwake(); } });
 function applyLyricsMode(on) {
   if (on && $('#sheet').classList.contains('qmode')) { $('#sheet').classList.remove('qmode'); $('#sQBtn').classList.remove('on'); }
   LY.mode = on;
@@ -3990,7 +4010,7 @@ async function renderLyrics() {
   box.className = 'lyr center'; box.innerHTML = loading();
   const L = await getLyrics(t);
   if (P.cur !== t || !LY.mode || seq !== LY.seq) return;
-  LY.data = L;
+  LY.data = L; screenAwake(); // con letra o sin ella, la pantalla se decide de nuevo
   if (!L) {
     box.className = 'lyr center';
     box.innerHTML = `<div class="none">${ic('lyrics')}<b>${tx('No hay letra para esta canción')}</b><span>${tx('Jellyfin usa archivos .lrc junto a tus canciones o el plugin LrcLib. También puedes buscarla o pegarla tú y sincronizarla a mano.')}</span><div class="btns">${api.searchLyrics ? `<button class="btn pri" data-act="lyr-search">${ic('search')}${tx('Buscar letra')}</button>` : ''}<button class="btn" data-act="lyr-paste">${ic('paste')}${tx('Pegar letra')}</button></div></div>`;

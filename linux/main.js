@@ -818,8 +818,9 @@ async function start() {
   });
   win.removeMenu();
   // Permisos: Electron, por omisión, concede todo lo que pida la página (micrófono, cámara, ubicación…).
-  // Nanuq solo necesita notificaciones, pantalla completa y copiar al portapapeles.
-  const OK_PERMS = new Set(['notifications', 'fullscreen', 'clipboard-sanitized-write']);
+  // Nanuq solo necesita notificaciones, pantalla completa, copiar al portapapeles y mantener la pantalla encendida (con la
+  // letra a la vista, ver screenAwake en app.js).
+  const OK_PERMS = new Set(['notifications', 'fullscreen', 'clipboard-sanitized-write', 'screen-wake-lock']);
   const ses = win.webContents.session;
   ses.setPermissionRequestHandler((wc, perm, cb, d) => cb(OK_PERMS.has(perm) && (d.requestingUrl || '').startsWith(origin + '/')));
   ses.setPermissionCheckHandler((wc, perm, reqOrigin) => OK_PERMS.has(perm) && reqOrigin === origin);

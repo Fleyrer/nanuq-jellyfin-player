@@ -128,7 +128,7 @@ ${tip('When you pause, the music fades out, and when you resume it fades in; cho
 
   add('letras', t('Letras', 'Lyrics'), t('La letra que sigue la canción, y cómo conseguirla.', 'Lyrics that follow the song, and how to get them.'), t(`
 ${shot('lyrics', 'La línea que suena se ilumina; las demás se apagan.')}
-<p>Toca <b>Letra</b> en el reproductor. La línea que suena se ilumina y la letra avanza sola; toca una línea para saltar a ese momento. Jellyfin 10.9+ las lee de archivos <code>.lrc</code> junto a tus canciones o del plugin <b>LrcLib</b>.</p>
+<p>Toca <b>Letra</b> en el reproductor. La línea que suena se ilumina y la letra avanza sola; toca una línea para saltar a ese momento. Jellyfin 10.9+ las lee de archivos <code>.lrc</code> junto a tus canciones o del plugin <b>LrcLib</b>. Mientras la letra está a la vista y la canción suena, la pantalla no se apaga.</p>
 <h2>Si no hay letra</h2>
 <ul><li><b>Buscar letra</b>: Nanuq la busca en LrcLib y eliges una versión.</li><li><b>Pegar letra</b>: pégala tú (si trae tiempos <code>[00:12.34]</code>, mejor).</li></ul>
 <h2>Sincronizar a mano</h2>
@@ -136,7 +136,7 @@ ${shot('sync', 'El editor: toca Marcar cuando empiece cada línea.')}
 ${steps(['Toca <b>Sincronizar</b> (o ⋮ → Sincronizar letra a mano).', 'Reproduce la canción y toca <b>Marcar</b> justo cuando empiece la línea resaltada (en la computadora, <kbd>Enter</kbd>).', 'Corrige con ↶ (deshacer) y −¼s / +¼s.', 'Toca <b>Guardar</b>: Nanuq sube un <code>.lrc</code> a tu Jellyfin.'])}
 ${tip('Para guardar letras en Jellyfin, tu usuario necesita el permiso <b>Permitir administrar letras</b> (Panel → Usuarios). Sin él, la letra se guarda solo en tu dispositivo.', 'synth')}`, `
 ${shot('lyrics', 'The playing line lights up; the others dim.')}
-<p>Tap <b>Lyrics</b> in the player. The playing line lights up and the lyrics move on their own; tap a line to jump to that moment. Jellyfin 10.9+ reads them from <code>.lrc</code> files next to your songs or from the <b>LrcLib</b> plugin.</p>
+<p>Tap <b>Lyrics</b> in the player. The playing line lights up and the lyrics move on their own; tap a line to jump to that moment. Jellyfin 10.9+ reads them from <code>.lrc</code> files next to your songs or from the <b>LrcLib</b> plugin. While the lyrics are on screen and the song is playing, the screen stays on.</p>
 <h2>If there are no lyrics</h2>
 <ul><li><b>Find lyrics</b>: Nanuq searches LrcLib and you pick a version.</li><li><b>Paste lyrics</b>: paste them yourself (better if they have <code>[00:12.34]</code> timestamps).</li></ul>
 <h2>Syncing by hand</h2>

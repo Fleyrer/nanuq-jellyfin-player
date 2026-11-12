@@ -78,6 +78,7 @@
     var noSource = function () { return { length: 0, start: function () { throw new RangeError('index'); }, end: function () { throw new RangeError('index'); } }; };
     var domErr = function (name, msg) { try { return new DOMException(msg, name); } catch (e) { var x = new Error(msg); x.name = name; return x; } };
     try { N.auReset(); } catch (e) { } // reproductores de una carga anterior de la página (p. ej. al cambiar de idioma)
+    try { if (N.keepScreen) N.keepScreen(false); } catch (e) { } // la página nueva decide si la pantalla queda encendida
 
     class NativeAudio extends EventTarget {
       constructor() {

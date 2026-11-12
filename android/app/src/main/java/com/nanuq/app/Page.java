@@ -71,6 +71,7 @@ final class Page {
     private MutableContextWrapper ctx;
     private WebView web;
     private MainActivity activity; // la pantalla que la muestra (null: sin pantalla)
+    private boolean keepOn;        // la página pidió la pantalla encendida (letra a la vista, ver screenAwake en app.js)
 
     private final NativeAudio.Sink audioSink = js -> main.post(() -> { if (web != null) web.evaluateJavascript(js, null); });
     // Una sola referencia: MediaCenter solo suelta el despachador si sigue siendo este.
@@ -97,6 +98,7 @@ final class Page {
     /** La pantalla muestra la página: la que ya existe (arrancada sin pantalla) o una nueva. Hilo principal. */
     WebView attach(MainActivity a) {
         activity = a;
+        a.setKeepOn(keepOn);
         if (web == null) create(a, START_URL);
         else {
             ctx.setBaseContext(a);
@@ -168,6 +170,7 @@ final class Page {
     }
 
     private void destroy() {
+        keepOn = false; MainActivity ka = activity; if (ka != null) ka.setKeepOn(false);
         main.removeCallbacks(tick);
         main.removeCallbacks(giveUp);
         media.detach(dispatcher);
@@ -243,6 +246,8 @@ final class Page {
         @JavascriptInterface public void setPlaybackState(String state) { media.setPlaybackState(state); }
         @JavascriptInterface public void setActions(String csv) { media.setActions(csv); }
         @JavascriptInterface public void setPosition(double duration, double position, double rate) { media.setPosition(duration, position, rate); }
+        // Pantalla encendida mientras se lee la letra (la decide la página: screenAwake).
+        @JavascriptInterface public void keepScreen(boolean on) { main.post(() -> { keepOn = on; MainActivity a = activity; if (a != null) a.setKeepOn(on); }); }
         @JavascriptInterface public void setBarColor(String css) {
             int c;
             try { c = Color.parseColor(css.trim()); } catch (Exception e) { return; }

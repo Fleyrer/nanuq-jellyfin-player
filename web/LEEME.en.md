@@ -54,7 +54,7 @@ Texts are written in Spanish inside `app.js`, wrapped in `tx('…')`, and their 
 
 ## Lyrics
 
-The **Lyrics** button (on the now playing screen or in the bottom bar on a computer) shows the synced lyrics and highlights them line by line; tap a line to jump to that moment. It requires Jellyfin 10.9 or newer and available lyrics:
+The **Lyrics** button (on the now playing screen or in the bottom bar on a computer) shows the synced lyrics and highlights them line by line; tap a line to jump to that moment. It requires Jellyfin 10.9 or newer and available lyrics: While the lyrics are on screen in the player and the song is playing, the screen doesn't turn off (it does when paused, to save battery).
 
 - `.lrc` (synced) or `.txt` files with the same name as the song, in the same folder, or
 - The **LrcLib** plugin: Dashboard → Plugins → Catalog → LrcLib, then rescan the library.

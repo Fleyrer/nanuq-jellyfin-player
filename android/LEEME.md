@@ -18,6 +18,7 @@ Herramientas instaladas en tu usuario (sin sudo):
 | JDK 21 (Temurin) | `~/.local/opt/jdk21` |
 | Android SDK (platform 35, build-tools 35, platform-tools/adb) | `~/Android/Sdk` |
 | Gradle | se descarga solo con `./gradlew` |
+| Node.js (para la prueba del reproductor, `test/*.test.js`) | el del sistema (`node` en el PATH) |
 
 ## Firma: no pierdas la llave
 

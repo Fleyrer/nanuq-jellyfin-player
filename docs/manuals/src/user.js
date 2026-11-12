@@ -239,13 +239,17 @@ ${tip('Everything goes through your own Jellyfin: no ports are opened on your de
 <ul><li><b>Notificación y pantalla de bloqueo</b> con carátula y controles; los audífonos Bluetooth también. Al desconectar los audífonos, se pausa.</li>
 <li><b>Descargas</b>: toca <b>Descargar</b> en el reproductor. Las canciones que escuchas 3 veces se guardan solas. En Ajustes → Descargas eliges el máximo, solo con Wi-Fi y la calidad. Sin conexión, Inicio te lleva a tus descargas.</li>
 <li><b>Lo que sigue, guardado por adelantado</b> (Ajustes → Reproducción): el teléfono baja las próximas canciones de tu cola (10 minutos, ajustable) para que una red lenta no se note.</li>
-<li><b>Atrás</b> cierra diálogos; en Inicio, manda la app al fondo sin cortar la música.</li></ul>
+<li><b>Atrás</b> cierra diálogos; en Inicio, manda la app al fondo sin cortar la música.</li>
+<li><b>Si otra app empieza a sonar</b> (un video, por ejemplo), Nanuq baja suave y se pausa; cuando ya no suena nada, vuelve sola (hasta 5 minutos después; <b>Ajustes → Volver a sonar cuando la otra app termine</b>). Con avisos, la navegación o una llamada, se pausa y vuelve sola.</li>
+<li><b>En pausa, los controles se quedan</b> en el panel. Si Android cerró Nanuq, ▶ en los audífonos la despierta sin abrir la pantalla y sigue tu cola donde iba.</li></ul>
 ${tip('Nanuq cuida la batería: baila solo unos segundos al empezar cada canción y deja de animarse con la pantalla apagada.', 'abejita')}`, `
 <div class="shots-row">${shot('phone-home', 'Home.', 'phone')}${shot('phone-player', 'Player.', 'phone')}${shot('phone-more', 'More.', 'phone')}</div>
 <ul><li><b>Notification and lock screen</b> with cover and controls; Bluetooth headphones too. Unplugging the headphones pauses it.</li>
 <li><b>Downloads</b>: tap <b>Download</b> in the player. Songs you play 3 times are saved automatically. In Settings → Downloads you choose the maximum, Wi-Fi only and the quality. Without a connection, Home takes you to your downloads.</li>
 <li><b>What's next, saved ahead of time</b> (Settings → Playback): the phone downloads the next songs in your queue (10 minutes, adjustable) so a slow network goes unnoticed.</li>
-<li><b>Back</b> closes dialogs; on Home, it sends the app to the background without stopping the music.</li></ul>
+<li><b>Back</b> closes dialogs; on Home, it sends the app to the background without stopping the music.</li>
+<li><b>If another app starts playing</b> (a video, for example), Nanuq fades out and pauses; once nothing is playing, it comes back on its own (up to 5 minutes later; <b>Settings → Resume when the other app is done</b>). With alerts, navigation or a call, it pauses and comes back on its own.</li>
+<li><b>While paused, the controls stay</b> in the panel. If Android closed Nanuq, ▶ on your headphones wakes it without opening the screen and continues your queue where it was.</li></ul>
 ${tip('Nanuq takes care of the battery: it only dances for a few seconds when each song starts and stops animating with the screen off.', 'abejita')}`));
 
   add('solicitar', t('Solicitar canción', 'Request a song'), t('¿Te falta una canción? Pídela.', 'Missing a song? Request it.'), t(`
@@ -262,7 +266,7 @@ ${table(['Ajuste', 'Qué hace'], [
     ['Idioma', 'Español, inglés o (Android) el del sistema.'], ['Tema', '18 temas, cada uno con su Nanuq.'],
     ['Mostrar en Discord', 'Escritorio: «Escuchando Nanuq» en tu perfil. Si no aparece, la línea de estado dice por qué.'],
     ['Calidad del streaming', '96 kbps por omisión (menos datos), 128/192/320 kbps u Original (FLAC, Opus, AAC, MP3… tal cual). El reproductor maximizado la muestra entre los dos tiempos.'], ['Formato al convertir', 'Opus (mejor sonido) o MP3; también para las descargas.'], ['Guardar por adelantado', 'Android: cuántos minutos de la cola bajar antes.'],
-    ['Animaciones del reproductor', 'Todas, solo el disco o ninguna.'], ['Desvanecer al pausar', 'Bajada y subida suave, de 0,5 a 5 s.'], ['Transición entre canciones del DJ', 'Apagada o 3/4/5 s: una canción baja mientras la otra sube.'], ['Forma de onda real', 'Dibuja la onda de cada canción (usa algo de datos).'],
+    ['Animaciones del reproductor', 'Todas, solo el disco o ninguna.'], ['Volver a sonar cuando la otra app termine', 'Android: tras pausarse porque otra app sonó, vuelve sola cuando ya no suena nada.'], ['Desvanecer al pausar', 'Bajada y subida suave, de 0,5 a 5 s.'], ['Transición entre canciones del DJ', 'Apagada o 3/4/5 s: una canción baja mientras la otra sube.'], ['Forma de onda real', 'Dibuja la onda de cada canción (usa algo de datos).'],
     ['Descargas', 'Android: máximo, solo Wi-Fi, guardar las más escuchadas y calidad.'], ['Mis dispositivos', 'Sincronizar, solo misma red, órdenes de otros usuarios.'],
     ['Servidor', 'Salir, Actualizar desde Jellyfin, Tu semana, datos guardados y Probar conexión.']])}`, `
 ${shot('settings', 'Settings on the computer.')}
@@ -270,7 +274,7 @@ ${table(['Setting', 'What it does'], [
     ['Language', 'Spanish, English or (Android) the system\'s.'], ['Theme', '18 themes, each with its Nanuq.'],
     ['Show on Discord', 'Desktop: “Listening to Nanuq” on your profile. If it doesn\'t show, the status line says why.'],
     ['Streaming quality', '96 kbps by default (less data), 128/192/320 kbps or Original (FLAC, Opus, AAC, MP3… as-is). The maximized player shows it between the two times.'], ['Conversion format', 'Opus (better sound) or MP3; also for downloads.'], ['Save ahead of time', 'Android: how many minutes of the queue to download early.'],
-    ['Player animations', 'All, just the record or none.'], ['Fade on pause', 'Smooth fade out and in, 0.5 to 5 s.'], ['Crossfade between DJ songs', 'Off or 3/4/5 s: one song fades out as the next fades in.'], ['Real waveform', 'Draws each song\'s waveform (uses some data).'],
+    ['Player animations', 'All, just the record or none.'], ['Resume when the other app is done', 'Android: after pausing because another app played, it comes back once nothing is playing.'], ['Fade on pause', 'Smooth fade out and in, 0.5 to 5 s.'], ['Crossfade between DJ songs', 'Off or 3/4/5 s: one song fades out as the next fades in.'], ['Real waveform', 'Draws each song\'s waveform (uses some data).'],
     ['Downloads', 'Android: maximum, Wi-Fi only, save the most played and quality.'], ['My devices', 'Sync, same network only, commands from other users.'],
     ['Server', 'Log out, Refresh from Jellyfin, Your week, saved data and Test connection.']])}`));
 
@@ -304,6 +308,7 @@ ${tip('The technical details are in <code>SECURITY.en.md</code> and in the techn
     ['No veo mis cambios del servidor', '<b>Ajustes → Actualizar desde Jellyfin</b>.'],
     ['Discord no muestra nada', 'Mira la línea de estado en Ajustes: dice si no encontró Discord, si Windows no dejó conectarse (Discord como administrador) o si Discord lo rechazó.'],
     ['Los teléfonos no ven la fiesta', 'Misma red Wi-Fi, firewall (TCP 47864, UDP 47865) o escribe la dirección.'],
+    ['Nanuq se pausó sola (teléfono)', 'Otra app empezó a sonar (un video). Vuelve sola cuando esa app deja de sonar; si sigue reproduciendo en silencio, ciérrala o toca ▶.'],
     ['Una favorita no se queda', 'Jellyfin 12 a veces la borra mientras suena: Nanuq la vuelve a guardar sola. Si persiste, márcala con la canción en pausa.'],
     ['«No se pudo abrir el almacén cifrado»', 'Desbloquea el llavero del sistema y vuelve a abrir Nanuq, o usa <b>Empezar de cero</b>.']])
     + tip('¿Algo más? Abre un issue en el proyecto. Si es un problema de seguridad, usa el reporte privado de GitHub.', 'navy'), table(['If this happens…', 'Try this'], [
@@ -312,6 +317,7 @@ ${tip('The technical details are in <code>SECURITY.en.md</code> and in the techn
     ['I don\'t see my server changes', '<b>Settings → Refresh from Jellyfin</b>.'],
     ['Discord shows nothing', 'Look at the status line in Settings: it says whether it didn\'t find Discord, whether Windows didn\'t allow the connection (Discord as administrator) or whether Discord rejected it.'],
     ['Phones can\'t see the party', 'Same Wi-Fi network, firewall (TCP 47864, UDP 47865) or type the address.'],
+    ['Nanuq paused on its own (phone)', 'Another app started playing (a video). It comes back once that app stops; if it keeps playing silently, close it or tap ▶.'],
     ['A favorite doesn\'t stick', 'Jellyfin 12 sometimes deletes it while it plays: Nanuq saves it again on its own. If it persists, mark it with the song paused.'],
     ['“The encrypted store couldn\'t be opened”', 'Unlock the system keyring and open Nanuq again, or use <b>Start over</b>.']])
     + tip('Anything else? Open an issue in the project. If it\'s a security problem, use GitHub\'s private reporting.', 'navy')));

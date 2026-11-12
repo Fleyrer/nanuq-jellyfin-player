@@ -18,7 +18,7 @@ import java.io.FileOutputStream;
  * deja de publicar una canción).
  */
 final class Resume {
-    private static final String KEY = "native.resume", ART = "resume-art.png";
+    private static final String KEY = "native.resume", ART = "resume-art.jpg", OLD_ART = "resume-art.png"; // PNG: de 1.46.7–1.47.3
     final String title, artist, album;
 
     private Resume(String t, String a, String al) { title = t; artist = a; album = al; }
@@ -38,15 +38,20 @@ final class Resume {
         SecureStore.get(c).del(KEY);
         //noinspection ResultOfMethodCallIgnored
         new File(c.getFilesDir(), ART).delete();
+        //noinspection ResultOfMethodCallIgnored
+        new File(c.getFilesDir(), OLD_ART).delete();
     }
 
     static void saveArt(Context c, Bitmap b) {
         File f = new File(c.getFilesDir(), ART), tmp = new File(c.getFilesDir(), ART + ".tmp");
-        try (FileOutputStream o = new FileOutputStream(tmp)) { b.compress(Bitmap.CompressFormat.PNG, 100, o); }
+        // JPEG al 85 %: unas 10 veces menos que PNG (se reescribe con cada álbum nuevo) y en la tarjeta se ve igual.
+        try (FileOutputStream o = new FileOutputStream(tmp)) { b.compress(Bitmap.CompressFormat.JPEG, 85, o); }
         catch (Exception e) { //noinspection ResultOfMethodCallIgnored
             tmp.delete(); return; }
         //noinspection ResultOfMethodCallIgnored
         tmp.renameTo(f);
+        //noinspection ResultOfMethodCallIgnored
+        new File(c.getFilesDir(), OLD_ART).delete();
     }
 
     static Resume load(Context c) {

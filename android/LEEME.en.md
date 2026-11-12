@@ -18,6 +18,7 @@ Tools installed in your user (no sudo):
 | JDK 21 (Temurin) | `~/.local/opt/jdk21` |
 | Android SDK (platform 35, build-tools 35, platform-tools/adb) | `~/Android/Sdk` |
 | Gradle | downloaded automatically by `./gradlew` |
+| Node.js (for the player test, `test/*.test.js`) | the system one (`node` on the PATH) |
 
 ## Signing: don't lose the key
 

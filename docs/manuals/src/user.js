@@ -261,7 +261,7 @@ ${shot('settings', 'Ajustes en la computadora.')}
 ${table(['Ajuste', 'Qué hace'], [
     ['Idioma', 'Español, inglés o (Android) el del sistema.'], ['Tema', '18 temas, cada uno con su Nanuq.'],
     ['Mostrar en Discord', 'Escritorio: «Escuchando Nanuq» en tu perfil. Si no aparece, la línea de estado dice por qué.'],
-    ['Calidad del streaming', 'Original (FLAC, Opus, AAC, MP3… tal cual) o 320/192/128/96 kbps.'], ['Formato al convertir', 'Opus (mejor sonido) o MP3; también para las descargas.'], ['Guardar por adelantado', 'Android: cuántos minutos de la cola bajar antes.'],
+    ['Calidad del streaming', '96 kbps por omisión (menos datos), 128/192/320 kbps u Original (FLAC, Opus, AAC, MP3… tal cual). El reproductor maximizado la muestra entre los dos tiempos.'], ['Formato al convertir', 'Opus (mejor sonido) o MP3; también para las descargas.'], ['Guardar por adelantado', 'Android: cuántos minutos de la cola bajar antes.'],
     ['Animaciones del reproductor', 'Todas, solo el disco o ninguna.'], ['Desvanecer al pausar', 'Bajada y subida suave, de 0,5 a 5 s.'], ['Transición entre canciones del DJ', 'Apagada o 3/4/5 s: una canción baja mientras la otra sube.'], ['Forma de onda real', 'Dibuja la onda de cada canción (usa algo de datos).'],
     ['Descargas', 'Android: máximo, solo Wi-Fi, guardar las más escuchadas y calidad.'], ['Mis dispositivos', 'Sincronizar, solo misma red, órdenes de otros usuarios.'],
     ['Servidor', 'Salir, Actualizar desde Jellyfin, Tu semana, datos guardados y Probar conexión.']])}`, `
@@ -269,7 +269,7 @@ ${shot('settings', 'Settings on the computer.')}
 ${table(['Setting', 'What it does'], [
     ['Language', 'Spanish, English or (Android) the system\'s.'], ['Theme', '18 themes, each with its Nanuq.'],
     ['Show on Discord', 'Desktop: “Listening to Nanuq” on your profile. If it doesn\'t show, the status line says why.'],
-    ['Streaming quality', 'Original (FLAC, Opus, AAC, MP3… as-is) or 320/192/128/96 kbps.'], ['Conversion format', 'Opus (better sound) or MP3; also for downloads.'], ['Save ahead of time', 'Android: how many minutes of the queue to download early.'],
+    ['Streaming quality', '96 kbps by default (less data), 128/192/320 kbps or Original (FLAC, Opus, AAC, MP3… as-is). The maximized player shows it between the two times.'], ['Conversion format', 'Opus (better sound) or MP3; also for downloads.'], ['Save ahead of time', 'Android: how many minutes of the queue to download early.'],
     ['Player animations', 'All, just the record or none.'], ['Fade on pause', 'Smooth fade out and in, 0.5 to 5 s.'], ['Crossfade between DJ songs', 'Off or 3/4/5 s: one song fades out as the next fades in.'], ['Real waveform', 'Draws each song\'s waveform (uses some data).'],
     ['Downloads', 'Android: maximum, Wi-Fi only, save the most played and quality.'], ['My devices', 'Sync, same network only, commands from other users.'],
     ['Server', 'Log out, Refresh from Jellyfin, Your week, saved data and Test connection.']])}`));

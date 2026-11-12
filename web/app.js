@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Fleyrer y colaboradores de Nanuq
 // SPDX-License-Identifier: GPL-3.0-or-later
 'use strict';
-const VERSION = '1.46.1';
+const VERSION = '1.47.3';
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 // JSON que llega de afuera (Jellyfin, SomeDL, la fiesta, tus otros dispositivos): sin claves «toString»/«valueOf»/«__proto__».
@@ -356,14 +356,9 @@ class Jellyfin {
   // Con calidad «Original», las canciones que no arrancaron en este reproductor se piden directo en MP3 (ver fallbackMp3).
   async stream(t) { return DL.localUrl(t.id) || PF.url(t.id) || this.streamUrl(t, +Settings.quality >= 1e7 && MP3.ids.has(t.id) ? 320000 : Settings.quality); }
   // Copia para guardar en el teléfono; Android la descarga con su propia sesión de reproducción.
-  // Las descargas se guardan en Opus o MP3 (según «Formato al convertir»); con «Original», el archivo tal cual.
-  dlUrl(t) {
-    const br = +Settings.dlQuality;
-    if (br >= 1e7) return this.streamUrl(t, br, 'dl' + uid());
-    const opus = Settings.codec === 'opus' && !MP3.ids.has(t.id); // en el formato de «Formato al convertir»
-    const q = new URLSearchParams({ UserId: this.userId, DeviceId: deviceId(), ApiKey: this.token, api_key: this.token, MaxStreamingBitrate: br, Container: opus ? 'ogg' : 'mp3', TranscodingContainer: opus ? 'ogg' : 'mp3', TranscodingProtocol: 'http', AudioCodec: opus ? 'opus' : 'mp3', PlaySessionId: 'dl' + uid() });
-    return `${this.base}/Audio/${sid(t.id)}/universal?${q}`;
-  }
+  // Si el archivo no pasa de la calidad de las descargas y ya está en un formato que suena tal cual, se guarda así; si no,
+  // Jellyfin lo convierte (a Opus o MP3, según «Formato al convertir»). Con «Original», el archivo tal cual.
+  dlUrl(t) { return this.streamUrl(t, +Settings.dlQuality, 'dl' + uid()); }
   async peaks(t) {
     const r = await fetch(DL.localUrl(t.id) || this.streamUrl(t, 64000));
     if (!r.ok) throw new Error('wave');
@@ -753,10 +748,14 @@ function refreshBear() {
    Settings & theme
    ========================================================= */
 // ¿Este reproductor abre Opus? (Chromium, Electron y el WebView de Android sí; algunos Safari no.)
-const OPUS_OK = (() => { try { return !!new Audio().canPlayType('audio/ogg; codecs="opus"'); } catch { return false; } })();
+// En la app de Android suena el reproductor del sistema (ver newAudio), que abre Opus en Ogg desde Android 10.
+const OPUS_OK = (() => { if (window.NanuqNativeAudio) { const v = /Android (\d+)/.exec(navigator.userAgent); return !!v && +v[1] >= 10; } try { return !!new Audio().canPlayType('audio/ogg; codecs="opus"'); } catch { return false; } })();
+// El reproductor: en la app de Android, el del sistema con su propio foco de audio (NanuqNativeAudio, de
+// android-bridge.js: se usa igual que un <audio>); en el escritorio y el navegador, un <audio>.
+const newAudio = () => window.NanuqNativeAudio ? new NanuqNativeAudio() : new Audio();
 const Settings = {
   theme: store.get('theme', 'navy'),
-  quality: store.get('quality', 140000000),
+  quality: store.get('quality', 96000),   // por omisión la más baja (menos datos); «Original» y las demás en Ajustes
   wave: store.get('wave', false),
   volume: store.get('volume', 1),
   albumSort: store.get('albumSort', 'name'),
@@ -778,6 +777,7 @@ const Settings = {
   fadeMs: store.get('fadeMs', 1000),   // … cuánto dura (0.5–5 s)
   xfade: store.get('xfade', 4),   // segundos de transición entre canciones del DJ (0 = apagada)
   codec: store.get('codec', OPUS_OK ? 'opus' : 'mp3'),   // formato al que Jellyfin convierte: opus | mp3
+  afResume: store.get('afResume', true),   // Android: volver a sonar cuando otra app que tomó el audio deja de sonar
   discord: store.get('discord', false),          // «Escuchando Nanuq» en Discord (apps de escritorio)
   discordCover: store.get('discordCover', false),  // con la portada (comparte la dirección de tu servidor)
   playerAnim: store.get('playerAnim', 'all'),   // con el DJ, en el reproductor: all (Nanuq y el disco) | disc (solo el disco) | none (la portada de siempre)
@@ -790,14 +790,18 @@ const Settings = {
   const one = (k, ok, d) => { if (!ok.includes(Settings[k])) Settings[k] = d; };
   const numIn = (k, a, b, d) => { const v = +Settings[k]; Settings[k] = Number.isFinite(v) && v >= a && v <= b ? v : d; };
   const bool = k => { if (typeof Settings[k] !== 'boolean') Settings[k] = !!Settings[k]; };
-  numIn('volume', 0, 1, 1); numIn('quality', 32000, 140000000, 140000000); numIn('dlQuality', 32000, 140000000, 320000);
+  numIn('volume', 0, 1, 1); numIn('quality', 32000, 140000000, 96000); numIn('dlQuality', 32000, 140000000, 320000);
   numIn('dlMax', 1, 100000, 100); numIn('pfMin', 1, 240, 10); numIn('fadeMs', 500, 5000, 1000);
   one('xfade', [0, 3, 4, 5], 4); one('codec', OPUS_OK ? ['opus', 'mp3'] : ['mp3'], OPUS_OK ? 'opus' : 'mp3');
   one('albumSort', ['name', 'artist', 'recent', 'year', 'random'], 'name'); one('songView', ['list', 'grid'], 'list');
   one('songSort', ['name', 'artist', 'album', 'recent', 'plays', 'random'], 'name'); one('artistView', ['songs', 'albums'], 'songs');
   one('artistSort', ['album', 'name', 'plays'], 'album'); one('playerAnim', ['all', 'disc', 'none'], 'all');
   one('favSort', ['name', 'artist', 'album', 'recent', 'played', 'plays', 'random'], 'name');
-  ['wave', 'devSync', 'devSameNet', 'devOthers', 'dlWifi', 'dlAuto', 'pfOn', 'djVoice', 'fade', 'discord', 'discordCover'].forEach(bool);
+  ['wave', 'devSync', 'devSameNet', 'devOthers', 'dlWifi', 'dlAuto', 'pfOn', 'djVoice', 'fade', 'afResume', 'discord', 'discordCover'].forEach(bool);
+})();
+// Android: el reproductor del sistema sabe si debe volver a sonar solo tras perder el audio (ver NativeAudio.java).
+(() => {
+  try { if (window.NanuqAndroid && NanuqAndroid.auConfig) NanuqAndroid.auConfig(!!Settings.afResume); } catch { }
 })();
 
 /* =========================================================
@@ -852,7 +856,7 @@ window.__nanuqDl = ev => {
     if (prev && prev.state !== 'done' && ev.state === 'done' && !ev.auto && P.cur && P.cur.id === ev.id) toast('«' + (ev.track.name || tx('La canción')) + tx('» ya está guardada en tu teléfono'));
   }
   DL.indexCovers();
-  updateDlBtn();
+  updateDlBtn(); qualPaint();
   const c = cur();
   if (c && c.name === 'downloads') renderDownloadsSoon();
   if (c && c.name === 'settings') { const x = $('#dlSum'); if (x) x.textContent = dlSummary(); }
@@ -898,6 +902,12 @@ const PF = {
   }
 };
 function fmtMB(b) { b = b || 0; return b >= 1e9 ? (b / 1e9).toFixed(1).replace('.', LANG === 'es' ? ',' : '.') + ' GB' : (b / 1e6).toFixed(b >= 1e8 ? 0 : 1).replace('.', LANG === 'es' ? ',' : '.') + ' MB'; }
+// Errores de descarga que manda Android (en español): el primer número (p. ej. el código del servidor) se aparta como {0}
+// y la frase se traduce. Lo que no tenga traducción (errores del sistema) sale tal cual.
+function dlErr(s) {
+  s = str(s).slice(0, 300); const m = /\d+/.exec(s);
+  return m ? tx(s.slice(0, m.index) + '{0}' + s.slice(m.index + m[0].length), [m[0]]) : tx(s);
+}
 function dlStatus(e) {
   if (!e) return '';
   switch (e.state) {
@@ -1539,7 +1549,8 @@ const DJ = {
     this.active = true; this.save();
     P.queue = items; const p = playIndex(0); renderQueueAll();
     this.extend();
-    await p; // la pantalla de carga se quita cuando ya suena
+    // La pantalla de carga se quita cuando ya suena, o a los 12 s (con el audio atorado no debe tapar la app para siempre).
+    await Promise.race([p, new Promise(r => setTimeout(r, 12000))]);
   },
   // ---- El DJ entre tus dispositivos ----
   // Antes de pasarle la música a otro dispositivo se deja en tu Jellyfin el estado de la sesión y qué ronda es cada
@@ -1617,7 +1628,7 @@ const DJ = {
       u.lang = u.voice ? u.voice.lang : LANG; u.rate = 1.03;
       // Como en la radio: la música baja mientras habla. Si interrumpe otra presentación, el volumen de referencia es
       // el de antes de la primera (no el ya bajado), y solo la última presentación lo devuelve.
-      const v = this.duckV ?? Settings.volume; this.duckV = v; // tu volumen (no el de ese instante: podía estar a media rampa) this.duckU = u; P.audio.volume = v * 0.3;
+      const v = this.duckV ?? Settings.volume; this.duckV = v; this.duckU = u; P.audio.volume = v * 0.3; // tu volumen (no el de ese instante: podía estar a media rampa)
       u.onend = u.onerror = () => {
         if (this.duckU !== u) return; // la interrumpió una presentación más nueva
         this.duckU = null; this.duckV = null;
@@ -1740,7 +1751,7 @@ function djLiveSync() {
   $$('.djhero').forEach(h => h.classList.toggle('live', vis && !c.contains('open') && cur()?.name === 'dj' && h.isConnected));
 }
 new MutationObserver(djLiveSync).observe($('#sheet'), { attributes: true, attributeFilter: ['class'] });
-document.addEventListener('visibilitychange', () => { if (document.visibilityState !== 'visible') nqBurstEnd(); setTimeout(djLiveSync, 0); }); // después de que RC.visible se actualice
+document.addEventListener('visibilitychange', () => { if (document.visibilityState !== 'visible') { nqBurstEnd(); rampsFinish(); } setTimeout(djLiveSync, 0); }); // después de que RC.visible se actualice
 let djLiveT = 0; addEventListener('resize', () => { clearTimeout(djLiveT); djLiveT = setTimeout(djLiveSync, 150); }); // al cambiar el ancho, la letra puede tapar al DJ o ponerse al lado
 function djTileHTML() {
   return `<button class="tile djtile${DJ.active ? ' live' : ''}" data-act="open" data-r="dj"><div class="djart">${djBearSVG()}</div><span class="djkick">${DJ.active ? tx('Al aire') : tx('Nuevo')}</span><b>DJ Nanuq</b><small>${tx('Tu música, presentada por Nanuq')}</small><span class="tp" data-act="dj-start" role="button" aria-label="${tx('Empezar DJ')}">${ic('play', 1)}</span></button>`;
@@ -1756,15 +1767,17 @@ const DJL = {
     const el = this.el = document.createElement('div');
     el.className = 'djload'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite');
     el.innerHTML = `<div class="djl-in">${djBearSVG('on keep')}<div class="djl-say"></div><div class="djl-dots" aria-hidden="true"><i></i><i></i><i></i></div></div>`;
+    el.onclick = () => this.hide(true); // un toque la quita
     document.body.appendChild(el); this.t0 = Date.now();
     const say = el.querySelector('.djl-say'), rest = DJ_LOAD_SAYS.slice(1).sort(() => Math.random() - 0.5);
     say.textContent = DJ_LOAD_SAYS[0]; let k = 0;
     this.iv = setInterval(() => { say.classList.add('fade'); setTimeout(() => { say.textContent = rest[k++ % rest.length]; say.classList.remove('fade'); }, 300); }, 2400);
   },
   // Se queda al menos 1 s (si no, parpadea cuando la ronda ya estaba lista).
-  hide() {
-    const el = this.el; if (!el) return;
-    setTimeout(() => { clearInterval(this.iv); el.classList.add('out'); setTimeout(() => { el.remove(); if (this.el === el) this.el = null; }, 350); }, Math.max(0, 1000 - (Date.now() - this.t0)));
+  hide(now) {
+    const el = this.el; if (!el || (el._bye && !now)) return; // ya se está yendo (un toque sí la quita ya)
+    el._bye = true;
+    setTimeout(() => { clearInterval(this.iv); el.classList.add('out'); setTimeout(() => { el.remove(); if (this.el === el) this.el = null; }, 350); }, now ? 0 : Math.max(0, 1000 - (Date.now() - this.t0)));
   }
 };
 V.dj = async (el) => {
@@ -2184,6 +2197,7 @@ V.settings = async (el) => {
     <div class="row"><div class="l">${tx('Desvanecer al pausar')}<small>${tx('La música baja suave al pausar y sube suave al reanudar.')}</small></div><button class="sw${Settings.fade ? ' on' : ''}" data-act="fade" aria-label="${tx('Desvanecer al pausar')}"></button></div>
     <div class="row" id="fadeRow"${Settings.fade ? '' : ' hidden'}><div class="l">${tx('Duración del desvanecido')}<small>${tx('Más corto se siente inmediato; más largo, más suave.')}</small></div><select class="sel" id="fadeSel" aria-label="${tx('Duración del desvanecido')}">${[500, 1000, 1500, 2000, 3000, 4000, 5000].map(v => `<option value="${v}"${+Settings.fadeMs === v ? ' selected' : ''}>${(v / 1000).toLocaleString(LOC)} s</option>`).join('')}</select></div>
     <div class="row"><div class="l">${tx('Transición entre canciones del DJ')}<small>${tx('Con DJ Nanuq, la canción que termina baja mientras la siguiente ya sube.')}</small></div><select class="sel" id="xfSel" aria-label="${tx('Transición entre canciones del DJ')}">${[[0, tx('Apagada')], [3, '3 s'], [4, '4 s'], [5, '5 s']].map(([v, n]) => `<option value="${v}"${+Settings.xfade === v ? ' selected' : ''}>${n}</option>`).join('')}</select></div>
+    ${window.NanuqNativeAudio ? `<div class="row"><div class="l">${tx('Volver a sonar cuando la otra app termine')}<small>${tx('Si otra app empieza a sonar (un video, por ejemplo), Nanuq baja suave y se pausa. Con esto, cuando ya no suene nada (hasta 5 minutos después), vuelve a sonar solo.')}</small></div><button class="sw${Settings.afResume ? ' on' : ''}" data-act="af-resume" aria-label="${tx('Volver a sonar cuando la otra app termine')}"></button></div>` : ''}
     <div class="row"><div class="l">${tx('Forma de onda real')}<small>${tx('Descarga una copia ligera de cada canción para dibujarla (≈2 MB por pista).')}</small></div><button class="sw${Settings.wave ? ' on' : ''}" data-act="wave" aria-label="${tx('Forma de onda')}"></button></div>
     ${PF.usable() ? `<div class="row"><div class="l">${tx('Guardar por adelantado lo que sigue')}<small>${tx('El teléfono baja las próximas canciones de tu cola mientras escuchas, así suenan aunque la red se ponga lenta o se corte un momento. Se guardan solo un rato y no cuentan como descargas.')}</small></div><button class="sw${Settings.pfOn ? ' on' : ''}" data-act="pf" aria-label="${tx('Guardar por adelantado lo que sigue')}"></button></div>
     <div class="row" id="pfRow"${Settings.pfOn ? '' : ' hidden'}><div class="l">${tx('Cuánto guardar por adelantado')}<small>${tx('Minutos de música de tu cola, a partir de la que suena.')}</small></div><select class="sel" id="pfSel">${[5, 10, 15, 20, 30, 60].map(v => `<option value="${v}"${+Settings.pfMin === v ? ' selected' : ''}>${tx('{0} minutos', [v])}</option>`).join('')}</select></div>` : ''}
@@ -2208,8 +2222,8 @@ V.settings = async (el) => {
     <div class="row"><div class="l">Nanuq ${VERSION}<small>${tx('Cliente de música para Jellyfin. Estética inspirada en Polaris.')}</small><small>${tx('Software libre bajo la licencia GNU GPL versión 3 o posterior: puedes usarlo, estudiarlo, compartirlo y modificarlo.')} <a href="https://github.com/Fleyrer/nanuq-jellyfin-player/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">${tx('Ver la licencia')}</a></small></div></div>
   </div>`;
   dcStatusPaint();
-  $('#qSel', el).onchange = e => Settings.set('quality', +e.target.value);
-  if ($('#codecSel', el)) $('#codecSel', el).onchange = e => Settings.set('codec', e.target.value === 'mp3' ? 'mp3' : 'opus');
+  $('#qSel', el).onchange = e => { Settings.set('quality', +e.target.value); qualPaint(); };
+  if ($('#codecSel', el)) $('#codecSel', el).onchange = e => { Settings.set('codec', e.target.value === 'mp3' ? 'mp3' : 'opus'); qualPaint(); };
   $('#fadeSel', el).onchange = e => Settings.set('fadeMs', +e.target.value);
   $('#xfSel', el).onchange = e => Settings.set('xfade', +e.target.value);
   // Cambiar de idioma: se guarda y la página se vuelve a abrir (así todo, hasta lo que se arma al cargar, sale en el idioma
@@ -2244,7 +2258,7 @@ V.downloads = async (el) => {
   const k = regList(done), autoN = all.filter(e => e.auto).length;
   const row = e => {
     const t = e.track || {}, i = doneE.indexOf(e), pct = e.state === 'downloading' && e.total > 0 ? Math.floor(e.bytes / e.total * 100) : -1;
-    const sub = [t.trackArtist || t.artist, e.state === 'done' ? fmtMB(e.size) : dlStatus(e) + (e.state === 'error' && e.error ? ': ' + e.error : '')].filter(Boolean).join(' · ');
+    const sub = [t.trackArtist || t.artist, e.state === 'done' ? fmtMB(e.size) : dlStatus(e) + (e.state === 'error' && e.error ? ': ' + dlErr(e.error) : '')].filter(Boolean).join(' · ');
     return `<div class="dlrow">${coverHTML(t, 100)}<button class="m"${i >= 0 ? ` data-act="play-list" data-l="${k}" data-i="${i}"` : ''}><div class="t">${esc(t.name || tx('Canción'))}${e.auto ? ('<span class="tag">' + tx('Automática') + '</span>') : ''}</div><small>${esc(sub)}</small>${pct >= 0 ? `<div class="dlbar"><i style="width:${pct}%"></i></div>` : ''}</button><button class="cbtn" data-act="dl-remove" data-id="${esc(e.id)}" aria-label="${tx('Quitar de las descargas')}" title="${tx('Quitar')}">${ic('x')}</button></div>`;
   };
   el.innerHTML = head(tx('Descargas'), done.length ? `<button class="btn" data-act="play-list" data-l="${k}" data-i="0">${ic('play', 1)}<span class="lb">${tx('Reproducir')}</span></button>` : '')
@@ -2265,13 +2279,7 @@ function renderDownloadsSoon() {
    Todo se dibuja en un <canvas>: nada de lo que llega del servidor se mete como
    HTML (el resumen en texto de la vista pasa por esc()). La música se genera aquí mismo (no usa tus canciones).
    ========================================================= */
-// Los resúmenes usan los datos del servidor (solo del usuario activo); el historial local que guardaban versiones
-// anteriores ya no se usa y se borra.
-const History = {
-  purge() {
-    try { store.del('history.' + (sid(api && api.userId) || 'local')); store.del('history.local'); for (const k of Object.keys(localStorage)) if (k.startsWith('nanuq.history.')) localStorage.removeItem(k); } catch { }
-  }
-};
+// Los resúmenes usan los datos del servidor (solo del usuario activo).
 // Historial de reproducción del servidor: plugin «Playback Reporting» de Jellyfin. Guarda cada reproducción (usuario,
 // canción, hora y segundos escuchados) desde cualquier app. Su API exige que el usuario sea administrador. Nanuq solo
 // lo lee, para el usuario activo, con la fecha que arma él y el filtro fijo «Audio» (el plugin mete el filtro tal cual
@@ -2288,12 +2296,13 @@ const ServerStats = {
   // Reproducciones entre dos fechas (locales): [{ ms, id, sec }]. Un día por consulta, cuatro a la vez.
   async plays(from, to, onProgress) {
     const days = []; for (let d = new Date(from); d.getTime() < to && days.length < 370; d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)) days.push(d);
-    const tz = -new Date().getTimezoneOffset() / 60, uid = sid(api.userId), pad = n => String(n).padStart(2, '0'), out = [];
+    const uid = sid(api.userId), pad = n => String(n).padStart(2, '0'), out = [];
     let k = 0, done = 0, stop = false;
     const worker = async () => {
       while (k < days.length && !stop) {
         const d = days[k++], ds = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-        const r = await api.req(`/user_usage_stats/${uid}/${ds}/GetItems`, { params: { filter: 'Audio', timezoneOffset: tz } }).catch(() => []);
+        // La diferencia horaria de ESE día (con horario de verano cambia a mitad del año), no la de hoy.
+        const r = await api.req(`/user_usage_stats/${uid}/${ds}/GetItems`, { params: { filter: 'Audio', timezoneOffset: -d.getTimezoneOffset() / 60 } }).catch(() => []);
         for (const x of Array.isArray(r) ? r.slice(0, 3000) : []) {
           const id = sid(x && x.Id); if (!id) continue;
           const m = /(\d{1,2}):(\d{2})\s*([AaPp])?/.exec(String(x.Time || '')); let h = m ? +m[1] : 12; const mi = m ? +m[2] : 0;
@@ -3270,7 +3279,7 @@ async function render(restore) {
    Player
    ========================================================= */
 const P = {
-  audio: new Audio(), scrubN: 0, queue: [], i: -1, cur: null, mode: ['once', 'all', 'one'].includes(store.get('mode', 'once')) ? store.get('mode', 'once') : 'once', session: uid(), seq: 0, peaks: new Map(), lastReport: 0,
+  audio: newAudio(), scrubN: 0, queue: [], i: -1, cur: null, mode: ['once', 'all', 'one'].includes(store.get('mode', 'once')) ? store.get('mode', 'once') : 'once', session: uid(), seq: 0, peaks: new Map(), lastReport: 0,
 };
 P.audio.preload = 'auto';
 // Pausas que hace Nanuq (tus botones, la barra espaciadora, los controles del sistema, la fiesta, cambiar de canción…)
@@ -3280,7 +3289,7 @@ P.audio.preload = 'auto';
 P.pause = () => { P.ownPauseAt = Date.now(); xfKill(0); if (FADE.out) fadeStop(); P.audio.pause(); };
 // Dos <audio>: en la transición entre canciones del DJ (crossfade) la que termina sigue sonando en el otro mientras baja.
 // P.audio es siempre el de la canción actual; los eventos del otro se ignoran (onAudio).
-P.els = [P.audio, new Audio()]; P.els[1].preload = 'auto';
+P.els = [P.audio, newAudio()]; P.els[1].preload = 'auto';
 P.els.forEach(a => { a.volume = Settings.volume; });
 const onAudio = (ev, fn) => P.els.forEach(a => a.addEventListener(ev, e => { if (e.target === P.audio) fn(e); }));
 // Como control remoto, P.queue es la cola del OTRO dispositivo: no se guarda como tuya.
@@ -3321,7 +3330,7 @@ function pdur() {
   if (!P.off && d && isFinite(d)) return d;
   return P.cur?.duration || (d && isFinite(d) ? (P.off || 0) + d : 0);
 }
-function setSrc(url) { clearTimeout(P.seekT); P.dragSec = null; P.off = 0; P.srcBase = url; P.ownPauseAt = Date.now(); P.extPause = null; P.audio.src = url; }
+function setSrc(url) { clearTimeout(P.seekT); P.dragSec = null; P.off = 0; P.srcBase = url; P.ownPauseAt = Date.now(); P.extPause = null; P.audio.src = url; qualPaint(); }
 // drag: el usuario está arrastrando la barra. Si saltar exige pedir otra vez el audio (conversión en vivo) o mandar
 // una orden al otro dispositivo, solo se mueve la barra y la petición sale al soltar o tras 300 ms quieto: así no se
 // arranca una conversión nueva en Jellyfin por cada movimiento del dedo.
@@ -3351,6 +3360,7 @@ async function playIndex(i, autoplay = true, quiet = false) {
   if (partyHostOpen()) return; // con la fiesta abierta, tu música no suena
   if (RC.remote) { RC.playQueue(P.queue, i); return; }
   if (!P.xfGo) xfKill(300); // cambiaste de canción a media transición: la que se iba se apaga ya
+  if (FADE.out) { fadeStop(); P.audio.volume = userVol(); } // elegiste otra canción mientras bajaba para pausar: suena a tu volumen y no se pausa al terminar la bajada
   if (P.cur && !quiet && !P.xfGo) api.report('stop', P.cur, ptime());
   P.i = i; P.cur = P.queue[i]; const n = ++P.seq;
   saveQueue(); updateNow(); renderQueueAll(); markCurrent(); DJ.onTrack();
@@ -3401,7 +3411,7 @@ function localFailed(n) {
   P.localFailSeq = n;
   if (PF.isUrl(P.srcBase)) { try { NanuqAndroid.pfBroken(t.id); } catch { } setSrc(api.streamUrl(t, +Settings.quality >= 1e7 && MP3.ids.has(t.id) ? 320000 : Settings.quality)); P.audio.play().catch(() => { }); return true; } // la guardada por adelantado: sin aviso
   const e = DL.get(t.id);
-  setSrc(api.streamUrl(t, 320000));
+  setSrc(api.streamUrl(t, 320000)); setTimeout(qualPaint, 400);
   P.audio.play().catch(() => { });
   if (e) { MP3.add(t.id); DL.remove(t.id); setTimeout(() => DL.add(t, !!e.auto), 300); } // la copia nueva, en MP3
   toast(tx('La copia descargada de «') + t.name + tx('» no se pudo reproducir: suena desde el servidor y se volverá a descargar en MP3.'), 5500);
@@ -3412,7 +3422,7 @@ function canFallback(n) {
 }
 function fallbackMp3(n) {
   if (!canFallback(n)) return false;
-  P.fbSeq = n; clearTimeout(P.fbT); MP3.add(P.cur.id);
+  P.fbSeq = n; clearTimeout(P.fbT); MP3.add(P.cur.id); qualPaint();
   const t = P.cur;
   setSrc(api.streamUrl(t, Math.min(320000, +Settings.quality)));
   armStallWatch(n);
@@ -3458,10 +3468,18 @@ function replayHere(autoplay = true) {
 // rampa lineal de amplitud parecía cambiar casi todo al principio al bajar y al final al subir.
 // Con temporizadores y no requestAnimationFrame: los cuadros se detienen con la pantalla apagada, y una página que suena no
 // se frena. El tope (ms + 300) asegura que termine aunque el temporizador se atrase.
-const FADE = { iv: 0, t: 0, on: false, base: 1, run: 0 }, FADE_DB = -50; // por debajo de −50 dB, silencio
+const FADE = { iv: 0, t: 0, on: false, run: 0 }, FADE_DB = -50; // por debajo de −50 dB, silencio
 const toDb = v => v > 0 ? Math.max(FADE_DB, 20 * Math.log10(v)) : FADE_DB;
 const fromDb = d => d <= FADE_DB ? 0 : 10 ** (d / 20);
-function rampStop(st) { clearInterval(st.iv); clearTimeout(st.t); st.on = false; st.run++; }
+function rampStop(st) { clearInterval(st.iv); clearTimeout(st.t); st.on = false; st.run++; st.end = null; }
+// ¿La página no está a la vista? (pantalla apagada o bloqueada, app en segundo plano: en Android lo avisa la app nativa con
+// __nanuqVis). Ahí los temporizadores van frenados (≈ 1 por minuto) y Chromium PAUSA el audio que suena a volumen 0 en
+// una página oculta (para ahorrar batería): una canción que empezaba en silencio para subir con una rampa se quedaba en
+// pausa y no se podía reanudar hasta encender la pantalla. Por eso, oculta: sin desvanecidos ni transición del DJ.
+// En la app de escritorio no aplica: sus temporizadores no se frenan con la ventana minimizada (backgroundThrottling: false).
+const pageHidden = () => !window.nanuqDesktop && (document.visibilityState !== 'visible' || (typeof RC !== 'undefined' && RC.visible === false));
+// La página se ocultó a media rampa: se termina ya (pausa ya, o volumen final ya; la canción que se iba, apagada).
+function rampsFinish() { if (FADE.on && FADE.end) FADE.end(); if (XF.on && XF.end) XF.end(); }
 // to: volumen final, o una función (se lee en cada paso: si el DJ empieza a hablar a media rampa, se adapta).
 // pow: curva de potencia constante (seno/coseno) para el crossfade: con dos rampas en dB a la vez, a la mitad las dos
 // canciones quedaban cerca de −20 dB y se oía un hueco; así la suma se mantiene pareja.
@@ -3469,8 +3487,8 @@ function ramp(st, el, to, ms, done, pow = false) {
   rampStop(st); const run = st.run, v0 = el.volume, a = toDb(v0), t0 = performance.now(), goal = () => Math.max(0, Math.min(1, typeof to === 'function' ? to() : to));
   const at = k => { const g = goal(); return !pow ? fromDb(a + (toDb(g) - a) * k) : g < v0 ? g + (v0 - g) * Math.cos(k * Math.PI / 2) : v0 + (g - v0) * Math.sin(k * Math.PI / 2); };
   let fin = false; const end = () => { if (fin || run !== st.run) return; fin = true; rampStop(st); el.volume = goal(); if (done) done(); };
-  if (ms <= 0 || el.muted) { end(); return; }
-  st.on = true;
+  if (ms <= 0 || el.muted || pageHidden()) { end(); return; }
+  st.on = true; st.end = end;
   st.iv = setInterval(() => { const k = (performance.now() - t0) / ms; if (k >= 1) end(); else el.volume = Math.min(1, at(k)); }, 4);
   st.t = setTimeout(end, ms + 300);
 }
@@ -3483,7 +3501,7 @@ const softMs = () => Settings.fade ? Settings.fadeMs : 0;
 const userVol = () => DJ.duckU ? Settings.volume * 0.3 : Settings.volume;
 function pauseSoft() {
   if (P.audio.paused) return;
-  const base = userVol(); FADE.base = base;
+  const base = userVol();
   xfKill(softMs());
   // FADE.out: ya cuenta como pausa (el botón cambia al instante) aunque siga bajando; tocar ▶ lo cancela (playSoft).
   fadeTo(0, softMs(), () => { FADE.out = false; P.pause(); P.audio.volume = base; });
@@ -3492,9 +3510,10 @@ function pauseSoft() {
 function playSoft() {
   // Después de una pausa que no hizo Nanuq, la salida de audio puede haber quedado muerta: se vuelve a cargar la canción.
   if (P.extPause && P.extPause.seq === P.seq && P.cur && !RC.remote) { P.extPause = null; replayHere(); return; }
-  const base = userVol(); FADE.base = base;
+  const base = userVol();
   if (FADE.out && !P.audio.paused) { FADE.out = false; fadeTo(base, softMs()); updatePlayState(); return; } // a media bajada: vuelve a subir
-  if (softMs() && !P.audio.muted) { fadeStop(); P.audio.volume = 0; }
+  if (softMs() && !P.audio.muted && !pageHidden()) { fadeStop(); P.audio.volume = 0; } // oculta: sin subir desde 0 (ver pageHidden)
+  else if (pageHidden()) { fadeStop(); P.audio.volume = base; }
   P.audio.play().then(() => fadeTo(base, softMs())).catch(() => { P.audio.volume = base; });
 }
 // Fiesta abierta en esta computadora y sonando (o en pausa) su canción: el play, siguiente, anterior, la barra espaciadora,
@@ -3556,7 +3575,7 @@ function xfKill(ms = 0) {
 }
 function xfCheck() {
   const sec = +Settings.xfade, nx = P.queue[P.i + 1];
-  if (!sec || P.scrub || XF.seq === P.seq || !DJ.active || RC.remote || partyHostOpen() || SY.on || P.mode === 'one' || P.audio.paused || FADE.on) return;
+  if (!sec || P.scrub || XF.seq === P.seq || !DJ.active || RC.remote || partyHostOpen() || SY.on || P.mode === 'one' || P.audio.paused || FADE.on || pageHidden()) return; // oculta: la siguiente entra normal al terminar (ver pageHidden)
   if (!P.cur || P.cur.djS !== DJ.session || !nx || nx.djS !== DJ.session) return;
   const d = pdur(), left = d - ptime();
   // +0.5 s: lo que tarda en arrancar la siguiente (las rampas empiezan cuando ya suena).
@@ -3642,12 +3661,27 @@ function updateNow() {
       navigator.mediaSession.metadata = t ? new MediaMetadata({ title: t.name, artist: t.trackArtist || t.artist || '', album: t.album || '', artwork: u ? [96, 256, 512].map(s => ({ src: api.img(t, s), sizes: s + 'x' + s, type: 'image/jpeg' })) : [{ src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' }] }) : null;
     } catch { }
   }
-  updatePlayState(); drawWaves();
+  updatePlayState(); drawWaves(); qualPaint();
   updateFavBtn(); updateDlBtn(); refreshFav(t); RC.decorate();
   if (SY.on && P.cur !== SY.t) syncCancel(tx('Sincronización cancelada: cambió la canción'));
   if (LY.mode) renderLyrics();
   refreshLyricsButtons();
   DJ.scene();
+}
+// Cómo llega la canción que suena, para el reproductor maximizado (entre los dos tiempos): formato y calidad máxima de
+// la conversión de Jellyfin (un archivo que ya pesa menos suena tal cual), «Original», o «En el teléfono» si es una
+// descarga. Nada en el modo demo ni controlando otro dispositivo.
+function qualPaint() {
+  const el = $('#sQual'); if (!el) return;
+  const t = P.cur; let s = '';
+  if (t && api && api.kind === 'jellyfin' && !RC.remote) {
+    const q = +Settings.quality, mp3 = MP3.ids.has(t.id);
+    if (DL.isLocal(P.srcBase) && !PF.isUrl(P.srcBase)) s = tx('En el teléfono'); // la que de verdad suena desde la descarga
+    else if (q >= 1e7) s = mp3 ? 'MP3 · 320 kbps' : tx('Original');
+    else s = (mp3 || Settings.codec !== 'opus' ? 'MP3' : 'Opus') + ' · ' + Math.round(q / 1000) + ' kbps';
+  }
+  el.textContent = s;
+  el.title = s ? tx('Calidad del streaming (como máximo). Cámbiala en Ajustes → Calidad del streaming.') : '';
 }
 function updatePlayState() {
   const party = partyNow(), playing = party ? !PH.audio.paused : RC.remote ? !RC.paused : !P.audio.paused && !!P.audio.src && !FADE.out;
@@ -3704,7 +3738,7 @@ async function dcStatusPaint() {
 // las órdenes allá (RC.cmd).
 const RCK = { el: null, posAt: 0 };
 function rcKeep(on) {
-  if (!('mediaSession' in navigator)) return;
+  if (!('mediaSession' in navigator) || window.NanuqAndroid) return; // en Android la notificación es nativa (y un audio del WebView le quitaría el foco a otras apps)
   if (!RCK.el) {
     if (!on) return;
     const n = 8000 * 12; // 12 s de silencio a 8 kHz
@@ -3742,7 +3776,8 @@ onAudio('playing', () => { setTimeout(() => { if (!P.audio.paused && !FADE.on &&
 onAudio('playing', () => { clearTimeout(P.fbT); if (!RC.remote && RCK.el && !RCK.el.paused) RCK.el.pause(); }); // ya suena la canción: el silencio se pausa
 onAudio('pause', () => {
   // ¿La pidió Nanuq? Si no (otra app tomó el audio), se recuerda para reanudar con la canción recargada.
-  if (!P.audio.ended && !RC.remote && P.audio.getAttribute('src') && Date.now() - (P.ownPauseAt || 0) > 1500) P.extPause = { seq: P.seq, at: Date.now() };
+  // (El reproductor del sistema de Android no queda así: si lo pausó otra app, al reanudar sigue donde iba.)
+  if (!P.audio.ended && !P.audio.native && !RC.remote && P.audio.getAttribute('src') && Date.now() - (P.ownPauseAt || 0) > 1500) P.extPause = { seq: P.seq, at: Date.now() };
   QPOS.save(true);
   updatePlayState(); if (api) api.report('progress', P.cur, ptime(), true); // (sin sesión todavía: p. ej. la fiesta detiene la música antes de entrar)
   // Entre canciones también hay una pausa breve: solo se pone triste si la música de verdad se detuvo.
@@ -3755,7 +3790,12 @@ onAudio('seeked', () => { LY.hold = 0; syncLyrics(true); DISC.update(); });
 onAudio('error', () => {
   if (!P.audio.getAttribute('src') || !P.cur) return;
   // Error de red: se recuerda para reintentar sola en cuanto vuelva la conexión (evento «online» o al volver a la app).
-  if (P.audio.error && P.audio.error.code === MediaError.MEDIA_ERR_NETWORK) P.netLost = { seq: P.seq, at: Date.now() };
+  const net = !!P.audio.error && P.audio.error.code === MediaError.MEDIA_ERR_NETWORK;
+  if (net) P.netLost = { seq: P.seq, at: Date.now() };
+  // Se cortó la red a media canción (el reproductor de Android lo avisa así): no es que el formato no sirva. Se espera a
+  // que vuelva y sigue en el mismo segundo (netBack, stallCheck). Antes caía en el MP3 de respaldo: la canción volvía a
+  // empezar desde 0 y quedaba en MP3 para siempre.
+  if (net && ptime() > 1) { updatePlayState(); return; }
   if (localFailed(P.seq) || fallbackMp3(P.seq)) return;
   updatePlayState(); playFailed(P.seq);
 });
@@ -3796,7 +3836,7 @@ document.addEventListener('pointerdown', e => {
   let last = f(e.clientX), moved = false;
   // Mientras arrastras, la canción queda en silencio (bajada rápida, sin chasquido) y vuelve a sonar donde la sueltes.
   const mute = !RC.remote && !partyNow() && !P.audio.paused && !FADE.out, tok = ++P.scrubN;
-  if (mute) { P.scrub = true; fadeTo(0, 30); } // 30/40 ms: solo para que no truene; no es el desvanecido de pausa
+  if (mute) { P.scrub = true; xfKill(30); fadeTo(0, 30); } // 30/40 ms: solo para que no truene; no es el desvanecido de pausa
   seekFrac(last);
   const mv = ev => { last = f(ev.clientX); moved = true; seekFrac(last, true); };
   const up = () => {
@@ -4177,8 +4217,11 @@ function renderQueue(box) {
   const sel = box.querySelector('[data-mode]'); sel.onchange = e => setMode(e.target.value);
   const c = box.querySelector('.qr.cur'); if (c) requestAnimationFrame(() => { const l = box.querySelector('.q-list'); const top = c.offsetTop - l.offsetTop; if (top < l.scrollTop || top > l.scrollTop + l.clientHeight - 60) l.scrollTop = top - l.clientHeight / 3; });
 }
+// El panel lateral de la cola solo se dibuja si se ve (pantalla ancha o abierto). En el teléfono está oculto y antes se
+// armaba igual con TODA la cola (hasta 3000 filas) en cada cambio de canción; se pone al día al abrirlo (queuePanel).
+function queuePanel() { const q = $('#queue'); if (mqQueue.matches || q.classList.contains('open')) renderQueue(q); }
 function renderQueueAll() {
-  renderQueue($('#queue')); renderSheetQueue();
+  queuePanel(); renderSheetQueue();
   if (cur()?.name === 'queue') { const b = $('.qview'); if (b) { const m = $('#main').scrollTop; renderQueue(b); $('#main').scrollTop = m; } }
 }
 // Mueve una canción de la cola de la posición «from» a «to» (la que suena sigue sonando).
@@ -4562,7 +4605,7 @@ window.__nanuqTick = () => {
   if (P.netLost && audioDead() && navigator.onLine !== false) netBack();
   stallCheck(); // con la pantalla bloqueada el setInterval de la página va frenado
 };
-window.__nanuqVis = v => { RC.visible = !!v; if (v) { netBack(); if (typeof PG !== 'undefined') PG.wake(true); } else nqBurstEnd(); djLiveSync(); };
+window.__nanuqVis = v => { RC.visible = !!v; if (v) { netBack(); if (typeof PG !== 'undefined') PG.wake(true); } else { nqBurstEnd(); rampsFinish(); } djLiveSync(); };
 async function openDevices() {
   if (!api || api.kind !== 'jellyfin') { toast(tx('Disponible al conectarte a tu servidor Jellyfin.')); return; }
   if (!Settings.devSync) { toast(tx('Activa «Sincronizar con mis otros dispositivos» en Ajustes.'), 4000); return; }
@@ -4773,9 +4816,9 @@ async function connTest() {
   // Prueba con un <audio> real (silenciado): así arranca el reproductor de verdad, con sus saltos (Range) y su decodificador.
   function playerProbe(url, ms = 20000) {
     return new Promise(resolve => {
-      const a = new Audio(); a.muted = true; a.preload = 'auto';
+      const a = newAudio(); a.muted = true; a.preload = 'auto'; // el mismo reproductor que suena de verdad
       const t0 = performance.now(); let waits = 0, done = false, to;
-      const end = r => { if (done) return; done = true; clearTimeout(to); try { a.pause(); a.removeAttribute('src'); a.load(); } catch { } resolve({ ...r, waits, ms: performance.now() - t0 }); };
+      const end = r => { if (done) return; done = true; clearTimeout(to); try { a.pause(); a.removeAttribute('src'); a.load(); if (a.dispose) a.dispose(); } catch { } resolve({ ...r, waits, ms: performance.now() - t0 }); };
       a.addEventListener('waiting', () => waits++); a.addEventListener('stalled', () => waits++);
       a.addEventListener('playing', () => end({ ok: true }));
       a.addEventListener('error', () => end({ ok: false, err: a.error ? tx('código ') + a.error.code + (a.error.message ? ' (' + a.error.message + ')' : '') : tx('desconocido') }));
@@ -4957,10 +5000,7 @@ const partyHost = () => !!(window.nanuqDesktop && window.nanuqDesktop.party);
 const partyGuest = () => !partyHost() && !!window.NanuqAndroid;
 const partyOn = () => partyHost() || partyGuest();
 // Canción para mandar a la fiesta: MP3 320 kbps (se reproduce en cualquier lado y pesa poco).
-function partySongUrl(t) {
-  const q = new URLSearchParams({ UserId: api.userId, DeviceId: deviceId(), ApiKey: api.token, api_key: api.token, MaxStreamingBitrate: 320000, Container: 'mp3', TranscodingContainer: 'mp3', TranscodingProtocol: 'http', AudioCodec: 'mp3', PlaySessionId: 'party' + uid() });
-  return `${api.base}/Audio/${sid(t.id)}/universal?${q}`;
-}
+function partySongUrl(t) { return api.streamUrl(t, 320000, 'party' + uid(), 'mp3'); }
 // Carátula para la fiesta: una miniatura JPEG de 240 px dibujada aquí (de tu Jellyfin o de tus descargas). Viaja con la
 // canción como data: (≤ 150 KB); si no se puede, la canción va sin carátula.
 async function partyCover(t) {
@@ -5740,7 +5780,7 @@ document.addEventListener('click', async e => {
       [tx('Pegar o editar letra'), 'paste', lyricsPaste],
       ...(LY.data && LY.data.local ? [[tx('Quitar la letra guardada en este teléfono'), 'x', forgetLocalLyrics]] : []),
       ...(api.kind === 'jellyfin' ? [[tx('Mis dispositivos'), 'devices', openDevices]] : []),
-      [tx('Ir al álbum'), 'disc', () => (P.cur.albumId || P.cur.album) && go('album', { id: P.cur.albumId, tid: P.cur.id }, { push: true })], [tx('Ir al artista'), 'user', () => (P.cur.artistId || P.cur.artist || P.cur.trackArtist) && go('artist', { id: P.cur.artistId, name: P.cur.artist || P.cur.trackArtist }, { push: true })], [tx('Ver la cola'), 'queue', () => mqMobile.matches ? go('queue') : (closeSheet(), $('#queue').classList.add('open'))]]); break;
+      [tx('Ir al álbum'), 'disc', () => (P.cur.albumId || P.cur.album) && go('album', { id: P.cur.albumId, tid: P.cur.id }, { push: true })], [tx('Ir al artista'), 'user', () => (P.cur.artistId || P.cur.artist || P.cur.trackArtist) && go('artist', { id: P.cur.artistId, name: P.cur.artist || P.cur.trackArtist }, { push: true })], [tx('Ver la cola'), 'queue', () => mqMobile.matches ? go('queue') : (closeSheet(), $('#queue').classList.add('open'), queuePanel())]]); break;
     case 'play-artist': { try { let t = await api.artistTracks(d.id, d.name); if (d.shuffle) t = t.sort(() => Math.random() - .5); if (t.length) setQueue(t, 0); else toast(tx('Este artista no tiene canciones')); } catch (err) { toast(err.message); } break; }
     case 'toggle': toggle(); break;
     case 'next': next(false); break;
@@ -5748,7 +5788,7 @@ document.addEventListener('click', async e => {
     case 'mute': { const m = !P.audio.muted; P.els.forEach(a => { a.muted = m; }); } if (typeof PH !== 'undefined') PH.audio.muted = P.audio.muted; paintVol(); break;
     case 'sheet': if (document.body.classList.contains('party-host')) break; openSheet(); break;
     case 'sheet-close': if (!back()) closeSheet(); break;
-    case 'queue': if (document.body.classList.contains('party-host')) break; $('#queue').classList.toggle('open'); break;
+    case 'queue': if (document.body.classList.contains('party-host')) break; $('#queue').classList.toggle('open'); queuePanel(); break;
     case 'lyrics': setLyricsMode(!LY.mode); break;
     case 'genre-shuffle': { const l = lists[d.l]; if (l && l.length) { const sh = [...l]; for (let i = sh.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [sh[i], sh[j]] = [sh[j], sh[i]]; } setQueue(sh, 0); } break; }
     case 'songview': Settings.set('songView', d.v); { const m = $('#main').scrollTop; await render(); $('#main').scrollTop = m; } break;
@@ -5808,6 +5848,7 @@ document.addEventListener('click', async e => {
     case 'dl-wifi': Settings.set('dlWifi', !Settings.dlWifi); el.classList.toggle('on', Settings.dlWifi); DL.config(); toast(Settings.dlWifi ? tx('Solo se descargará con Wi-Fi') : tx('También se descargará con datos móviles')); break;
     case 'pf': Settings.set('pfOn', !Settings.pfOn); el.classList.toggle('on', Settings.pfOn); { const r = $('#pfRow'); if (r) r.hidden = !Settings.pfOn; } PF.sync(); break;
     case 'dl-auto': Settings.set('dlAuto', !Settings.dlAuto); el.classList.toggle('on', Settings.dlAuto); break;
+    case 'af-resume': Settings.set('afResume', !Settings.afResume); el.classList.toggle('on', Settings.afResume); try { NanuqAndroid.auConfig(!!Settings.afResume); } catch { } break;
     case 'fade': Settings.set('fade', !Settings.fade); el.classList.toggle('on', Settings.fade); { const r = $('#fadeRow'); if (r) r.hidden = !Settings.fade; } break;
     case 'discord': Settings.set('discord', !Settings.discord); el.classList.toggle('on', Settings.discord); { const r = $('#dcCoverRow'); if (r) r.hidden = !Settings.discord; } DISC.key = '-'; DISC.update(); { const x = $('#dcSt'); if (x) x.hidden = !Settings.discord; } dcStatusPaint(); setTimeout(dcStatusPaint, 2500); setTimeout(dcStatusPaint, 7000); break;
     case 'discord-cover': Settings.set('discordCover', !Settings.discordCover); el.classList.toggle('on', Settings.discordCover); DISC.key = '-'; DISC.update(); break;
@@ -6000,7 +6041,6 @@ function showLogin(stage) {
 }
 function startApp(a) {
   api = a; cache.clear(); ServerStats.ok = null;
-  setTimeout(() => History.purge(), 1500); // historial local de versiones anteriores: ya no se usa
   setTimeout(() => RC.start(), 800);
   setTimeout(() => DL.backfillCovers(), 4000);
   setTimeout(() => REQ.schedule(0), 2500); // pedidos a SomeDL que seguían en camino
@@ -6035,8 +6075,8 @@ async function logout() {
 $('#sidenav').innerHTML = NAV.map(([r, n, i]) => `<button data-act="nav" data-r="${r}">${ic(i)}${n}</button>`).join('');
 $('#tabs').innerHTML = TABS.map(([r, n, i]) => `<button data-act="nav" data-r="${r}">${ic(i)}${n}</button>`).join('');
 bearInit();
-store.del('playerBear'); // opción quitada (Nanuq ya no aparece sobre el reproductor)
 applyTheme(Settings.theme);
+mqQueue.addEventListener?.('change', queuePanel); // la ventana se ensanchó: el panel aparece al día
 mqMobile.addEventListener?.('change', () => { if (!mqMobile.matches && cur()?.name === 'queue') go('home', {}, { root: true }); requestAnimationFrame(drawWaves); });
 DL.init();
 (async () => {
@@ -6054,6 +6094,12 @@ const sess = await Vault.load();
 if (sess && sess.kind === 'jellyfin' && sess.base && !recentServers().some(x => x.base === sess.base)) rememberServer({ base: sess.base, serverName: sess.serverName, version: sess.version }, sess.userName);
 showSplash(sess && sess.kind === 'jellyfin' && sess.token ? sess.userName : '');
 if (sess && sess.kind === 'jellyfin' && sess.token) startApp(new Jellyfin(sess)); else showLogin();
+// Android: tocaste ▶ en los controles del sistema con Nanuq cerrado (la tarjeta de «reanudar»): la app arrancó sin
+// pantalla con «?resume=1» para seguir tu cola donde iba (ver Page.resumeHeadless en Android).
+if (/[?&]resume=1(&|$)/.test(location.search)) {
+  try { history.replaceState(history.state, '', location.pathname); } catch { }
+  if (api && api.kind === 'jellyfin' && P.cur && !RC.remote) toggle();
+}
 })();
 try { history.replaceState({ d: 0 }, ''); history.pushState({ d: 1 }, ''); } catch { }
 // Solo en el navegador (para abrir sin conexión). La app de escritorio y la de Android ya traen los archivos y no lo usan:

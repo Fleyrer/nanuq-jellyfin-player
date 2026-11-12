@@ -643,7 +643,9 @@ body.rc-on #mArtist,body.rc-on #pArtist{color:var(--accent);font-weight:500}
 .sheet .info a{color:var(--soft)}
 .sheet .sk{width:100%;max-width:520px;margin:0 auto}
 .sheet .seek{height:52px}
-.sheet .times{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.sheet .times{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+/* Cómo llega la canción («Opus · 96 kbps»): entre los dos tiempos, pequeña y apagada (ver qualPaint en app.js) */
+.sheet .times .squal{flex:1;min-width:0;text-align:center;font-size:10.5px;letter-spacing:.3px;opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sheet .ctrls{justify-content:space-between;max-width:520px;margin:12px auto 0;width:100%}
 .sheet .cbtn{width:48px;height:48px}
 .sheet .cbtn .i{width:24px;height:24px}

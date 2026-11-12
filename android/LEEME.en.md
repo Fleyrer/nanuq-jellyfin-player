@@ -32,8 +32,9 @@ The release APK is signed with `~/.android/nanuq-release.jks`. The password is i
 
 - **`http://` servers on your network work.** The app is served internally from `http://localhost`, so there's no mixed-content blocking. IPs without a scheme use `http://…:8096`. Certificates you install yourself on Android are also accepted (for Jellyfin with its own certificate).
 - **Music in the background and with the screen off.** While it plays, a foreground service keeps the app, the CPU and Wi-Fi alive.
+- **It plays with the system player, not inside the WebView.** If another app starts playing (a video, for example), Nanuq fades out and pauses; once nothing is playing anymore (up to 5 minutes later), it resumes on its own (Settings → “Resume when the other app is done”). With short alerts, navigation or a call, it pauses and resumes on its own when they end. Opus in Ogg from Android 10 (before that, MP3).
 - **Notification and lock screen** with cover, previous, play/pause, next and a position bar. Bluetooth headphone buttons work too. Disconnecting the headphones pauses the music.
-- After 10 minutes paused the service is released, and the notification can be dismissed by swiping it.
+- While paused, the controls stay (the service keeps running without using battery: it releases the CPU and Wi-Fi) until you swipe the notification away (where the system allows it) or close the app from Recents. If Android closes Nanuq to free memory, ▶ on your headphones, on a notification left behind or on the “resume” card (only on phones that have it enabled; not Samsung) wakes it without opening its screen and continues your queue where it was.
 - **Back** closes dialogs and goes back between screens. On the home screen it sends the app to the background without stopping the music. Removing it from recents closes it.
 - The system bars take the chosen theme's color.
 - **Favorite and Download** on the now playing screen. Favorite marks the song in Jellyfin. Download saves it on the phone and, from then on, it plays from that file without using data.
@@ -54,7 +55,7 @@ The release APK is signed with `~/.android/nanuq-release.jks`. The password is i
 ## Files
 
 - `bridge/android-bridge.js`: replaces `navigator.mediaSession` with a version that talks to Android. It's injected into `index.html` at build time.
-- `app/src/main/java/com/nanuq/app/MainActivity.java`: the WebView and the internal `localhost` server.
+- `app/src/main/java/com/nanuq/app/MainActivity.java`: the screen (Back, bar colors). The page lives in `Page.java` (the WebView, the `NanuqAndroid` bridge and the internal `localhost` server), which can also start without a screen; `NanuqBrowserService.java` and `Resume.java`: the “resume” card in the system controls.
 - `MediaCenter.java`: the system MediaSession and the notification.
 - `PlaybackService.java`: the foreground service and the CPU and Wi-Fi locks.
 - `NativeHttp.java`: CORS-free HTTP requests for “Request a song” (`NanuqAndroid.http`, answers in `window.__nanuqHttp`).
@@ -64,3 +65,4 @@ The release APK is signed with `~/.android/nanuq-release.jks`. The password is i
 - `res/values-en/strings.xml`: native texts in English (notification and channels).
 - `SecureStore.java`: encrypted store for personal data (AES-256-GCM with the Android Keystore).
 - `Discovery.java`: discovery of Jellyfin servers on the local network (UDP 7359).
+- `NativeAudio.java`: the music, with the system player (`MediaPlayer`) and its own audio focus; the page uses it like an `<audio>` (`NanuqNativeAudio` in `android-bridge.js`).

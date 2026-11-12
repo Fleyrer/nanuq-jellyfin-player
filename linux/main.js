@@ -144,9 +144,16 @@ function vaultBackend() {
 // cifrado con AES-256-GCM. La página lo usa de forma síncrona (sendSync) porque su almacenamiento es síncrono.
 // kind: nombre del llavero si funciona; 'locked' si hay datos cifrados pero el llavero no los abre (no se guarda nada
 // en claro); null si no hay llavero (la página guarda como antes y Ajustes lo dice).
-const SEC = { map: null, key: null, kind: null, t: 0, dirty: false, tried: 0, busy: null };
+const SEC = { map: null, key: null, kind: null, t: 0, dirty: false, tried: 0, busy: null, big: new Map(), bigDirty: new Set() };
 const secFile = () => path.join(app.getPath('userData'), 'datos-cifrados.bin');
 const secKeyFile = () => path.join(app.getPath('userData'), 'clave-datos.bin');
+// Los índices grandes (biblioteca, hasta 2 MB; letras, hasta 6 MB) van cada uno en su propio archivo cifrado
+// («datos-<clave>.bin», misma clave y mismo AES-GCM): antes iban con todo lo demás y cada cambio pequeño (cambiar de
+// canción cambia 2 o 3 datos) volvía a cifrar y escribir varios MB.
+const SEC_BIG = new Set(['libIdx', 'lyrIdx']);
+const secBigFile = k => path.join(app.getPath('userData'), 'datos-' + k + '.bin');
+const secSeal = (key, text) => { const iv = crypto.randomBytes(12), c = crypto.createCipheriv('aes-256-gcm', key, iv); const ct = Buffer.concat([c.update(text, 'utf8'), c.final()]); return Buffer.concat([iv, c.getAuthTag(), ct]); };
+const secOpen = (key, b) => { const d = crypto.createDecipheriv('aes-256-gcm', key, b.subarray(0, 12)); d.setAuthTag(b.subarray(12, 28)); return Buffer.concat([d.update(b.subarray(28)), d.final()]).toString('utf8'); };
 function writeAtomic(file, buf) { const tmp = file + '.tmp'; fs.writeFileSync(tmp, buf, { mode: 0o600 }); fs.renameSync(tmp, file); }
 // kind: 'locked' = hay datos pero el llavero no los abre ahora (no arrancó, está bloqueado): se reintenta cuando la
 // página pregunta; 'lost' = la clave abre pero los datos no (dañados): solo «Empezar de cero» los recupera.
@@ -169,12 +176,11 @@ async function secInit() {
   } catch { SEC.kind = 'locked'; SEC.map = null; SEC.key = null; return; }
   try {
     let map = {};
-    if (fs.existsSync(secFile())) {
-      const b = fs.readFileSync(secFile()), d = crypto.createDecipheriv('aes-256-gcm', key, b.subarray(0, 12));
-      d.setAuthTag(b.subarray(12, 28));
-      map = JSON.parse(Buffer.concat([d.update(b.subarray(28)), d.final()]).toString('utf8'));
-    }
-    Object.assign(SEC, { key, map, kind: backend });
+    if (fs.existsSync(secFile())) map = JSON.parse(secOpen(key, fs.readFileSync(secFile())));
+    Object.assign(SEC, { key, map, kind: backend, big: new Map(), bigDirty: new Set() });
+    // Versiones anteriores: los índices grandes estaban en el archivo común; pasan a su propio archivo.
+    for (const k of SEC_BIG) if (Object.prototype.hasOwnProperty.call(map, k)) { SEC.big.set(k, map[k]); SEC.bigDirty.add(k); delete map[k]; SEC.dirty = true; }
+    if (SEC.dirty) SEC.t = setTimeout(secFlush, 400);
   } catch { SEC.kind = 'lost'; SEC.map = null; SEC.key = null; }
 }
 // «Empezar de cero» (lo pide la página, con tu confirmación): los archivos que ya no se abren se apartan con otro
@@ -182,17 +188,18 @@ async function secInit() {
 ipcMain.handle('nanuq:secreset', async e => {
   if (!fromApp(e)) return null;
   const tag = '.ilegible-' + Date.now();
-  for (const f of [secFile(), secKeyFile()]) try { if (fs.existsSync(f)) fs.renameSync(f, f + tag); } catch { }
-  Object.assign(SEC, { map: null, key: null, kind: null, dirty: false });
+  for (const f of [secFile(), secKeyFile(), ...[...SEC_BIG].map(secBigFile)]) try { if (fs.existsSync(f)) fs.renameSync(f, f + tag); } catch { }
+  Object.assign(SEC, { map: null, key: null, kind: null, dirty: false, big: new Map(), bigDirty: new Set() });
   await secInit();
   return SEC.kind;
 });
 function secFlush() {
   if (!SEC.dirty || !SEC.key) return;
   SEC.dirty = false; clearTimeout(SEC.t);
-  const iv = crypto.randomBytes(12), c = crypto.createCipheriv('aes-256-gcm', SEC.key, iv);
-  const ct = Buffer.concat([c.update(JSON.stringify(SEC.map), 'utf8'), c.final()]);
-  try { writeAtomic(secFile(), Buffer.concat([iv, c.getAuthTag(), ct])); } catch { }
+  // Primero los índices (al pasar de una versión anterior, el archivo común se escribe sin ellos solo después).
+  for (const k of SEC.bigDirty) { const v = SEC.big.get(k); try { if (v == null) fs.rmSync(secBigFile(k), { force: true }); else writeAtomic(secBigFile(k), secSeal(SEC.key, v)); } catch { } }
+  SEC.bigDirty.clear();
+  try { writeAtomic(secFile(), secSeal(SEC.key, JSON.stringify(SEC.map))); } catch { }
 }
 app.on('before-quit', secFlush);
 const SEC_KEY = /^[A-Za-z0-9._-]{1,120}$/;
@@ -205,9 +212,13 @@ ipcMain.on('nanuq:sec', (e, m = {}) => {
     e.returnValue = SEC.kind; return;
   }
   if (!ok || typeof m.k !== 'string' || !SEC_KEY.test(m.k)) { e.returnValue = null; return; }
-  if (m.op === 'get') { e.returnValue = Object.prototype.hasOwnProperty.call(SEC.map, m.k) ? SEC.map[m.k] : null; return; }
-  if (m.op === 'set' && typeof m.v === 'string' && m.v.length <= 8e6) SEC.map[m.k] = m.v;
-  else if (m.op === 'del') delete SEC.map[m.k];
+  const big = SEC_BIG.has(m.k);
+  if (m.op === 'get') {
+    if (big && !SEC.big.has(m.k)) { let v = null; try { if (fs.existsSync(secBigFile(m.k))) v = secOpen(SEC.key, fs.readFileSync(secBigFile(m.k))); } catch { } SEC.big.set(m.k, v); } // dañado: como si no existiera (se vuelve a armar)
+    e.returnValue = big ? SEC.big.get(m.k) : Object.prototype.hasOwnProperty.call(SEC.map, m.k) ? SEC.map[m.k] : null; return;
+  }
+  if (m.op === 'set' && typeof m.v === 'string' && m.v.length <= 8e6) { if (big) { SEC.big.set(m.k, m.v); SEC.bigDirty.add(m.k); } else SEC.map[m.k] = m.v; }
+  else if (m.op === 'del') { if (big) { SEC.big.set(m.k, null); SEC.bigDirty.add(m.k); } else delete SEC.map[m.k]; }
   else { e.returnValue = false; return; }
   SEC.dirty = true; clearTimeout(SEC.t); SEC.t = setTimeout(secFlush, 400);
   e.returnValue = true;
@@ -830,7 +841,6 @@ async function start() {
   // index.html y app.js) y la caché de código compilado de JavaScript. Si otra app los alterara, no llegan a usarse.
   try { await ses.clearStorageData({ storages: ['serviceworkers', 'cachestorage'] }); } catch { }
   try { await ses.clearCodeCaches({}); } catch { }
-  try { fs.rmSync(path.join(app.getPath('userData'), 'cache-sin-token'), { force: true }); } catch { }
   if (st.maximized) win.maximize();
   win.once('ready-to-show', () => win.show());
   for (const ev of ['resize', 'move']) win.on(ev, () => { clearTimeout(saveState.t); saveState.t = setTimeout(saveState, 400); });

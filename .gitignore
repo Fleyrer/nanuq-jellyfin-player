@@ -13,6 +13,9 @@ instaladores/
 keystore.properties
 *.jks
 *.keystore
+# Respaldo cifrado de la llave (nanuq-llave-respaldo-*.tar.gz.gpg) y la carpeta donde se descifra: tampoco al repositorio
+nanuq-llave*
+*.gpg
 
 # Rutas locales de cada computadora
 local.properties

@@ -55,6 +55,14 @@ final class SecureStore {
 
     private long triedAt;
 
+    // Los índices grandes (biblioteca, hasta 2 MB; letras, hasta 6 MB) van cada uno en su propio archivo cifrado
+    // («datos-<clave>.bin», misma clave y mismo AES-GCM). Antes iban en el mismo archivo que la cola, el conteo y el DJ, y
+    // cada cambio pequeño (cambiar de canción cambia 2 o 3 datos) volvía a cifrar y escribir varios MB.
+    private static final java.util.Set<String> BIG = new java.util.HashSet<>(Arrays.asList("libIdx", "lyrIdx"));
+    private final java.util.Map<String, String> big = new java.util.HashMap<>(); // ya leídos (null = no hay)
+    private final java.util.Set<String> bigDirty = new java.util.HashSet<>();
+    private File bigFile(String k) { return new File(file.getParentFile(), "datos-" + k + ".bin"); }
+
     private SecureStore(Context app) {
         file = new File(app.getFilesDir(), "datos-cifrados.bin");
         open();
@@ -93,6 +101,10 @@ final class SecureStore {
         try {
             map = new JSONObject(new String(decrypt(readAll(file)), StandardCharsets.UTF_8));
             kind = "android-keystore";
+            // Versiones anteriores: los índices grandes estaban en el archivo común; pasan a su propio archivo.
+            big.clear(); bigDirty.clear();
+            for (String k : BIG) if (map.has(k)) { big.put(k, map.optString(k, null)); bigDirty.add(k); map.remove(k); }
+            if (!bigDirty.isEmpty()) scheduleSave();
         } catch (javax.crypto.AEADBadTagException | android.security.keystore.KeyPermanentlyInvalidatedException | org.json.JSONException e) {
             map = null; kind = "lost";
         } catch (Exception e) {
@@ -112,8 +124,12 @@ final class SecureStore {
      */
     synchronized String reset() {
         if (pending != null) pending.cancel(false);
+        long now = System.currentTimeMillis();
         if (file.isFile()) //noinspection ResultOfMethodCallIgnored
-            file.renameTo(new File(file.getPath() + ".ilegible-" + System.currentTimeMillis()));
+            file.renameTo(new File(file.getPath() + ".ilegible-" + now));
+        for (String k : BIG) { File f = bigFile(k); if (f.isFile()) //noinspection ResultOfMethodCallIgnored
+            f.renameTo(new File(f.getPath() + ".ilegible-" + now)); }
+        big.clear(); bigDirty.clear();
         try { KeyStore ks = KeyStore.getInstance("AndroidKeyStore"); ks.load(null); ks.deleteEntry(ALIAS); } catch (Exception ignored) { }
         open();
         return kind;
@@ -123,19 +139,30 @@ final class SecureStore {
 
     synchronized String get(String k) {
         if (!ready() || !validKey(k)) return null;
+        if (BIG.contains(k)) {
+            if (!big.containsKey(k)) {
+                String v = null; File f = bigFile(k);
+                // Si no se puede abrir (dañado), como si no existiera: la página vuelve a armar el índice.
+                if (f.isFile()) { try { v = new String(decrypt(readAll(f)), StandardCharsets.UTF_8); } catch (Exception ignored) { } }
+                big.put(k, v);
+            }
+            return big.get(k);
+        }
         return map.has(k) ? map.optString(k, null) : null;
     }
 
     synchronized boolean set(String k, String v) {
         if (!ready() || !validKey(k) || v == null || v.length() > 8_000_000) return false;
-        try { map.put(k, v); } catch (Exception e) { return false; }
+        if (BIG.contains(k)) { big.put(k, v); bigDirty.add(k); }
+        else try { map.put(k, v); } catch (Exception e) { return false; }
         scheduleSave();
         return true;
     }
 
     synchronized void del(String k) {
         if (!ready() || !validKey(k)) return;
-        map.remove(k);
+        if (BIG.contains(k)) { big.put(k, null); bigDirty.add(k); }
+        else map.remove(k);
         scheduleSave();
     }
 
@@ -151,7 +178,22 @@ final class SecureStore {
 
     private void saveNow() {
         byte[] plain;
-        synchronized (this) { if (!ready()) return; plain = map.toString().getBytes(StandardCharsets.UTF_8); }
+        java.util.Map<String, String> bigs = new java.util.HashMap<>();
+        synchronized (this) {
+            if (!ready()) return;
+            plain = map.toString().getBytes(StandardCharsets.UTF_8);
+            for (String k : bigDirty) bigs.put(k, big.get(k));
+            bigDirty.clear();
+        }
+        // Primero los índices (al pasar de una versión anterior, el archivo común se escribe ya sin ellos solo después).
+        for (java.util.Map.Entry<String, String> e : bigs.entrySet()) {
+            File f = bigFile(e.getKey());
+            if (e.getValue() == null) { //noinspection ResultOfMethodCallIgnored
+                f.delete(); continue; }
+            byte[] b = e.getValue().getBytes(StandardCharsets.UTF_8);
+            try { writeAtomic(f, encrypt(b)); } catch (Exception ignored) { }
+            Arrays.fill(b, (byte) 0);
+        }
         try { writeAtomic(file, encrypt(plain)); } catch (Exception ignored) { }
         Arrays.fill(plain, (byte) 0);
     }

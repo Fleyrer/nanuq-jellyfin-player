@@ -38,5 +38,27 @@
             android:name=".PlaybackService"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
+
+        <!-- Botones multimedia con Nanuq cerrado (▶ la despierta): ver MediaButtonReceiver. Exportado porque el sistema
+             entrega ahí los botones; con la app cerrada solo ▶ hace algo. El permiso (solo lo tiene el sistema) impide que
+             otra app instalada le mande un «▶» y ponga a sonar tu música. -->
+        <receiver
+            android:name=".MediaButtonReceiver"
+            android:exported="true"
+            android:permission="android.permission.MEDIA_CONTENT_CONTROL">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+
+        <!-- «Reanudar» en los controles del sistema (la tarjeta con la última canción): ver NanuqBrowserService.
+             Exportado porque lo usa la interfaz de Android; solo les responde a apps del sistema. -->
+        <service
+            android:name=".NanuqBrowserService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+        </service>
     </application>
 </manifest>

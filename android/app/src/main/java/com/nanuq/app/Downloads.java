@@ -391,7 +391,7 @@ final class Downloads {
             }
             // Opus (Ogg): sin Content-Length, una descarga cortada o alterada solo se nota revisando sus páginas (fuera del candado:
             // leer el archivo tarda un poco).
-            boolean ogg = paused || e.cancelled || OggCheck.valid(part);
+            boolean ogg = paused || e.cancelled || OggCheck.valid(part, len);
             synchronized (this) {
                 if (e.cancelled || entries.get(e.id) != e) { part.delete(); return; }
                 if (paused) { part.delete(); e.state = "waiting"; emit(e); return; }

@@ -187,7 +187,7 @@ final class Prefetch {
                     if (n > MAX_FILE) throw new IOException("Demasiado grande");
                 }
             }
-            ok = !it.cancelled && n > 0 && (len <= 0 || n >= len) && OggCheck.valid(part); // Opus: páginas completas y sin cambios
+            ok = !it.cancelled && n > 0 && (len <= 0 || n >= len) && OggCheck.valid(part, len); // Opus: páginas completas y sin cambios
         } catch (Exception ignored) {
         } finally {
             if (con != null) con.disconnect();

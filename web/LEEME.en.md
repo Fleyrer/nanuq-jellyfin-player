@@ -158,7 +158,7 @@ With DJ Nanuq, in the last seconds of a song the next one already starts: the en
 
 ## Formats and quality
 
-With **Original** quality, your files play as they are: FLAC, Opus, AAC/M4A, MP3, WAV, OGG. If you pick a lower bitrate (or the file goes over it), Jellyfin converts it to **Opus** (better sound than MP3 at the same bitrate) or MP3: **Settings → Conversion format** (only shown if your player opens Opus). If a song won't start in Opus, Nanuq asks for it in MP3 and remembers. Phone downloads are saved in that same format (or the file as-is with “Original”). While you drag the progress bar, the song stays silent and plays again where you let go.
+By default Nanuq asks for the lowest quality, **96 kbps** (it uses less data; in Opus it sounds good), and the maximized player shows how each song arrives between the two times (e.g. “Opus · 96 kbps”, “Original” or “On the phone”). Change it in **Settings → Streaming quality**. With **Original** quality, your files play as they are: FLAC, Opus, AAC/M4A, MP3, WAV, OGG. If you pick a lower bitrate (or the file goes over it), Jellyfin converts it to **Opus** (better sound than MP3 at the same bitrate) or MP3: **Settings → Conversion format** (only shown if your player opens Opus). If a song won't start in Opus, Nanuq asks for it in MP3 and remembers. Phone downloads are saved in that same format (or the file as-is with “Original”). While you drag the progress bar, the song stays silent and plays again where you let go.
 
 ## Queue in the player
 

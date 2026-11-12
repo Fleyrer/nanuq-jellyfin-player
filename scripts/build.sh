@@ -49,10 +49,15 @@ if want flatpak && ! want linux; then
 fi
 
 if want android; then echo; echo "== Android"; android/build-apk.sh; fi
+if want linux || want windows; then
+  # Pruebas de main.js (cifrado de la fiesta, quién entra a la sala, almacén cifrado): si fallan, no hay paquetes de escritorio.
+  node --test linux/test/*.test.js >/dev/null || { echo "Fallaron las pruebas de escritorio (node --test linux/test/*.test.js): no se compila" >&2; exit 1; }
+fi
 if want linux; then
-  echo; echo "== Linux (AppImage y RPM)"
+  # El RPM necesita rpmbuild (sudo dnf install rpm-build); sin él solo el AppImage (si no, fallaba todo y no había Flatpak).
+  if command -v rpmbuild >/dev/null; then dist=dist; echo; echo "== Linux (AppImage y RPM)"; else dist=dist:appimage; echo; echo "== Linux (AppImage; sin rpmbuild no hay RPM)"; fi
   [ -d linux/node_modules ] || (cd linux && npm install)
-  (cd linux && npm run dist 2>&1 | grep -E '^Listo:|rror' || true)
+  (cd linux && npm run "$dist" 2>&1 | grep -E '^Listo:|rror' || true)
   ls "dist/$ver"/nanuq-"$ver"-x86_64.AppImage >/dev/null # falla si no se generó
 fi
 if want flatpak; then echo; echo "== Flatpak"; linux/flatpak/build-flatpak.sh | tail -1; fi

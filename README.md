@@ -156,12 +156,12 @@ scripts/build.sh minor      # 1.30.2 → 1.31.0
 scripts/build.sh android    # solo el APK (también: linux, flatpak, windows)
 ```
 
-Los paquetes quedan en `dist/<versión>/`.
+Los paquetes quedan en `dist/<versión>/`. Antes de compilar corren pruebas automáticas, sin dependencias (si fallan, no hay paquetes): la integridad de las descargas Opus (`android/test/OggCheckTest.java`), el reproductor de Android (`node --test android/test/*.test.js`) y el cifrado de las canciones de la fiesta (`node --test linux/test/*.test.js`).
 
 | Plataforma | Carpeta | Necesita | Guía |
 |---|---|---|---|
 | Web (PWA) | `web/` | nada | [web/LEEME.md](web/LEEME.md): alojarla, IPv6, idiomas, letras, favoritas, Solicitar canción (SomeDL), Fiesta |
-| Android (APK) | `android/` | JDK 21 en `~/.local/opt/jdk21`, Android SDK en `~/Android/Sdk` (platform 35, build-tools 35) y la llave de firma | [android/LEEME.md](android/LEEME.md): herramientas, firma, instalar |
+| Android (APK) | `android/` | JDK 21 en `~/.local/opt/jdk21`, Android SDK en `~/Android/Sdk` (platform 35, build-tools 35), Node.js (para la prueba del reproductor) y la llave de firma | [android/LEEME.md](android/LEEME.md): herramientas, firma, instalar |
 | Linux (AppImage, RPM) | `linux/` | Node.js (`npm install` en `linux/`), `fpm` en `~/bin` y `rpm-build` para el RPM | [linux/LEEME.md](linux/LEEME.md) |
 | Flatpak | `linux/flatpak/` | `org.flatpak.Builder` y los runtimes 26.08 de Flathub | [linux/LEEME.md](linux/LEEME.md#flatpak) |
 | Windows (instalador NSIS) | `linux/` | Lo mismo que Linux, más **Wine** (para poner el ícono y los datos del `.exe`) | `scripts/build.sh windows` |

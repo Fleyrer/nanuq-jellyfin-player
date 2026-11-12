@@ -13,7 +13,9 @@ import java.util.regex.Pattern;
  * Integridad de lo que se descarga (descargas y cola guardada por adelantado).
  * Ogg (Opus): cada página trae su CRC y la última marca el fin del flujo (EOS). Las conversiones de Jellyfin no mandan
  * Content-Length, así que sin esto una descarga cortada a la mitad (o con bytes cambiados en el camino) se guardaba
- * como buena. Se revisan todas las páginas y que el archivo termine justo en una página con EOS.
+ * como buena. Se revisan todas las páginas (CRC) y que el archivo termine justo en el borde de una página; si el servidor
+ * no dijo el tamaño, además, que la última marque el fin del flujo (EOS). Con tamaño, eso ya lo comprueba quien descarga
+ * (algunos .ogg/.opus propios, que suenan tal cual en «Original», no traen EOS).
  */
 final class OggCheck {
     private OggCheck() { }
@@ -38,15 +40,18 @@ final class OggCheck {
         return n;
     }
 
-    /** true si no es Ogg (otros formatos no se revisan aquí) o si es un Ogg completo y sin alterar. */
-    static boolean valid(File f) {
+    /**
+     * true si no es Ogg (otros formatos no se revisan aquí) o si es un Ogg completo y sin alterar.
+     * len: el tamaño que mandó el servidor (Content-Length), o ≤ 0 si no lo mandó (conversiones): entonces se exige EOS.
+     */
+    static boolean valid(File f, long len) {
         try (InputStream in = new BufferedInputStream(new FileInputStream(f), 64 * 1024)) {
             byte[] h = new byte[27], lace = new byte[255], body = new byte[255 * 255];
             boolean first = true, eos = false;
             while (true) {
                 int r = read(in, h, 27);
                 if (first && (r < 4 || h[0] != 'O' || h[1] != 'g' || h[2] != 'g' || h[3] != 'S')) return true; // no es Ogg
-                if (r == 0) return eos;             // terminó justo después de una página: ¿era la última?
+                if (r == 0) return eos || len > 0;  // terminó justo después de una página: ¿era la última?
                 if (r < 27 || h[0] != 'O' || h[1] != 'g' || h[2] != 'g' || h[3] != 'S' || h[4] != 0) return false;
                 first = false;
                 int nseg = h[26] & 0xff;

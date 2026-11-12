@@ -44,8 +44,6 @@ final class MediaCenter {
 
     static final String CHANNEL = "playback";
     static final int NOTIFICATION_ID = 1;
-    /** Tras este tiempo en pausa se libera el servicio; la notificación queda y se puede descartar. */
-    private static final long PAUSE_RELEASE_MS = 10 * 60 * 1000;
 
     private static MediaCenter instance;
 
@@ -90,6 +88,11 @@ final class MediaCenter {
             @Override public void onRewind() { dispatch("seekbackward", 10); }
         }, main);
         session.setSessionActivity(contentIntent());
+        // Con la app cerrada, el sistema manda los botones multimedia (▶ de los audífonos) a MediaButtonReceiver.
+        android.content.ComponentName mbr = new android.content.ComponentName(app, MediaButtonReceiver.class);
+        if (Build.VERSION.SDK_INT >= 33) session.setMediaButtonBroadcastReceiver(mbr);
+        else { //noinspection deprecation
+            session.setMediaButtonReceiver(PendingIntent.getBroadcast(app, 0, new Intent(Intent.ACTION_MEDIA_BUTTON).setComponent(mbr), PendingIntent.FLAG_IMMUTABLE)); }
         publishState();
     }
 
@@ -113,6 +116,27 @@ final class MediaCenter {
     void dispatch(String action, double arg) {
         Dispatcher d = dispatcher;
         if (d != null) d.dispatch(action, arg);
+        // ▶ con Nanuq cerrado (tarjeta de «reanudar» de Android o una notificación que quedó): la página arranca sin
+        // pantalla y sigue tu cola (ver Page.resumeHeadless).
+        else if ("play".equals(action)) Page.get(app).resumeHeadless();
+    }
+
+    /**
+     * Mientras la página arranca sin pantalla para reanudar: el servicio pasa a primer plano YA (Android solo lo permite
+     * justo después de tocar los controles) con la última canción a la vista, en pausa.
+     */
+    void holdForResume() {
+        main.post(() -> {
+            Resume r = Resume.load(app);
+            if (r != null && title.isEmpty()) { title = r.title; artist = r.artist; album = r.album; art = r.art(app); publishMetadata(); }
+            if ("none".equals(state)) state = "paused";
+            publishState();
+            try {
+                Intent i = new Intent(app, PlaybackService.class);
+                if (Build.VERSION.SDK_INT >= 26) app.startForegroundService(i); else app.startService(i);
+            } catch (Exception ignored) { } // Android no lo dejó: la música igual arranca y se reintenta al sonar
+            refresh();
+        });
     }
 
     // ---- Llamadas desde la página (llegan en el hilo del puente JS) ----
@@ -123,11 +147,14 @@ final class MediaCenter {
             artist = a == null ? "" : a;
             album = al == null ? "" : al;
             String u = url == null ? "" : url;
+            if (!title.isEmpty()) Resume.save(app, title, artist, album);
+            else Resume.clear(app); // sin canción (cerraste sesión, vaciaste la cola): nada que reanudar
             if (!u.equals(artUrl)) {
                 artUrl = u;
                 art = null;
                 if (!u.isEmpty()) io.execute(() -> {
                     Bitmap b = loadBitmap(u);
+                    if (b != null) Resume.saveArt(app, b);
                     main.post(() -> {
                         if (b != null && u.equals(artUrl)) { art = b; publishMetadata(); refresh(); }
                     });
@@ -141,6 +168,7 @@ final class MediaCenter {
     void setPlaybackState(String s) {
         main.post(() -> {
             String next = "playing".equals(s) || "paused".equals(s) ? s : "none";
+            if ("playing".equals(next)) Page.get(app).played(); // retomada sin pantalla: ya sonó, no se apaga sola
             position = currentPosition();
             positionAt = SystemClock.elapsedRealtime();
             state = next;
@@ -203,14 +231,9 @@ final class MediaCenter {
         session.setActive(!"none".equals(state));
     }
 
-    private final Runnable releaseAfterPause = () -> {
-        PlaybackService s = PlaybackService.current;
-        if (s != null && !isPlaying()) s.release(false);
-    };
 
     /** Ajusta servicio, notificación y bloqueos según el estado actual. */
     private void refresh() {
-        main.removeCallbacks(releaseAfterPause);
         PlaybackService svc = PlaybackService.current;
         if ("none".equals(state)) {
             setNoisyReceiver(false);
@@ -231,7 +254,10 @@ final class MediaCenter {
             } else svc.setLocks(true);
         } else {
             setNoisyReceiver(false);
-            if (svc != null) { svc.setLocks(false); main.postDelayed(releaseAfterPause, PAUSE_RELEASE_MS); }
+            // En pausa el servicio sigue en primer plano (sin bloqueos de CPU ni Wi-Fi: no gasta batería). Antes se soltaba a
+            // los 10 min y, en el mismo segundo, la interfaz de Samsung quitaba los controles del panel (visto con logcat el
+            // 2026-11-12). Se suelta si deslizas la notificación (ACTION_DISMISS) o al cerrar la app.
+            if (svc != null) svc.setLocks(false);
         }
         nm.notify(NOTIFICATION_ID, buildNotification());
     }
@@ -267,6 +293,7 @@ final class MediaCenter {
                 .setSubText(album.isEmpty() ? null : album)
                 .setLargeIcon(art)
                 .setContentIntent(contentIntent())
+                .setDeleteIntent(serviceIntent(PlaybackService.ACTION_DISMISS)) // la deslizaste (en pausa): se suelta el servicio
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setCategory(Notification.CATEGORY_TRANSPORT)
                 .setShowWhen(false)
@@ -321,7 +348,7 @@ final class MediaCenter {
             Uri u = Uri.parse(url);
             InputStream in;
             HttpURLConnection con = null;
-            boolean asset = MainActivity.HOST.equals(u.getHost()) && u.getPath() != null && !u.getPath().contains("..");
+            boolean asset = Page.HOST.equals(u.getHost()) && u.getPath() != null && !u.getPath().contains("..");
             boolean local = "127.0.0.1".equals(u.getHost()) && "http".equals(u.getScheme()); // carátula descargada (LocalServer)
             if (!asset && !local && !Downloads.okUrl(url, true)) return null; // solo carátulas de Jellyfin
             if (asset) {

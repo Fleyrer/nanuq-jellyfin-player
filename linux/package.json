@@ -1,7 +1,7 @@
 {
   "name": "nanuq",
   "productName": "Nanuq",
-  "version": "1.46.1",
+  "version": "1.47.3",
   "description": "Cliente de música para Jellyfin",
   "main": "main.js",
   "author": {
@@ -15,6 +15,7 @@
     "prepare-web": "node prepare-web.js",
     "start": "node prepare-web.js && electron .",
     "dist": "node prepare-web.js && USE_SYSTEM_FPM=true electron-builder --linux AppImage rpm && node collect.js",
+    "dist:appimage": "node prepare-web.js && electron-builder --linux AppImage && node collect.js",
     "dist:win": "node prepare-web.js && electron-builder --win nsis && node collect.js"
   },
   "build": {

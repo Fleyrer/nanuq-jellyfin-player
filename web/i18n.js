@@ -158,7 +158,6 @@ const EN = {
   "madrugada": "late night",
   "para la madrugada": "for the late night",
   "tu música": "your music",
-  "Nanuq está armando tu sesión…": "Nanuq is putting your session together…",
   "Todavía no hay suficiente música para el DJ.": "There isn't enough music for the DJ yet.",
   "{0}{1}. Soy Nanuq, tu DJ.": "{0}{1}. I'm Nanuq, your DJ.",
   "DJ en pausa: la cola se queda como está.": "DJ paused: the queue stays as it is.",
@@ -1010,7 +1009,24 @@ const EN = {
   "Computadora (Windows)": "Computer (Windows)",
   "sonando:": "playing:",
   "Controlar {0}": "Control {0}",
-  "tus {0} canciones descargadas": "your {0} downloaded songs"
+  "tus {0} canciones descargadas": "your {0} downloaded songs",
+  "Demasiadas redirecciones": "Too many redirects",
+  "Dirección de descarga no válida": "Invalid download address",
+  "El archivo es demasiado grande": "The file is too large",
+  "El servidor no envió audio": "The server didn't send any audio",
+  "El servidor rechazó la descarga ({0}). Vuelve a iniciar sesión.": "The server rejected the download ({0}). Sign in again.",
+  "El servidor redirigió a otro sitio": "The server redirected to another site",
+  "El servidor respondió {0}": "The server responded {0}",
+  "La descarga llegó incompleta o dañada": "The download arrived incomplete or damaged",
+  "La descarga quedó incompleta": "The download was incomplete",
+  "No hay espacio suficiente en el teléfono": "There isn't enough space on the phone",
+  "No se pudo guardar el archivo": "Couldn't save the file",
+  "Redirección sin destino": "Redirect without a destination",
+  "Volver a sonar cuando la otra app termine": "Resume when the other app is done",
+  "En el teléfono": "On the phone",
+  "Original": "Original",
+  "Calidad del streaming (como máximo). Cámbiala en Ajustes → Calidad del streaming.": "Streaming quality (at most). Change it in Settings → Streaming quality.",
+  "Si otra app empieza a sonar (un video, por ejemplo), Nanuq baja suave y se pausa. Con esto, cuando ya no suene nada (hasta 5 minutos después), vuelve a sonar solo.": "If another app starts playing (a video, for example), Nanuq fades out and pauses. With this on, once nothing is playing anymore (up to 5 minutes later), it starts playing again on its own."
 };
 function tx(s, v) {
   let r = String(s ?? '');

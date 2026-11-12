@@ -21,6 +21,7 @@ public class PlaybackService extends Service {
     static final String ACTION_PAUSE = "com.nanuq.app.PAUSE";
     static final String ACTION_NEXT = "com.nanuq.app.NEXT";
     static final String ACTION_PREV = "com.nanuq.app.PREV";
+    static final String ACTION_DISMISS = "com.nanuq.app.DISMISS"; // deslizaste la notificación
 
     static volatile PlaybackService current;
 
@@ -51,10 +52,16 @@ public class PlaybackService extends Service {
 
         String a = intent == null ? null : intent.getAction();
         // Arranque en frío desde un botón de la notificación: el proceso había muerto y la notificación quedó a la vista.
-        // Sin la página (el WebView) no hay música que tocar: se quita todo en vez de dejar un servicio vacío encendido.
+        // ▶ vuelve a sonar (la página arranca sin pantalla y sigue la cola, ver Page.resumeHeadless); con los demás
+        // botones no hay nada que tocar: se quita todo en vez de dejar un servicio vacío encendido.
         // (La página, cuando existe, arranca este servicio sin acción.)
-        if (a != null && !media.hasPage()) { media.stopIfNoPage(); release(true); return START_NOT_STICKY; }
-        if (ACTION_PLAY.equals(a)) media.dispatch("play", Double.NaN);
+        if (a != null && !media.hasPage()) {
+            if (ACTION_PLAY.equals(a)) { Page.get(this).resumeHeadless(); return START_NOT_STICKY; }
+            media.stopIfNoPage(); release(true); return START_NOT_STICKY;
+        }
+        // Quitaste la notificación en pausa: el servicio se suelta (sonando no se puede quitar: va fija).
+        if (ACTION_DISMISS.equals(a)) { if (!media.isPlaying()) { release(true); return START_NOT_STICKY; } }
+        else if (ACTION_PLAY.equals(a)) media.dispatch("play", Double.NaN);
         else if (ACTION_PAUSE.equals(a)) media.dispatch("pause", Double.NaN);
         else if (ACTION_NEXT.equals(a)) media.dispatch("nexttrack", Double.NaN);
         else if (ACTION_PREV.equals(a)) media.dispatch("previoustrack", Double.NaN);
